@@ -1,0 +1,42 @@
+import React from 'react';
+import BlockSchedule from "@/Components/tables/BlockSchedule";
+import { useState } from "react";
+
+const FreeSection = ({blockSec,student,reg}) => {
+    const [classsched, getClasssched]=useState([''])
+    const test=(e)=>{
+        e.preventDefault()
+        const data={
+            0:e.currentTarget.value,
+            1:student.StudentNo,
+            2:reg.CollegeID,
+            3:reg.ProgID,
+            4:reg.RegID
+        }
+        axios.post(route("getBlockClassSchedule"), { data })
+        .then(response => {
+            getClasssched(response.data)
+            console.log(classsched); 
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+        });
+    }
+
+  return (
+    <>
+        <label for="blocksection" class="block  text-base font-medium text-gray-900 dark:text-white m-4">Free Section</label>
+            <select id="blocksection" onChange={test} class=" m-4 w-1/4 block px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                <option value='' selected>Choose</option>
+            {blockSec.map((row, rowIndex)=>(
+                <option key={rowIndex} id={row.SectionID} value={row.SectionID} >{row.SectionName}</option>
+            ))}
+            </select>
+        <div className="m-4">
+            <BlockSchedule value={classsched}></BlockSchedule>
+        </div>
+    </>
+  );
+};
+
+export default FreeSection;
