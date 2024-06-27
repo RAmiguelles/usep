@@ -15,6 +15,7 @@ const BlockSection = ({blockSec,student,reg}) => {
             3:reg.ProgID,
             4:reg.RegID
         }
+        console.log(data)
         axios.post(route("getBlockClassSchedule"), { data })
         .then(response => {
             getClasssched(response.data)

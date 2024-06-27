@@ -7,10 +7,15 @@ import { Link } from '@inertiajs/react';
 
 export default function Authenticated({ user, header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
-
+    const bgUrl='url("/img/eagle.jpg")'
+    const mainStyle = {
+        backgroundImage: bgUrl,
+        backgroundSize: 'contain',
+        height: '100vh',          
+      };
     return (
         <div className="min-h-screen bg-gray-100">
-            <nav className="bg-gradient-to-r from-primary-light to-primary-dark border-b border-gray-100">
+            <nav className="bg-white border-b border-gray-100">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         <div className="flex">
@@ -18,16 +23,17 @@ export default function Authenticated({ user, header, children }) {
                                 <Link href={route('dashboard')}>
                                     <ApplicationLogo className="block h-9 w-auto fill-current text-gray-800" />
                                 </Link>
+                                <div style={{height: '0px', width: '16px'}}></div><div className="border border-gray-500/50" style={{height: '32px', width: '1px'}}></div><div style={{height: '0px', width: '16px'}}></div>
                             </div>
-
-                            <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                            <div className="mt-2" style={{height: '100%', width: '100%', placeContent: 'unset', alignItems: 'unset', overflow: 'unset'}}>
+                                <div class="" style={{color: 'rgb(229, 156, 36)', fontWeight: '600', fontSize: '18px'}}>One <span class="" style={{color: 'rgb(151, 57, 57)', fontWeight: '600', fontSize: '18px'}}>Data. </span>One <span class="" style={{color: 'rgb(151, 57, 57)', fontWeight: '600', fontSize: '18px'}}>USeP. </span></div>
+                                <div class="" style={{color: 'rgb(87, 87, 87)', fontWeight: '600', fontSize: '14px'}}>Student Portal</div>
+                            </div>
+                            {/* <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                                 <NavLink href={route('dashboard')} active={route().current('dashboard')}>
                                     Dashboard
                                 </NavLink>
-                                <NavLink href={route('enrollment.index')} active={route().current('enrollment.index')}>
-                                    Enrollment
-                                </NavLink>
-                            </div>
+                            </div> */}
                         </div>  
 
                         <div className="hidden sm:flex sm:items-center sm:ms-6">
@@ -37,11 +43,23 @@ export default function Authenticated({ user, header, children }) {
                                         <span className="inline-flex rounded-md">
                                             <button
                                                 type="button"
-                                                className="inline-flex items-center px-3 py-2 hover:shadow-md border border-transparent text-md leading-4 font-medium rounded-md text-gray-100 bg-transparent hover:bg-primary-dark hover:text-gray-700 focus:outline-none transition ease-in-out duration-250"
+                                                className="inline-flex items-center px-3 py-2 hover:shadow-md border border-transparent text-md leading-4 font-medium rounded-md text-gray-800 bg-transparent hover:bg-primary-dark hover:text-gray-700 focus:outline-none transition ease-in-out duration-250"
                                             >
-                                                {user.name}
-
-                                                <svg
+                                                <svg 
+                                                    xmlns="http://www.w3.org/2000/svg" 
+                                                    focusable="false" 
+                                                    width="20" 
+                                                    height="20" 
+                                                    preserveAspectRatio="xMidYMid meet" 
+                                                    viewBox="0 0 24 24" 
+                                                    style={{transform: 'rotate(360deg)'}}
+                                                >
+                                                    <path 
+                                                        d="M4 22a8 8 0 1 1 16 0h-2a6 6 0 1 0-12 0H4zm8-9c-3.315 0-6-2.685-6-6s2.685-6 6-6s6 2.685 6 6s-2.685 6-6 6zm0-2c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4z" 
+                                                        fill="currentColor"
+                                                    />
+                                                </svg>
+                                                {/* <svg
                                                     className="ms-2 -me-0.5 h-4 w-4"
                                                     xmlns="http://www.w3.org/2000/svg"
                                                     viewBox="0 0 20 20"
@@ -52,7 +70,7 @@ export default function Authenticated({ user, header, children }) {
                                                         d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
                                                         clipRule="evenodd"
                                                     />
-                                                </svg>
+                                                </svg> */}
                                             </button>
                                         </span>
                                     </Dropdown.Trigger>
@@ -119,14 +137,15 @@ export default function Authenticated({ user, header, children }) {
                     </div>
                 </div>
             </nav>
-
             {header && (
                 <header className="bg-white shadow">
                     <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">{header}</div>
                 </header>
             )}
 
-            <main>{children}</main>
+            <main>
+                {children}
+            </main>
         </div>
     );
 }

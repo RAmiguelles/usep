@@ -19,9 +19,8 @@ class User extends Authenticatable
     // protected $table = 'dbo.ES_Users';
 
     protected $fillable = [
-        'UserID',
-        'email',
-        'password',
+        'studentNo',
+  
     ];
 
     /**
@@ -30,7 +29,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $hidden = [
-        'password',
+
         'remember_token',
     ];
 

@@ -37,15 +37,16 @@ class ES_StudentsController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
+    public function show(string $id, $token)
+    {   
+        dd($token);
         $student=ES_Student::where('StudentNo',$id)->first();
         $reg=$student->Reg->last();
         $enroll_sub = DB::select("EXEC dbo.ES_GetEnrolledSubjects '".$reg->RegID."'"); # get enrolledsub
         $blockSec=DB::select("EXEC dbo.ES_getBlockSections ?,?,?,?,?",array($reg->CampusID,$reg->TermID,$student->StudentNo,$reg->CollegeID,$reg->ProgID));
         $freeSec=DB::select("EXEC dbo.ES_getFreeSections ?,?,?,?,?",array($reg->CampusID,$reg->TermID,$student->StudentNo,$reg->CollegeID,$reg->ProgID));
         
-        return Inertia::render('Enrollment/test',[
+        return Inertia::render('Enrollment/EnrollmentPage',[
                 'student'=>$student,
                 'enroll_sub'=>$enroll_sub,
                 'blockSec'=>$blockSec,

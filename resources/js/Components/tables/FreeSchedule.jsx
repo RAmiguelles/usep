@@ -1,10 +1,21 @@
 import React from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
+import 'primereact/resources/themes/lara-light-blue/theme.css';  // Theme
+import 'primereact/resources/primereact.min.css';         // Core CSS
+// import 'primeicons/primeicons.css';    
+import "./../../../css/style.css"
+import { useState } from 'react';
 
-const FreeSchedule = ({value=null}) => {
+const FreeSchedule = ({value=null, onSelectionChange}) => {
+  const [selectedFreeScehds, setSelectedFreeScehds] = useState([]);
+
+  const handleSelectionChange = (e) => {
+      setSelectedFreeScehds(e.value);
+      onSelectionChange(e.value);
+  };
   return (
-      <DataTable value={value} scrollable selectionMode='checkbox' onSelectionChange={(e) => setSelectedProducts(e.value)} dataKey="id" tableStyle={{ minWidth: '50rem' }}>
+      <DataTable value={value} scrollable selectionMode='checkbox' selection={selectedFreeScehds} onSelectionChange={handleSelectionChange} dataKey="id" tableStyle={{ minWidth: '50rem' }}>
           <Column selectionMode="multiple" frozen headerStyle={{ width: '3rem' }}></Column>
           <Column field="ScheduleID" header="ScheduleID" frozen style={{ minWidth: '100px', backgroundColor:'white' }}></Column>
           <Column field="SubjectCode" header="Subject Code" frozen style={{ minWidth: '150px', backgroundColor:'white'  }}></Column>

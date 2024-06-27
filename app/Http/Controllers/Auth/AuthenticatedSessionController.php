@@ -33,33 +33,33 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        $csrfToken = $request->header('x-xsrf-token');
         // $request->authenticate();
+        $csrfToken=$request->header('x-xsrf-token');
         $data = [
-            'pmaps_id' => $request->UserID,
-            'password' => $request->password,
-            'token' => 'a3fbd181665bcbc428be0c1412366979',
+            // 'username' => $request->IdNumber,
+            // 'password' => $request->password,
+            'username' => '2015-21713',
+            'password' => 'portal@SDMD123',
+            'campusID' => $request->campus,
         ];
         $response = Http::withHeaders([
             'X-CSRF-TOKEN' => $csrfToken,
             'Content-Type' => 'application/json',
-        ])->post("https://hris.usep.edu.ph/api/auth/login", $data);
+        ])->post("https://api.usep.edu.ph/user/auth", $data);
         $data=$response->json();
-        if(!$data["Error"]){
-            $user = User::where('UserID', $data['id'])->first();
-            if($user){
-                Auth::login($user);
-            }else{
+        if($data["success"]==true){
+            $user = User::where('studentNo', $data['user'])->first();
+            if(!$user){
                 $user = User::create([
-                    'UserID' => $data['id'],
-                    'email' => $data['Email'],
-                    'password' => Hash::make($request->input('sss')),
+                    'studentNo' => $data['user'],
                 ]);
-            }      
+            }
             Auth::login($user);
-            return redirect()->intended(route('dashboard', absolute: false));
+            $request->session()->regenerate();
+            return redirect()->intended(route('student.show',$data['user'], absolute: false));
+        }else{
+            return redirect()->back()->withErrors(['status' => 'Invalid credentials']);
         }
-        return redirect()->back();
     }
 
     /**

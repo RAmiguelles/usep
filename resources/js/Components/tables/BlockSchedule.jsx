@@ -9,6 +9,7 @@ import { useState } from 'react';
 
 const BlockSchedule = ({value=null,  onSelectionChange}) => {
   const [selectedBlockScehds, setSelectedBlockScehds] = useState([]);
+  console.log(value)
 
   const handleSelectionChange = (e) => {
       setSelectedBlockScehds(e.value);
