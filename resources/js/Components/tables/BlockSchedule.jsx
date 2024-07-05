@@ -7,9 +7,8 @@ import 'primereact/resources/primereact.min.css';         // Core CSS
 import "./../../../css/style.css"
 import { useState } from 'react';
 
-const BlockSchedule = ({value=null,  onSelectionChange}) => {
+const BlockSchedule = ({value=null,  onSelectionChange, select}) => {
   const [selectedBlockScehds, setSelectedBlockScehds] = useState([]);
-  console.log(value)
 
   const handleSelectionChange = (e) => {
       setSelectedBlockScehds(e.value);
@@ -17,7 +16,7 @@ const BlockSchedule = ({value=null,  onSelectionChange}) => {
   };
 
   return (
-      <DataTable value={value} scrollable selectionMode='checkbox' selection={selectedBlockScehds} onSelectionChange={handleSelectionChange} datakey="id" tableStyle={{ minWidth: '50rem' }}>
+      <DataTable value={value} scrollable selectionMode='checkbox' selection={select} onSelectionChange={handleSelectionChange} datakey="id" tableStyle={{ minWidth: '50rem' }}>
           <Column selectionMode="multiple" frozen headerStyle={{ width: '3rem'}}></Column>
           <Column datakey="SubjectID" field="ScheduleID" header="ScheduleID" frozen style={{ minWidth: '100px'}}></Column>
           <Column datakey="SubjectID" field="SubjectCode" header="Subject Code" frozen style={{ minWidth: '150px'}}></Column>

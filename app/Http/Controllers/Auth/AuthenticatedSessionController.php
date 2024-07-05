@@ -12,8 +12,8 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Support\Facades\Http;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Session;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -38,7 +38,7 @@ class AuthenticatedSessionController extends Controller
         $data = [
             // 'username' => $request->IdNumber,
             // 'password' => $request->password,
-            'username' => '2015-21713',
+            'username' => '2021-02497',
             'password' => 'portal@SDMD123',
             'campusID' => $request->campus,
         ];
@@ -55,7 +55,10 @@ class AuthenticatedSessionController extends Controller
                 ]);
             }
             Auth::login($user);
-            $request->session()->regenerate();
+            $request->session()->put('idNumber',$data['user']);
+            $request->session()->put('campusID',$request->campus);
+            $request->session()->put('token',$data['token']);
+
             return redirect()->intended(route('student.show',$data['user'], absolute: false));
         }else{
             return redirect()->back()->withErrors(['status' => 'Invalid credentials']);

@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
 
 class IfAuth
 {
@@ -17,8 +18,8 @@ class IfAuth
     public function handle(Request $request, Closure $next): Response
     {
         if(!Auth::user()){
-            return $next($request);
+            return route($request);
         }
-            return back();
+            return Redirect::route('student.show',Auth::user()->studentNo);
     }
 }

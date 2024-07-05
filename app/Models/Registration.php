@@ -8,5 +8,5 @@ use Illuminate\Database\Eloquent\Model;
 class Registration extends Model
 {
     use HasFactory;
-    protected $table = 'dbo.ES_Registrations';
+    protected $table = 'dbo.ES_RegistrationDetails';
 }

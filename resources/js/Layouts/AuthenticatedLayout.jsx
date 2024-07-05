@@ -7,12 +7,7 @@ import { Link } from '@inertiajs/react';
 
 export default function Authenticated({ user, header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
-    const bgUrl='url("/img/eagle.jpg")'
-    const mainStyle = {
-        backgroundImage: bgUrl,
-        backgroundSize: 'contain',
-        height: '100vh',          
-      };
+    
     return (
         <div className="min-h-screen bg-gray-100">
             <nav className="bg-white border-b border-gray-100">
@@ -26,8 +21,8 @@ export default function Authenticated({ user, header, children }) {
                                 <div style={{height: '0px', width: '16px'}}></div><div className="border border-gray-500/50" style={{height: '32px', width: '1px'}}></div><div style={{height: '0px', width: '16px'}}></div>
                             </div>
                             <div className="mt-2" style={{height: '100%', width: '100%', placeContent: 'unset', alignItems: 'unset', overflow: 'unset'}}>
-                                <div class="" style={{color: 'rgb(229, 156, 36)', fontWeight: '600', fontSize: '18px'}}>One <span class="" style={{color: 'rgb(151, 57, 57)', fontWeight: '600', fontSize: '18px'}}>Data. </span>One <span class="" style={{color: 'rgb(151, 57, 57)', fontWeight: '600', fontSize: '18px'}}>USeP. </span></div>
-                                <div class="" style={{color: 'rgb(87, 87, 87)', fontWeight: '600', fontSize: '14px'}}>Student Portal</div>
+                                <div className="" style={{color: 'rgb(229, 156, 36)', fontWeight: '600', fontSize: '18px'}}>One <span className="" style={{color: 'rgb(151, 57, 57)', fontWeight: '600', fontSize: '18px'}}>Data. </span>One <span className="" style={{color: 'rgb(151, 57, 57)', fontWeight: '600', fontSize: '18px'}}>USeP. </span></div>
+                                <div className="" style={{color: 'rgb(87, 87, 87)', fontWeight: '600', fontSize: '14px'}}>Student Portal</div>
                             </div>
                             {/* <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                                 <NavLink href={route('dashboard')} active={route().current('dashboard')}>
@@ -76,7 +71,7 @@ export default function Authenticated({ user, header, children }) {
                                     </Dropdown.Trigger>
 
                                     <Dropdown.Content>
-                                        <Dropdown.Link href={route('profile.edit')}>Profile</Dropdown.Link>
+                                        {/* <Dropdown.Link href={route('profile.edit')}>Profile</Dropdown.Link> */}
                                         <Dropdown.Link href={route('logout')} method="post" as="button">
                                             Log Out
                                         </Dropdown.Link>
@@ -129,7 +124,7 @@ export default function Authenticated({ user, header, children }) {
                         </div>
 
                         <div className="mt-3 space-y-1">
-                            <ResponsiveNavLink href={route('profile.edit')}>Profile</ResponsiveNavLink>
+                            {/* <ResponsiveNavLink href={route('profile.edit')}>Profile</ResponsiveNavLink> */}
                             <ResponsiveNavLink method="post" href={route('logout')} as="button">
                                 Log Out
                             </ResponsiveNavLink>
