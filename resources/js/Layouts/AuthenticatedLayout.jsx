@@ -5,7 +5,7 @@ import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link } from '@inertiajs/react';
 
-export default function Authenticated({ user, header, children }) {
+export default function Authenticated({ header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
     
     return (
@@ -15,7 +15,7 @@ export default function Authenticated({ user, header, children }) {
                     <div className="flex justify-between h-16">
                         <div className="flex">
                             <div className="shrink-0 flex items-center">
-                                <Link href={route('dashboard')}>
+                                <Link href={route('welcome')}>
                                     <ApplicationLogo className="block h-9 w-auto fill-current text-gray-800" />
                                 </Link>
                                 <div style={{height: '0px', width: '16px'}}></div><div className="border border-gray-500/50" style={{height: '32px', width: '1px'}}></div><div style={{height: '0px', width: '16px'}}></div>
@@ -72,7 +72,7 @@ export default function Authenticated({ user, header, children }) {
 
                                     <Dropdown.Content>
                                         {/* <Dropdown.Link href={route('profile.edit')}>Profile</Dropdown.Link> */}
-                                        <Dropdown.Link href={route('logout')} method="post" as="button">
+                                        <Dropdown.Link href={route('logout')} method="get" as="button">
                                             Log Out
                                         </Dropdown.Link>
                                     </Dropdown.Content>
@@ -108,19 +108,12 @@ export default function Authenticated({ user, header, children }) {
 
                 <div className={(showingNavigationDropdown ? 'block' : 'hidden') + ' sm:hidden'}>
                     <div className="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink href={route('dashboard')} active={route().current('dashboard')}>
-                            Dashboard
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink href={route('enrollment.index')} active={route().current('enrollment.*')}>
-                            Enrollment
-                        </ResponsiveNavLink>
-                        
                     </div>
 
                     <div className="pt-4 pb-1 border-t border-gray-200">
                         <div className="px-4">
-                            <div className="font-medium text-base text-gray-800">{user.name}</div>
-                            <div className="font-medium text-sm text-gray-500">{user.email}</div>
+                            {/* <div className="font-medium text-base text-gray-800">{user.name}</div>
+                            <div className="font-medium text-sm text-gray-500">{user.email}</div> */}
                         </div>
 
                         <div className="mt-3 space-y-1">

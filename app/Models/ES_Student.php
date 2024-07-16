@@ -26,4 +26,9 @@ class ES_Student extends Model
         DB::select("EXEC dbo.sp_SaveEnrolledSubjects ?,?,?",array($RegID,$Schedule,$Seq));
         return $RegID;
     }
+
+    protected function CurriculumID($id){
+        $cur=DB::select("EXEC dbo.ES_GetStudentInfo ?",array($id));
+        return ($cur[0]->CurriculumID);
+    }
 }

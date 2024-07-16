@@ -36,10 +36,10 @@ class AuthenticatedSessionController extends Controller
         // $request->authenticate();
         $csrfToken=$request->header('x-xsrf-token');
         $data = [
-            // 'username' => $request->IdNumber,
-            // 'password' => $request->password,
-            'username' => '2021-02497',
-            'password' => 'portal@SDMD123',
+            'username' => $request->IdNumber,
+            'password' => $request->password,
+            // 'username' => '2021-02497',
+            // 'password' => 'portal@SDMD123',
             'campusID' => $request->campus,
         ];
         $response = Http::withHeaders([
@@ -48,13 +48,6 @@ class AuthenticatedSessionController extends Controller
         ])->post("https://api.usep.edu.ph/user/auth", $data);
         $data=$response->json();
         if($data["success"]==true){
-            $user = User::where('studentNo', $data['user'])->first();
-            if(!$user){
-                $user = User::create([
-                    'studentNo' => $data['user'],
-                ]);
-            }
-            Auth::login($user);
             $request->session()->put('idNumber',$data['user']);
             $request->session()->put('campusID',$request->campus);
             $request->session()->put('token',$data['token']);
@@ -70,12 +63,8 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        Auth::guard('web')->logout();
-
-        $request->session()->invalidate();
-
+        $request->session()->flush();
         $request->session()->regenerateToken();
-
         return redirect('/');
     }
 }

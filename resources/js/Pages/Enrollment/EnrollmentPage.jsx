@@ -11,11 +11,11 @@ import EnrollSub from '@/Components/contents/EnrollSub';
 
 const LoadingSpinner = () => (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-        <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-b-4 border-gray-900"></div>
+        <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-b-4 border-primary-dark"></div>
     </div>
 );
 
-export default function Main({auth,reg,data}) {
+export default function Main({reg,data}) {
     const [activePage, setActivePage] = useState('Page1');
     const [profilePic, setprofilePic] = useState('');
     const [profile, setprofile] = useState([]);
@@ -72,7 +72,6 @@ export default function Main({auth,reg,data}) {
     }
     return (
         <AuthenticatedLayout
-            user={auth.user}
             header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">#:{reg.RegID}</h2>}
         >{loading ? (
             <LoadingSpinner /> // Render loading spinner while loading is true
@@ -80,12 +79,13 @@ export default function Main({auth,reg,data}) {
             <>
             <Head title="Enrollment" />
             <div className="">
-                <div className="" style={{height:'100px'}}></div>
+                <div className="" style={{height:'200px',background:'linear-gradient(0deg,rgba(151, 57, 57, 0.1),rgba(151, 57, 57, 0.1)),url(/img/banner.jpg)',backgroundSize:'cover', backgroundPosition:'center'}}></div>
                 <div className="profile">
                     <div className="" style={{height: '100%', width: '100%', display: 'flex', flexDirection: 'column', flexWrap: 'unset', justifyContent: 'center', alignItems: 'center', alignContent: 'unset', overflow: 'unset'}}>
                         <div className="" style={{height: '100%', width: '100%', display: 'flex', flexDirection: 'column', flexWrap: 'unset', justifyContent: 'center', alignItems: 'center', alignContent: 'unset', overflow: 'unset'}}>
+                            {/* <img className="w-full " src="/img/banner.jpg" alt=""/> */}
                             <div className="slide-in-fwd-center"> 
-                                <img src={profilePic} alt="Profile" className="rounded-full border-4 border-primary-dark p-2" style={{height: '150px', width: '150px', marginTop: '-50px'}}/> 
+                                <img src={profilePic} alt="Profile" className="rounded-full border-4 border-primary-dark p-2 hover:animate-spin" style={{height: '150px', width: '150px', marginTop: '-93px'}}/> 
                             </div>
                             <div className="text-2xl text-primary-dark">{profile.studentID}</div>
     
@@ -141,6 +141,12 @@ export default function Main({auth,reg,data}) {
                 </div>
             </div>   
 
+            
+            <div className="m-6 flex flex-col shadow-md bg-gray-50 rounded-md">
+                <div className="w-full p-2 bg-primary-dark"></div>
+                <EnrollSub data={reg.RegID} reload={reload} load={handlereload}></EnrollSub>
+            </div>
+
             <div className="m-6 flex flex-col shadow-md bg-gray-50 rounded-md">
                 <div className="w-full p-2 bg-primary-dark"></div>
                 <nav className="nav-bar m-4">
@@ -149,14 +155,8 @@ export default function Main({auth,reg,data}) {
                 </nav>
                 <div className="page-content">
                     {activePage === 'Page1' && <BlockSection datas={[profile,reg]} reload={handlereload} ></BlockSection>}
-                    {activePage === 'Page2' && <FreeSection datas={[profile,reg]}></FreeSection>}
+                    {activePage === 'Page2' && <FreeSection datas={[profile,reg]} reload={handlereload}></FreeSection>}
                 </div>
-            </div>
-
-
-            <div className="m-6 flex flex-col shadow-md bg-gray-50 rounded-md">
-                <div className="w-full p-2 bg-primary-dark"></div>
-                <EnrollSub data={reg.RegID} reload={reload} load={handlereload}></EnrollSub>
             </div>
             </> 
         )}
