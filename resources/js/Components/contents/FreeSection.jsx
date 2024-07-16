@@ -1,10 +1,20 @@
 import React from 'react';
 import FreeSchedule from "@/Components/tables/FreeSchedule";
+<<<<<<< Updated upstream
 import { useState } from "react";
 
 const FreeSection = ({blockSec,student,reg}) => {
+=======
+import { useState, useEffect } from "react";
+import Modal from '@/Components/Modal';
+import SecondaryButton from '@/Components/SecondaryButton';
+
+const FreeSection = ({datas, reload}) => {
+    const [freeSection, setfreeSection]=useState([])
+>>>>>>> Stashed changes
     const [classsched, getClasssched]=useState([''])
     const [selectedClassSched, setSelectedClassSched] = useState([]);
+    const [showConfirm,setShowConfirm]=useState(false)
 
     const test=(e)=>{
         e.preventDefault()
@@ -30,7 +40,12 @@ const FreeSection = ({blockSec,student,reg}) => {
     }
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log(selectedClassSched)
+        axios.post(route("saveSubjects"), {selectedClassSched, RegID : datas[1].RegID})
+        .then(response => {
+            reload(true)
+            setSelectedClassSched([])
+            setShowConfirm(false)
+        })
       }
 
 
@@ -44,11 +59,28 @@ const FreeSection = ({blockSec,student,reg}) => {
             ))}
             </select>
         <div className="m-4">
-            <form action="#" onSubmit={handleSubmit} method="post">
+            <form method="post">
                 <FreeSchedule value={classsched} onSelectionChange={handleSelectionChange}></FreeSchedule>
-            <button type="submit" className="text-white bg-gradient-to-r from-primary-light to-primary-dark hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right">submit</button>
+            <button type="button" onClick={()=>setShowConfirm(true)} className="text-white bg-gradient-to-r from-primary-light to-primary-dark hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3">submit</button>
             </form>
         </div>
+        
+        <Modal show={showConfirm} maxWidth='md'>
+            <div className='p-0 m-3'>
+                <div className='flex flex-column items-center justify-center p-3'>
+                    <img className="self-center" src="/img/warning.png" alt="Warning" />
+                    <p>Are you sure you want to Add this item?</p>
+                </div>
+                <div className='w-auto flex justify-center'>
+                    <SecondaryButton className="m-2" onClick={()=>setShowConfirm(false)}>
+                    Close
+                    </SecondaryButton>
+                    <SecondaryButton className="m-2" onClick={handleSubmit}>
+                    Confirm
+                    </SecondaryButton>
+                </div>
+            </div>
+        </Modal>
     </>
   );
 };

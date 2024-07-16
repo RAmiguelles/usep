@@ -18,4 +18,9 @@ class ES_Student extends Model
     {
         return $this->hasMany(Registration::class,'StudentNo','StudentNo');
     }
+
+    protected function CurriculumID($id){
+        $cur=DB::select("EXEC dbo.ES_GetStudentInfo ?",array($id));
+        return ($cur[0]->CurriculumID);
+    }
 }

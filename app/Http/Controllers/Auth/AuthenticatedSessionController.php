@@ -36,10 +36,17 @@ class AuthenticatedSessionController extends Controller
         // $request->authenticate();
         $csrfToken=$request->header('x-xsrf-token');
         $data = [
+<<<<<<< Updated upstream
             // 'username' => $request->IdNumber,
             // 'password' => $request->password,
             'username' => '2015-21713',
             'password' => 'portal@SDMD123',
+=======
+            'username' => $request->IdNumber,
+            'password' => $request->password,
+            // 'username' => '2021-02497',
+            // 'password' => 'portal@SDMD123',
+>>>>>>> Stashed changes
             'campusID' => $request->campus,
         ];
         $response = Http::withHeaders([
@@ -48,6 +55,7 @@ class AuthenticatedSessionController extends Controller
         ])->post("https://api.usep.edu.ph/user/auth", $data);
         $data=$response->json();
         if($data["success"]==true){
+<<<<<<< Updated upstream
             $user = User::where('studentNo', $data['user'])->first();
             if(!$user){
                 $user = User::create([
@@ -56,6 +64,12 @@ class AuthenticatedSessionController extends Controller
             }
             Auth::login($user);
             $request->session()->regenerate();
+=======
+            $request->session()->put('idNumber',$data['user']);
+            $request->session()->put('campusID',$request->campus);
+            $request->session()->put('token',$data['token']);
+
+>>>>>>> Stashed changes
             return redirect()->intended(route('student.show',$data['user'], absolute: false));
         }else{
             return redirect()->back()->withErrors(['status' => 'Invalid credentials']);
@@ -67,12 +81,8 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        Auth::guard('web')->logout();
-
-        $request->session()->invalidate();
-
+        $request->session()->flush();
         $request->session()->regenerateToken();
-
         return redirect('/');
     }
 }

@@ -1,10 +1,17 @@
 import React from 'react';
 import BlockSchedule from "@/Components/tables/BlockSchedule";
+<<<<<<< Updated upstream
 import { useState } from "react";
+=======
+import { useState, useEffect } from "react";
+import Modal from '@/Components/Modal';
+import SecondaryButton from '@/Components/SecondaryButton';
+>>>>>>> Stashed changes
 
 const BlockSection = ({blockSec,student,reg}) => {
     const [classsched, getClasssched]=useState([''])
-    const [selectedClassSched, setSelectedClassSched] = useState([]);
+    const [selectedClassSched, setSelectedClassSched] = useState([])
+    const [showConfirm,setShowConfirm]=useState(false)
 
     const test=(e)=>{
         e.preventDefault()
@@ -30,8 +37,19 @@ const BlockSection = ({blockSec,student,reg}) => {
     }
     const handleSubmit = (e) => {
         e.preventDefault();
+<<<<<<< Updated upstream
         console.log(selectedClassSched)
       }
+=======
+        axios.post(route("saveSubjects"), {selectedClassSched, RegID : datas[1].RegID})
+        .then(response => {
+            console.log(response)
+            // reload(true)
+            // setSelectedClassSched([])
+            // setShowConfirm(false)
+        })
+    }
+>>>>>>> Stashed changes
 
 
   return (
@@ -44,11 +62,34 @@ const BlockSection = ({blockSec,student,reg}) => {
             ))}
             </select>
         <div className="m-4">
+<<<<<<< Updated upstream
             <form action="#" onSubmit={handleSubmit} method="post">
                 <BlockSchedule value={classsched} onSelectionChange={handleSelectionChange}></BlockSchedule>
                 <button type="submit" className="text-white bg-gradient-to-r from-primary-light to-primary-dark hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right">submit</button>
+=======
+            <form>
+                <BlockSchedule value={classsched} onSelectionChange={handleSelectionChange} select={selectedClassSched}></BlockSchedule>
+                <button type="button" onClick={()=>setShowConfirm(true)} className="text-white bg-gradient-to-r from-primary-light to-primary-dark hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3">submit</button>
+>>>>>>> Stashed changes
             </form>
         </div>
+
+        <Modal show={showConfirm} maxWidth='md'>
+            <div className='p-0 m-3'>
+                <div className='flex flex-column items-center justify-center p-3'>
+                    <img className="self-center" src="/img/warning.png" alt="Warning" />
+                    <p>Are you sure you want to Add this item?</p>
+                </div>
+                <div className='w-auto flex justify-center'>
+                    <SecondaryButton className="m-2" onClick={()=>setShowConfirm(false)}>
+                    Close
+                    </SecondaryButton>
+                    <SecondaryButton className="m-2" onClick={handleSubmit}>
+                    Confirm
+                    </SecondaryButton>
+                </div>
+            </div>
+        </Modal>
     </>
   );
 };

@@ -1,10 +1,16 @@
 
-import { Link, Head } from '@inertiajs/react';
-import { useState } from "react";
+import { Link, Head, useForm } from '@inertiajs/react';
+import { useState, useEffect } from "react";
 import Modal from '@/Components/Modal';
+import ModalLogin from '@/Components/ModalLogin';
 import SeconButton from '@/Components/SecondaryButton';
 import SecondaryButton from '@/Components/SecondaryButton';
 import PrimaryButton from '@/Components/PrimaryButton';
+import Checkbox from '@/Components/Checkbox';
+import InputError from '@/Components/InputError';
+import TextInput from '@/Components/TextInput';
+import ApplicationLogo from '@/Components/ApplicationLogo';
+import SdmdLogo from '@/Components/SdmdLogo';
 
 
 export default function Welcome({ auth, laravelVersion, phpVersion }) {
@@ -15,23 +21,55 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
         document.getElementById('background')?.classList.add('!hidden');
     };
     const [show, setShow] = useState(true);
+    const [showLogin, setShowLogin] = useState(false);
+
+    const { data, setData, post, processing, errors, reset } = useForm({
+        IdNumber: '',
+        password: '',
+        campus:'',
+        remember: false,
+    });
+    useEffect(() => {
+        return () => {
+            reset('password');
+        };
+    }, []);
+
+    const submit = (e) => {
+        e.preventDefault();
+        post(route('login'));
+
+    };
 
     return (
         <>
             <Head title="Welcome" />
 
-                        <header className="items-center p-3 bg-gradient-to-r from-primary-light to-primary-dark">
-                            <nav className="-mx-3 flex flex-1 justify-end">
-                                    <>
-                                        <Link
-                                            href={route('login')}
-                                            className="rounded-md px-8 py-2 text-black ring-1 ring-transparent transition hover:text-white focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
-                                        >
-                                            Log in
-                                        </Link>
-                                    </>
-                            </nav>
-                        </header>
+            <header>
+                <div className='bg-gradient-to-r from-primary-light to-primary-dark' style={{height:'15px'}}> </div>
+                <nav className="bg-white border-b border-gray-200">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex justify-between h-14">
+                            <div className="flex">
+                                <div className="shrink-0 flex items-center">
+                                    <ApplicationLogo className="block h-9 w-auto fill-current text-gray-800"/>
+                                    <div style={{height: '0px', width: '16px'}}></div><div className="border border-gray-500/50" style={{height: '32px', width: '1px'}}></div><div style={{height: '0px', width: '16px'}}></div>
+                                    <div className="" style={{height: '100%', width: '100%', placeContent: 'unset', alignItems: 'unset', overflow: 'unset'}}>
+                                        <div class="" style={{color: 'rgb(229, 156, 36)', fontWeight: '600', fontSize: '18px'}}>One <span class="" style={{color: 'rgb(151, 57, 57)', fontWeight: '600', fontSize: '18px'}}>Data. </span>One <span class="" style={{color: 'rgb(151, 57, 57)', fontWeight: '600', fontSize: '18px'}}>USeP. </span></div>
+                                        <div class="" style={{color: 'rgb(87, 87, 87)', fontWeight: '600', fontSize: '14px'}}>Enrollment System</div>
+                                    </div>
+                                </div>
+                            </div>  
+
+                            <div className="hidden sm:flex sm:items-center sm:ms-6">
+                                <div className="ms-3 flex relative">
+                                    <SdmdLogo className="block h-9 w-auto fill-current text-gray-800"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+            </header>
                         <main>
                         
                         <Modal show={show}>
@@ -51,6 +89,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                             </div>
                             <div className='footer p-4 mt-12 bg-gradient-to-r from-primary-light to-primary-dark'></div>
                         </Modal>
+
                         <div className='w-full h-screen relative bg-gradient-to-r from-gray-200 to-gray-400'>
                           <img className='w-full h-screen object-cover absolute mix-blend-overlay animation-fade' src="img/eagle.jpg" alt="Background"/>
                           <div className='w-full h-screen flex flex-col justify-start items-center absolute'>
@@ -58,13 +97,79 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                                   <div className='text-5xl'>University of Southeastern Philippines</div>
                                   <div className='text-6xl'>Enrollment System</div>
                                   <div className="mt-24">
-                                      <a href={route('login')} className='inline-flex items-center px-6 py-3 bg-white border border-block rounded-xl font-semibold text-md text-gray-100 uppercase tracking-widest bg-gradient-to-r from-primary-light to-primary-dark hover:bg-gradient-to-br focus:bg-red-800 active:bg-red-800 focus:outline-none focus:ring-2 focus:ring-primary-dark focus:ring-offset-2 transition ease-in-out duration-150 opacity-25transition ease-in-out delay-50 bg-blue-500 hover:-translate-y-1 hover:scale-110 duration-300'>
-                                          Log in
-                                      </a>
+                                      <button type="button" onClick={()=>setShowLogin(true)} className='inline-flex items-center px-6 py-3 bg-white border border-block rounded-xl font-semibold text-md text-gray-100 uppercase tracking-widest bg-gradient-to-r from-primary-light to-primary-dark hover:bg-gradient-to-br focus:bg-red-800 active:bg-red-800 focus:outline-none focus:ring-2 focus:ring-primary-dark focus:ring-offset-2 transition ease-in-out duration-150 opacity-25transition ease-in-out delay-50 bg-blue-500 hover:-translate-y-1 hover:scale-110 duration-300'>Log in</button>
                                   </div>
                           </div>
                         </div>     
                         </main>
+                        <ModalLogin show={showLogin} maxWidth='lg'>
+                            <div className='p-6 backdrop-blur-sm'>
+                                <div className='flex w-auto items-center justify-center'>
+                                    <form onSubmit={submit}>
+                                        <div className='m-3'>
+                                            <select name="campus" id="campus" className="focus:rounded-md focus:shadow-sm border-2 border-gray-500/50 rounded-md w-80 p-2.5 " onChange={(e) => setData('campus', e.target.value)}>
+                                                <option value="" disabled selected>Campus</option>
+                                                <option value="1">Obrero</option>
+                                                <option value="2">Mintal</option>
+                                                <option value="3">Tagum</option>
+                                                <option value="4">Mabini</option>
+                                            </select>
+                                            <InputError message={errors.campus} className="mt-2" />
+                                        </div>
+                                        <div className='m-3'>
+                                        <TextInput
+                                                id="IdNumber"
+                                                type="text"
+                                                name="IdNumber"
+                                                value={data.IdNumber}
+                                                className="mt-1 block w-80 border-2 rounded-md border-gray-500/50"
+                                                autoComplete="username"
+                                                isFocused={true}
+                                                placeholder="ID Number"
+                                                onChange={(e) => setData('IdNumber', e.target.value)}
+                                            />
+
+                                            <InputError message={errors.IdNumber} className="mt-2" />
+                                        </div>
+
+                                        <div className='m-3'>
+                                            <TextInput
+                                                id="password"
+                                                type="password"
+                                                name="password"
+                                                value={data.password}
+                                                className="mt-1 block w-80 border-2 rounded-md border-gray-500/50"
+                                                autoComplete="current-password"
+                                                placeholder="Password"
+                                                onChange={(e) => setData('password', e.target.value)}
+                                            />
+
+                                            <InputError message={errors.password} className="mt-2" />
+                                        </div>
+
+                                        <div className="block mt-4">
+                                            <label className="flex items-center">
+                                                <Checkbox
+                                                    name="remember"
+                                                    checked={data.remember}
+                                                    onChange={(e) => setData('remember', e.target.checked)}
+                                                />
+                                                <span className="ms-2 text-sm text-gray-600">Remember me</span>
+                                            </label>
+                                        </div>
+
+                                        <div className="flex items-center justify-center mt-12">
+                                            <PrimaryButton className="ms-0 md:ms-4" disabled={processing}>
+                                                Log in
+                                            </PrimaryButton>
+                                            <button type="button" onClick={()=>setShowLogin(false)} className='ms-0 md:ms-4 inline-flex items-center px-6 py-3 bg-white border border-block rounded-xl font-semibold text-md text-gray-100 uppercase tracking-widest bg-gradient-to-r from-primary-light to-primary-dark hover:bg-gradient-to-br focus:bg-red-800 active:bg-red-800 focus:outline-none focus:ring-2 focus:ring-primary-dark focus:ring-offset-2 transition ease-in-out duration-150 '>Close</button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div className='w-auto flex justify-center'>
+                                </div>
+                            </div>
+                        </ModalLogin>
         </>
     );
 }

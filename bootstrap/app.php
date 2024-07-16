@@ -16,7 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
         ]);
         $middleware->alias([
-            'ifAuth' => \App\Http\Middleware\IfAuth::class,
+            'ifUser' => \App\Http\Middleware\IfAuth::class,
+            'User' => \App\Http\Middleware\CheckUser::class,
         ]);
         //
     })
