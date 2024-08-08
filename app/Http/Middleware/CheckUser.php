@@ -5,10 +5,9 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 
-class IfAuth
+class CheckUser
 {
     /**
      * Handle an incoming request.
@@ -17,9 +16,9 @@ class IfAuth
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if(!session()->get('idNumber')){
+        if(session()->get('idNumber')){
             return $next($request);
         }
-        return Redirect::route('student.show');
+        return Redirect::route('welcome');
     }
 }

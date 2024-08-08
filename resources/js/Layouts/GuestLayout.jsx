@@ -18,7 +18,7 @@ export default function Guest({ children }) {
                                 <div style={{height: '0px', width: '16px'}}></div><div className="border border-gray-500/50" style={{height: '32px', width: '1px'}}></div><div style={{height: '0px', width: '16px'}}></div>
                                 <div className="" style={{height: '100%', width: '100%', placeContent: 'unset', alignItems: 'unset', overflow: 'unset'}}>
                                     <div class="" style={{color: 'rgb(229, 156, 36)', fontWeight: '600', fontSize: '18px'}}>One <span class="" style={{color: 'rgb(151, 57, 57)', fontWeight: '600', fontSize: '18px'}}>Data. </span>One <span class="" style={{color: 'rgb(151, 57, 57)', fontWeight: '600', fontSize: '18px'}}>USeP. </span></div>
-                                    <div class="" style={{color: 'rgb(87, 87, 87)', fontWeight: '600', fontSize: '14px'}}>Student Portal</div>
+                                    <div class="" style={{color: 'rgb(87, 87, 87)', fontWeight: '600', fontSize: '14px'}}>Online Enrollment</div>
                                 </div>
                             </div>
                         </div>  

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Registration;
+use Illuminate\Support\Facades\DB;
 
 class ES_Student extends Model
 {
@@ -14,8 +15,9 @@ class ES_Student extends Model
 
     protected $hidden = ['SSMA_TimeStamp'];
 
-    public function Reg()
-    {
-        return $this->hasMany(Registration::class,'StudentNo','StudentNo');
+    public function SaveSubject($RegID, $Schedule, $Seq)
+    { 
+        DB::select("EXEC dbo.sp_SaveEnrolledSubjects ?,?,?",array($RegID,$Schedule,$Seq));
+        return $RegID;
     }
 }
