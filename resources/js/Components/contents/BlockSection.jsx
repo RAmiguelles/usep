@@ -9,13 +9,12 @@ const BlockSection = ({datas, reload}) => {
     const [classsched, getClasssched]=useState([''])
     const [selectedClassSched, setSelectedClassSched] = useState([])
     const [showConfirm,setShowConfirm]=useState(false)
-
     const params={
         0:datas[1].CampusID,
         1:datas[1].TermID,
         2:datas[0].studentID,
-        3:datas[1].CollegeID,
-        4:datas[1].ProgID
+        3:datas[0].collegeID,
+        4:datas[0].progID
     }
 
     useEffect(() => {
@@ -40,13 +39,14 @@ const BlockSection = ({datas, reload}) => {
         const data={
             0:e.currentTarget.value,
             1:datas[0].studentID,
-            2:datas[1].CollegeID,
-            3:datas[1].ProgID,
+            2:datas[0].collegeID,
+            3:datas[0].progID,
             4:datas[1].RegID
         }
         axios.post(route("getBlockClassSchedule"), { data })
         .then(response => {
             getClasssched(response.data)
+            setSelectedClassSched([])
         })
         .catch(error => {
             console.error('Error fetching data:', error);
@@ -59,7 +59,8 @@ const BlockSection = ({datas, reload}) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        axios.post(route("saveSubjects"), {selectedClassSched, RegID : datas[1].RegID})
+        console.log(selectedClassSched)
+        axios.post(route("saveSubjects"), {selectedClassSched, cID : datas[1].CurriculumID,RegID:datas[1].RegID})
         .then(response => {
             console.log(response)
             // reload(true)
@@ -81,7 +82,7 @@ const BlockSection = ({datas, reload}) => {
         <div className="m-4">
             <form>
                 <BlockSchedule value={classsched} onSelectionChange={handleSelectionChange} select={selectedClassSched}></BlockSchedule>
-                <button type="button" onClick={()=>setShowConfirm(true)} className="text-white bg-gradient-to-r from-primary-light to-primary-dark hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3">submit</button>
+                <button type="button" onClick={()=>setShowConfirm(true)} disabled={selectedClassSched.length == []} className="text-white bg-gradient-to-r from-primary-light to-primary-dark hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3">submit</button>
             </form>
         </div>
 

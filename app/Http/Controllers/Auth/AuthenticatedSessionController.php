@@ -12,8 +12,10 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Support\Facades\Http;
 use App\Models\User;
+use App\Models\DBOSession;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\DB;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -32,14 +34,12 @@ class AuthenticatedSessionController extends Controller
      * Handle an incoming authentication request.
      */
     public function store(LoginRequest $request): RedirectResponse
-    {
+    {  
         // $request->authenticate();
         $csrfToken=$request->header('x-xsrf-token');
         $data = [
             'username' => $request->IdNumber,
             'password' => $request->password,
-            // 'username' => '2021-02497',
-            // 'password' => 'portal@SDMD123',
             'campusID' => $request->campus,
         ];
         $response = Http::withHeaders([
@@ -48,11 +48,11 @@ class AuthenticatedSessionController extends Controller
         ])->post("https://api.usep.edu.ph/user/auth", $data);
         $data=$response->json();
         if($data["success"]==true){
+            DBOSession::where('idNumber',$data['user'])->delete();
             $request->session()->put('idNumber',$data['user']);
             $request->session()->put('campusID',$request->campus);
             $request->session()->put('token',$data['token']);
-
-            return redirect()->intended(route('student.show',$data['user'], absolute: false));
+            return redirect()->intended(route('student.show', absolute: false));
         }else{
             return redirect()->back()->withErrors(['status' => 'Invalid credentials']);
         }
@@ -63,6 +63,7 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        DBOSession::where('user_id',session()->get('idNumber'))->delete();
         $request->session()->flush();
         $request->session()->regenerateToken();
         return redirect('/');

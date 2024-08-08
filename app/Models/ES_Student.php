@@ -15,20 +15,9 @@ class ES_Student extends Model
 
     protected $hidden = ['SSMA_TimeStamp'];
 
-    public function Registration($id)
-    {
-        $reg=DB::table("dbo.ES_Registrations")->where('StudentNo',$id)->get()->last();
-        return $reg;
-    }
-
     public function SaveSubject($RegID, $Schedule, $Seq)
     { 
         DB::select("EXEC dbo.sp_SaveEnrolledSubjects ?,?,?",array($RegID,$Schedule,$Seq));
         return $RegID;
-    }
-
-    protected function CurriculumID($id){
-        $cur=DB::select("EXEC dbo.ES_GetStudentInfo ?",array($id));
-        return ($cur[0]->CurriculumID);
     }
 }

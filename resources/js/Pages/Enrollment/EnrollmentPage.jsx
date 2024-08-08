@@ -8,6 +8,7 @@ import { Column } from 'primereact/column';
 import BlockSection from "@/Components/contents/BlockSection";
 import FreeSection from "@/Components/contents/FreeSection";
 import EnrollSub from '@/Components/contents/EnrollSub';
+import { format } from 'date-fns';
 
 const LoadingSpinner = () => (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -44,13 +45,12 @@ export default function Main({reg,data}) {
 
                 if (data && data.user && data.campus && data.token) {
                     const profileResponse = await axios.get(`${url}getProfile/${data.user}/${data.campus}`, getHTTPConfig(data.token));
-                    console.log("GET PROFILE", profileResponse);
                     if (profileResponse.data) {
+                        const date = new Date(reg.RegDate);
+                        reg.RegDate = format(date, 'MM/dd/yyyy');
                         setprofile(profileResponse.data);
-                        console.log(profileResponse.data)
                         // Fetch profile picture only when profile data is ready
                         const profilePicResponse = await axios.get(`${url}getProfilePic/${data.user}/${data.campus}`, getHTTPConfig(data.token));
-                        console.log("GET PROFILE PIC", profilePicResponse);
                         if (profilePicResponse.data) {
                             setprofilePic(profilePicResponse.data);
                         }
@@ -72,7 +72,7 @@ export default function Main({reg,data}) {
     }
     return (
         <AuthenticatedLayout
-            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">#:{reg.RegID}</h2>}
+            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight"></h2>}
         >{loading ? (
             <LoadingSpinner /> // Render loading spinner while loading is true
         ) : (
@@ -91,64 +91,82 @@ export default function Main({reg,data}) {
     
                             <div className="text-2xl text-gray-800 font-semibold" >{profile.fullName}</div>
                             <div className="text-2xl text-gray-800 font-semibold" >{profile.program}</div>
-
-                        </div>
-                        <div className="w-screen m-6 flex flex-col shadow-md justify-center items-center bg-gray-50 rounded-md">
-                            <div className="w-full p-2 bg-primary-dark"></div>
-                            <div className="p-2">                    
-                                <ul className="flex items-center mr-8">
-                                <li className="mr-4">
-                                    <p className="font-bold">College:<span>{profile.college}</span></p>
-                                </li>
-                                <li className="mr-4">
-                                    <p className="font-bold">Major Study:<span>{profile.major}</span></p>
-                                </li>
-                                <li className="mr-4">
-                                    <p className="font-bold">C.Code:<span>{profile.curriculumCode}</span></p>
-                                </li>
-                                <li className="mr-4">
-                                    <p className="font-bold">Reg. Date: <span>{profile.studentID}</span></p>
-                                </li>
-                                </ul>
-                            </div>
-                            <div className="p-2">
-                                <ul className="flex items-center">
-                                    <li className="mr-4">
-                                        <p className="font-bold">Year level: <span>{profile.yearLevel}</span></p>
-                                    </li>
-                                    <li className="mr-4">
-                                        <p className="font-bold">Max load: <span>{profile.maxUnitsLoad}</span></p>
-                                    </li>
-                                    <li className="mr-4">
-                                        <p className="font-bold">Session:<span>{profile.studentID}</span></p>
-                                    </li>
-                                    <li className="mr-4">
-                                        <p className="font-bold">Status:<span>{}</span></p>
-                                    </li>
-                                    <li className="mr-4">
-                                        <p className="font-bold">Gender: <span>{profile.sex}</span></p>
-                                    </li>
-                                    <li className="mr-4">
-                                        <p className="font-bold">Scholarship:<span>{}</span></p>
-                                    </li>
-                                    <li>
-                                        <p className="font-bold">Expiry Date:<span>{}</span></p>
-                                    </li>
-                                </ul>
-                            </div>
                         </div>
                     </div>
                 </div>
             </div>   
-
+            <div className="m-6 flex flex-col shadow-md bg-gray-50 rounded-md items-center bg-white">
+                <div className="w-full p-2 bg-primary-dark"><label className="block text-2xl font-bold text-white text-center">Profile information</label></div>
+                <div class="overflow-x-auto m-3">
+                    <table class="min-w-auto bg-white">
+                        <tbody>
+                            <tr class="info-cell">
+                                <td class="px-3 py-2 font-bold">Registration No.</td>
+                                <td class="px-3 py-2">:</td>
+                                <td class="px-3 py-2">{reg.RegID}</td>
+                            </tr>
+                            <tr class="info-cell">
+                                <td class="px-3 py-2 font-bold">Registration Date</td>
+                                <td class="px-3 py-2">:</td>
+                                <td class="px-3 py-2">{reg.RegDate}</td>
+                            </tr>
+                            <tr class="info-cell">
+                                <td class="px-3 py-2 font-bold">College Name</td>
+                                <td class="px-3 py-2">:</td>
+                                <td class="px-3 py-2">{profile.college}</td>
+                            </tr>
+                            <tr class="info-cell">
+                                <td class="px-3 py-2 font-bold">Program Name</td>
+                                <td class="px-3 py-2">:</td>
+                                <td class="px-3 py-2">{profile.program}</td>
+                            </tr>
+                            <tr class="info-cell">
+                                <td class="px-3 py-2 font-bold">Major Name</td>
+                                <td class="px-3 py-2">:</td>
+                                <td class="px-3 py-2">{profile.major}</td>
+                            </tr>
+                            <tr class="info-cell">
+                                <td class="px-3 py-2 font-bold">Year Level Description</td>
+                                <td class="px-3 py-2">:</td>
+                                <td class="px-3 py-2">{profile.yearLevel}</td>
+                            </tr>
+                            <tr class="info-cell">
+                                <td class="px-3 py-2 font-bold">Curriculum Name</td>
+                                <td class="px-3 py-2">:</td>
+                                <td class="px-3 py-2">{reg.CurriculumCode}</td>
+                            </tr>
+                            <tr class="info-cell">
+                                <td class="px-3 py-2 font-bold">Max. Load</td>
+                                <td class="px-3 py-2">:</td>
+                                <td class="px-3 py-2">{profile.maxUnitsLoad}</td>
+                            </tr>
+                            <tr class="info-cell">
+                                <td class="px-3 py-2 font-bold">Status</td>
+                                <td class="px-3 py-2">:</td>
+                                <td class="px-3 py-2">{profile.status}</td>
+                            </tr>
+                            <tr class="info-cell">
+                                <td class="px-3 py-2 font-bold">Gender</td>
+                                <td class="px-3 py-2">:</td>
+                                <td class="px-3 py-2">{profile.sex=='F'? "Female":"Male"}</td>
+                            </tr>
+                            <tr class="info-cell">
+                                <td class="px-3 py-2 font-bold">Scholarship Name</td>
+                                <td class="px-3 py-2">:</td>
+                                <td class="px-3 py-2">{reg.ScholarProviderName}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             
             <div className="m-6 flex flex-col shadow-md bg-gray-50 rounded-md">
-                <div className="w-full p-2 bg-primary-dark"></div>
+                <div className="w-full p-2 bg-primary-dark"><label className="block text-2xl font-bold text-white text-center">List of Enrolled Subject</label></div>
                 <EnrollSub data={reg.RegID} reload={reload} load={handlereload}></EnrollSub>
             </div>
 
             <div className="m-6 flex flex-col shadow-md bg-gray-50 rounded-md">
-                <div className="w-full p-2 bg-primary-dark"></div>
+                <div className="w-full p-2 bg-primary-dark"><label className="block text-2xl font-bold text-white text-center">List of Sections</label></div>
                 <nav className="nav-bar m-4">
                     <button onClick={() => handleNavClick('Page1')} className={`hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l ${activePage == 'Page1' ? 'bg-gray-400' : 'bg-gray-300'}`}>Block Section</button>
                     <button onClick={() => handleNavClick('Page2')}  className={`hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l ${activePage == 'Page2' ? 'bg-gray-400' : 'bg-gray-300'}`}>Free Section</button>

@@ -20,6 +20,6 @@ class IfAuth
         if(!session()->get('idNumber')){
             return $next($request);
         }
-        return Redirect::route('student.show',session()->get('idNumber'));
+        return Redirect::route('student.show');
     }
 }

@@ -16,7 +16,7 @@ Route::middleware('ifUser')->group(function () {
     Route::post('login', [AuthenticatedSessionController::class, 'store'])->name('login');
 });
 Route::middleware('User')->group(function () {
-    Route::get('/student/{id}', [StudentController::class, 'show'])->name('student.show');
+    Route::get('/student', [StudentController::class, 'show'])->name('student.show');
     Route::post('/student/getEnrollSubject', [StudentController::class, 'getEnrollSubject'])->name('getEnrollSubject');
     Route::post('/deleteSubjects', [StudentController::class, 'deleteSubjects'])->name('deleteSubjects');
     Route::post('/saveSubjects', [StudentController::class, 'saveSubjects'])->name('saveSubjects');

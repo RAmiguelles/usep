@@ -14,8 +14,8 @@ const FreeSection = ({datas, reload}) => {
         0:datas[1].CampusID,
         1:datas[1].TermID,
         2:datas[0].studentID,
-        3:datas[1].CollegeID,
-        4:datas[1].ProgID
+        3:datas[0].collegeID,
+        4:datas[0].progID
     }
 
     useEffect(() => {
@@ -40,8 +40,8 @@ const FreeSection = ({datas, reload}) => {
         const data={
             0:e.currentTarget.value,
             1:datas[0].studentID,
-            2:datas[1].CollegeID,
-            3:datas[1].ProgID,
+            2:datas[0].collegeID,
+            3:datas[0].progID,
             4:datas[1].RegID
         }
         axios.post(route("getBlockClassSchedule"), { data })

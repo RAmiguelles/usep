@@ -22,7 +22,7 @@ export default function Authenticated({ header, children }) {
                             </div>
                             <div className="mt-2" style={{height: '100%', width: '100%', placeContent: 'unset', alignItems: 'unset', overflow: 'unset'}}>
                                 <div className="" style={{color: 'rgb(229, 156, 36)', fontWeight: '600', fontSize: '18px'}}>One <span className="" style={{color: 'rgb(151, 57, 57)', fontWeight: '600', fontSize: '18px'}}>Data. </span>One <span className="" style={{color: 'rgb(151, 57, 57)', fontWeight: '600', fontSize: '18px'}}>USeP. </span></div>
-                                <div className="" style={{color: 'rgb(87, 87, 87)', fontWeight: '600', fontSize: '14px'}}>Student Portal</div>
+                                <div class="" style={{color: 'rgb(87, 87, 87)', fontWeight: '600', fontSize: '14px'}}>Online Enrollment</div>
                             </div>
                             {/* <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                                 <NavLink href={route('dashboard')} active={route().current('dashboard')}>

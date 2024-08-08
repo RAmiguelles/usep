@@ -1,15 +1,18 @@
 import React from 'react';
 import EnrollSubTable from "@/Components/tables/EnrollSubTable";
-import { useState,useEffect } from "react";
+import { useState,useEffect, useRef } from "react";
 import Modal from '@/Components/Modal';
 import SecondaryButton from '@/Components/SecondaryButton';
+import { useReactToPrint } from 'react-to-print';
+import Print from '../print';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {faDownload} from '@fortawesome/free-solid-svg-icons'
 
 const EnrollSub = ({data, reload, load}) => {
     const[enrollSubject, setenrollSubject]=useState([]);
     const [selectedSub, setSelectedSub] = useState([]);
-    const [show, setShow] = useState(false);
     const [showDelete, setShowDelete] = useState(false);
-   
+    const componentRef=useRef();
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -25,7 +28,7 @@ const EnrollSub = ({data, reload, load}) => {
         };
 
         fetchData();
-    }, [data, reload]);
+    }, [data,reload]);
 
     const handleSelectionChange = (selectedSubs) => {
         setSelectedSub(selectedSubs);
@@ -42,34 +45,27 @@ const EnrollSub = ({data, reload, load}) => {
         })
     }
 
+    const printData=useReactToPrint({
+        content:()=> componentRef.current,
+        documentTittle:"test",
+        onAfterPrint:()=>allert("success")
+    })
+
 
   return (
     <>
-        <label htmlFor="blocksection" className="block  text-base font-medium text-gray-900 dark:text-white m-4">Enroll Sub</label>
-
+        <Print componentRef={componentRef} style={{display:'none'}}></Print>
+        <div className="flex items-center justify-between m-4"> {/* Container for label and print button */}
+                {/* <button className="self-end ml-4 text-black font-bold py-2 px-4 rounded" type="button" onClick={printData}><FontAwesomeIcon icon={faDownload}></FontAwesomeIcon>  Print</button> */}
+            </div>
         <div className="m-4">
             <form action="#" method="post">
                 <EnrollSubTable value={enrollSubject} onSelectionChange={handleSelectionChange} select={selectedSub}></EnrollSubTable>
-                <button type="button" onClick={()=>setShowDelete(true)} className="text-white bg-gradient-to-r from-primary-light to-primary-dark hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3">Remove</button>
-                <button type="button" onClick={()=>setShow(true)} className="text-white bg-gradient-to-r from-primary-light to-primary-dark hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3">Fees</button>
+                <button type="button" onClick={()=>setShowDelete(true)} disabled={selectedSub.length === 0} className="text-white bg-gradient-to-r from-primary-light to-primary-dark hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3">Remove</button>
+                <button type="button" onClick={printData} className="text-white bg-gradient-to-r from-primary-light to-primary-dark hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3"><FontAwesomeIcon icon={faDownload}></FontAwesomeIcon>  Print</button>
             </form>
         </div>
         
-        <Modal show={show}>
-            <div className='header p-4 bg-gradient-to-r from-primary-light to-primary-dark'></div>
-            <div className='p-0'>
-                <div className='w-auto items-center justify-center p-12'>
-                    test
-                </div>
-                <div className='w-auto flex justify-center'>
-                    <SecondaryButton className="justify-self-center" onClick={()=>setShow(false)}>
-                    Close
-                    </SecondaryButton>
-                </div>
-            </div>
-            <div className='footer p-4 mt-12 bg-gradient-to-r from-primary-light to-primary-dark'></div>
-        </Modal>
-
         <Modal show={showDelete} maxWidth='md'>
             <div className='p-0 m-3'>
                 <div className='flex flex-column items-center justify-center p-3'>
