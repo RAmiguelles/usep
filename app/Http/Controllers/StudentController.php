@@ -16,6 +16,13 @@ class StudentController extends Controller
     public function show()
     { 
         try {
+            // Prepare data for the view
+            $data = [
+                'user' => session()->get('idNumber'),
+                'token' => session()->get('token'),
+                'campus' => session()->get('campusID'),
+            ];
+        
             // Fetch registration ID using the session ID number
             $regID = DB::select("EXEC dbo.CUSTOM_ES_GetCurrentStudReg ?", [session()->get('idNumber')]);
         
@@ -26,23 +33,45 @@ class StudentController extends Controller
         
             // Fetch student registration details
             $registration = DB::select("EXEC dbo.ES_GetStudentRegistration_r2 ?, ?", [$regID[0]->regID, session()->get('idNumber')]);
-        
             // Check if registration details were returned
             if (empty($registration) || !isset($registration[0])) {
                 throw new Exception('No registration details found.');
             }
-        
-            // Prepare data for the view
-            $data = [
-                'user' => session()->get('idNumber'),
-                'token' => session()->get('token'),
-                'campus' => session()->get('campusID'),
-            ];
+
+            $result=DB::select("EXEC dbo.CUSTOM_isUndergrad ?,?",[session()->get('idNumber'),session()->get('campusID')]);
+            if($result[0]->Result==1){
+                // $isOpen=DB::select("EXEC dbo.CUSTOM_isEnrollmentOpen ?,?",[$registration[0]->TermID,session()->get('campusID')]);
+                $query = "
+                DECLARE @isOpen BIT;
+                DECLARE @enrollmentStartDate DATE;
+                DECLARE @enrollmentEndDate DATE;
+    
+                SET @isOpen = 0;
+    
+                SELECT 
+                    @enrollmentStartDate = StartEnrollment,
+                    @enrollmentEndDate = EndEnrollment
+                FROM ES_AYTermConfig
+                WHERE TermID = ? AND CampusID = ?;
+    
+                IF @enrollmentStartDate IS NOT NULL AND @enrollmentEndDate IS NOT NULL
+                BEGIN
+                    IF GETDATE() BETWEEN @enrollmentStartDate AND @enrollmentEndDate
+                    BEGIN
+                        SET @isOpen = 1;
+                    END
+                END
+                SELECT @isOpen AS isOpen, @enrollmentStartDate AS StartEnrollment, @enrollmentEndDate AS EndEnrollment ;";
+    
+            $isOpenResult = DB::select($query, [$registration[0]->TermID,session()->get('campusID')]);
+            $isOpenResult[0]->isOpen=$isOpenResult[0]->isOpen==0? false : true;
+            } 
         
             // Render the view using Inertia
             return Inertia::render('Enrollment/EnrollmentPage', [
                 'reg' => $registration[0],
-                'data' => $data
+                'data' => $data,
+                'enrollment'=> $isOpenResult[0]
             ]);
         
         } catch (Exception $e) {
@@ -72,22 +101,61 @@ class StudentController extends Controller
     }
 
     public function saveSubjects(Request $request){
-        return(array($request->RegID,8));
+        $enrol = DB::select("EXEC dbo.ES_GetEnrolledSubjects '".$request->RegID."'"); # get enrolledsub
+        $count=count($enrol);
         $sortedData = collect($request->selectedClassSched)->sortBy('Cntr')->values()->all();
         foreach ($sortedData as $sub) {
-            $preRequisites=DB::select("EXEC dbo.ES_GetPrerequisiteSubjects ?,?,?",array(session()->get('idNumber'),$request->cID,$sub['SubjectID']));
-            if($preRequisites!=null){
-                foreach($preRequisites as $preReq){
-                    $ifPass=DB::select("EXEC dbo.ES_GetSubjectPreRequisiteIfPassed ?,?,?",array(session()->get('idNumber'),$preReq->SubjectID,0));
-                    if($ifPass==null || $ifPass[0]->Remarks=='Incomplete' || $ifPass[0]->Remarks=='Failed'){
-                        return ($ifPass);
+            $count++;
+            $conflict=0;
+            if(count($enrol)>0){
+                foreach($enrol as $enrol_sub){
+                    $result=DB::select("EXEC dbo.sp_CheckSchedConflicts ?,?",array($sub['ScheduleID'],$enrol_sub->ScheduleID));
+                    $conflict=$conflict+$result[0]->Conflict;
+                    if($result[0]->Conflict >0){
+                        return response()->json([
+                            'error' => "Conflict",
+                            'sub1' => $sub['ScheduleID'],
+                            'sub2' => $enrol_sub->ScheduleID
+                        ]);
                     }
                 }
-                DB::select("EXEC dbo.sp_SaveEnrolledSubjects ?,?,?",array($request->RegID,$sub['ScheduleID'],8));
+                if($conflict==0){
+                    $preRequisites=DB::select("EXEC dbo.ES_GetPrerequisiteSubjects ?,?,?",array(session()->get('idNumber'),$request->cID,$sub['SubjectID']));
+                    if($preRequisites!=null){
+                        foreach($preRequisites as $preReq){
+                            $ifPass=DB::select("EXEC dbo.ES_GetSubjectPreRequisiteIfPassed ?,?,?",array(session()->get('idNumber'),$preReq->SubjectID,0));
+                            if($ifPass==null || $ifPass[0]->Remarks=='Incomplete' || $ifPass[0]->Remarks=='Failed'){
+                                return response()->json([
+                                    'error' => "Failed",
+                                    'remarks' => $ifPass[0]->Remarks,
+                                    'sub' => $sub['ScheduleID']
+                                ]);
+                            }
+                        }
+                        DB::select("EXEC dbo.sp_SaveEnrolledSubjects ?,?,?",array($request->RegID,$sub['ScheduleID'],$count));
+                    }else{
+                        DB::select("EXEC dbo.sp_SaveEnrolledSubjects ?,?,?",array($request->RegID,$sub['ScheduleID'],$count));     
+                    }
+                }else{
+                    return response()->json(['error' => 'Something went wrong!']);
+                }
+            }else{
+                $preRequisites=DB::select("EXEC dbo.ES_GetPrerequisiteSubjects ?,?,?",array(session()->get('idNumber'),$request->cID,$sub['SubjectID']));
+                if($preRequisites!=null){
+                    foreach($preRequisites as $preReq){
+                        $ifPass=DB::select("EXEC dbo.ES_GetSubjectPreRequisiteIfPassed ?,?,?",array(session()->get('idNumber'),$preReq->SubjectID,0));
+                        if($ifPass==null || $ifPass[0]->Remarks=='Incomplete' || $ifPass[0]->Remarks=='Failed'){
+                            return ($ifPass);
+                        }
+                    }
+                    DB::select("EXEC dbo.sp_SaveEnrolledSubjects ?,?,?",array($request->RegID,$sub['ScheduleID'],$count));
+                }else{
+                    DB::select("EXEC dbo.sp_SaveEnrolledSubjects ?,?,?",array($request->RegID,$sub['ScheduleID'],$count));     
+                }
             }
-            DB::select("EXEC dbo.sp_SaveEnrolledSubjects ?,?,?",array($request->RegID,$sub['ScheduleID'],8));
+
         }
-        // return response()->json(['message' => 'Subjects saved successfully']);
+        return response()->json(['message' => 'Subjects saved successfully']);
     }
 
 

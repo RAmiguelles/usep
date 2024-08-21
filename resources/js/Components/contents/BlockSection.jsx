@@ -3,6 +3,7 @@ import BlockSchedule from "@/Components/tables/BlockSchedule";
 import { useState, useEffect } from "react";
 import Modal from '@/Components/Modal';
 import SecondaryButton from '@/Components/SecondaryButton';
+import Swal from 'sweetalert2';
 
 const BlockSection = ({datas, reload}) => {
     const [blockSection, setblockSection]=useState([])
@@ -59,14 +60,47 @@ const BlockSection = ({datas, reload}) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log(selectedClassSched)
+        setShowConfirm(false)
         axios.post(route("saveSubjects"), {selectedClassSched, cID : datas[1].CurriculumID,RegID:datas[1].RegID})
         .then(response => {
-            console.log(response)
-            // reload(true)
-            // setSelectedClassSched([])
-            // setShowConfirm(false)
-        })
+            if (response.data.error) {
+                const errorMessage = response.data.error === 'Conflict'
+                ? `Conflict detected between schedules: ${response.data.sub1} and ${response.data.sub2}.`
+                : `Failed to meet prerequisites of ScheduleID ${response.data.sub}.`;
+                Swal.fire({
+                    title: 'Conflict!',
+                    text: errorMessage,
+                    icon: 'warning',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#FFC107',  // Yellow color for warning
+                }).then(() => {
+                    // Actions to perform after user confirms the success alert
+                    reload(true);
+                    setSelectedClassSched([]);
+                });
+            } else {
+                Swal.fire({
+                    title: 'Success!',
+                    text: response.data.message || 'Subjects saved successfully.',
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#28a745',  // Green color for success
+                }).then(() => {
+                    // Actions to perform after user confirms the success alert
+                    reload(true);
+                    setSelectedClassSched([]);
+                });
+            }
+        }).catch(error => {
+            console.error("Error saving subjects:", error);
+            Swal.fire({
+                title: 'Error!',
+                text: 'There was a problem saving the subjects. Please try again.',
+                icon: 'error',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#D75D5F',
+            });
+        });
     }
 
 
@@ -82,7 +116,7 @@ const BlockSection = ({datas, reload}) => {
         <div className="m-4">
             <form>
                 <BlockSchedule value={classsched} onSelectionChange={handleSelectionChange} select={selectedClassSched}></BlockSchedule>
-                <button type="button" onClick={()=>setShowConfirm(true)} disabled={selectedClassSched.length == []} className="text-white bg-gradient-to-r from-primary-light to-primary-dark hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3">submit</button>
+                <button type="button" onClick={()=>setShowConfirm(true)} disabled={selectedClassSched.length == []} className={`text-white hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3 ${selectedClassSched.length == [] ? 'bg-gray-400' : ' bg-gradient-to-r from-primary-light to-primary-dark'}`}>submit</button>
             </form>
         </div>
 

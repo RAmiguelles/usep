@@ -25,7 +25,7 @@ Route::middleware('User')->group(function () {
     Route::post('/getBlockSection', [EnrollmentController::class, 'getBlockSection'])->name('getBlockSection');
     Route::post('/getFreeSection', [EnrollmentController::class, 'getFreeSection'])->name('getFreeSection');
     Route::post('/getBlockClassSchedule', [EnrollmentController::class, 'getBlockClassSchedule'])->name('getBlockClassSchedule');
-    Route::post('/getFreeClassSchedule', [EnrollmentController::class, 'getFreelassSchedule'])->name('getFreeClassSchedule');
+    Route::post('/getFreeClassSchedule', [EnrollmentController::class, 'getFreeClassSchedule'])->name('getFreeClassSchedule');
 
     Route::get('logout', [AuthenticatedSessionController::class, 'destroy'])
     ->name('logout');

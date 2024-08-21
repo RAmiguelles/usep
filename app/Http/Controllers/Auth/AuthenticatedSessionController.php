@@ -16,6 +16,7 @@ use App\Models\DBOSession;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
+use LDAP\Result;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -63,7 +64,7 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        DBOSession::where('user_id',session()->get('idNumber'))->delete();
+        DBOSession::where('idNumber',session()->get('idNumber'))->delete();
         $request->session()->flush();
         $request->session()->regenerateToken();
         return redirect('/');

@@ -8,7 +8,7 @@ import Print from '../print';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {faDownload} from '@fortawesome/free-solid-svg-icons'
 
-const EnrollSub = ({data, reload, load}) => {
+const EnrollSub = ({data, reload, isopen, load}) => {
     const[enrollSubject, setenrollSubject]=useState([]);
     const [selectedSub, setSelectedSub] = useState([]);
     const [showDelete, setShowDelete] = useState(false);
@@ -19,7 +19,6 @@ const EnrollSub = ({data, reload, load}) => {
                 const Response = await axios.post(route("getEnrollSubject"),{data});
                 if (Response.data) {
                     setenrollSubject(Response.data);
-                    console.log(Response.data)
                     load(false)
                 }
             } catch (error) {
@@ -61,7 +60,7 @@ const EnrollSub = ({data, reload, load}) => {
         <div className="m-4">
             <form action="#" method="post">
                 <EnrollSubTable value={enrollSubject} onSelectionChange={handleSelectionChange} select={selectedSub}></EnrollSubTable>
-                <button type="button" onClick={()=>setShowDelete(true)} disabled={selectedSub.length === 0} className="text-white bg-gradient-to-r from-primary-light to-primary-dark hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3">Remove</button>
+                <button type="button" onClick={()=>setShowDelete(true)} disabled={selectedSub.length === 0 || !isopen} className={`text-white hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3 ${selectedSub.length === 0 || !isopen ? 'bg-gray-400' : ' bg-gradient-to-r from-primary-light to-primary-dark'}`}>Remove</button>
                 <button type="button" onClick={printData} className="text-white bg-gradient-to-r from-primary-light to-primary-dark hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3"><FontAwesomeIcon icon={faDownload}></FontAwesomeIcon>  Print</button>
             </form>
         </div>
