@@ -31,6 +31,7 @@
         "primereact": "^10.6.5",
         "react-data-table-component": "^7.6.2",
         "react-to-print": "^2.15.1",
-        "styled-components": "^6.1.11"
+        "styled-components": "^6.1.11",
+        "sweetalert2": "^11.12.4"
     }
 }

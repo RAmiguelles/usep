@@ -28,7 +28,6 @@ class EnrollmentController extends Controller
 
     public function getFreeClassSchedule(Request $request){
         $response=DB::select("EXEC dbo.ES_getFreeClassSchedules_r2 ?,?,?,?,?",$request->data);
-
         return response()->json($response);
     }
 }

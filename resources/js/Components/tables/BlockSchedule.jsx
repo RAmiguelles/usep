@@ -38,7 +38,7 @@ const BlockSchedule = ({value=[],  onSelectionChange, select}) => {
           <Column datakey="SubjectID" field="Faculty1" header="Faculty" style={{ minWidth: '200px' }}></Column>
           <Column datakey="SubjectID" field="LectHrs" header="Lec Hours" style={{ minWidth: '100px' }}></Column>
           <Column datakey="SubjectID" field="LabHrs" header="Lab Hours" style={{ minWidth: '100px' }}></Column>
-          <Column datakey="SubjectID" field="SchedRegistered" header="Registered" style={{ minWidth: '100px' }}></Column>
+          <Column datakey="SubjectID" field="Registered" header="Registered" style={{ minWidth: '100px' }}></Column>
           <Column datakey="SubjectID" field="Limit" header="Limit" style={{ minWidth: '100px' }}></Column>
           <Column datakey="SubjectID" field="SectionID" header="Section ID" style={{ minWidth: '100px' }}></Column>
           <Column datakey="SubjectID" field="SubjectID" header="Subject ID" style={{ minWidth: '100px' }}></Column>
