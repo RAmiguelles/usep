@@ -16,7 +16,7 @@ const FreeSchedule = ({value=[], onSelectionChange}) => {
   };
   return (
       <DataTable value={value} scrollable selectionMode='checkbox' selection={selectedFreeScehds} onSelectionChange={handleSelectionChange} dataKey="id" tableStyle={{ minWidth: '50rem' }}>
-          <Column selectionMode="multiple" frozen headerStyle={{ width: '3rem' }}></Column>
+          <Column selectionMode={value[0]==""?"null": "multiple"} frozen headerStyle={{ width: '3rem' }}></Column>
           <Column datakey="SubjectID" field="ScheduleID" header="ScheduleID" frozen style={{ minWidth: '100px', backgroundColor:'white' }} body={(rowData) => rowData.ScheduleID || 'N/A'}></Column>
           <Column datakey="SubjectID" field="SubjectCode" header="Subject Code" frozen style={{ minWidth: '150px', backgroundColor:'white'  }}></Column>
           <Column datakey="SubjectID" field="SubjectTitle" header="Subject Title" style={{ minWidth: '400px' }}></Column>
