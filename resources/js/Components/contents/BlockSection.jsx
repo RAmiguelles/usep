@@ -64,9 +64,7 @@ const BlockSection = ({datas, reload}) => {
         axios.post(route("saveSubjects"), {selectedClassSched, cID : datas[1].CurriculumID,RegID:datas[1].RegID})
         .then(response => {
             if (response.data.error) {
-                const errorMessage = response.data.error === 'Conflict'
-                ? `Conflict detected between schedules: ${response.data.sub1} and ${response.data.sub2}.`
-                : `Failed to meet prerequisites of ScheduleID ${response.data.sub}.`;
+                const errorMessage = response.data.error
                 Swal.fire({
                     title: 'Conflict!',
                     text: errorMessage,

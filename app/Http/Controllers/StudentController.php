@@ -28,7 +28,12 @@ class StudentController extends Controller
         
             // Check if registration ID was returned
             if (empty($regID) || !isset($regID[0]->regID)) {
-                throw new Exception('No registration ID found.');
+                $outstandingbalance = DB::select("EXEC dbo.CUSTOM_ES_GetOutstandingBalanceFromStudentLedger ?", [session()->get('idNumber')]);
+                if($outstandingbalance[0]->OutstandingBalance){
+                    throw new Exception("Please clear all your unpaid balance.");
+                }else{
+                    throw new Exception('No registration ID found.');
+                }
             }
         
             // Fetch student registration details
@@ -107,16 +112,16 @@ class StudentController extends Controller
         foreach ($sortedData as $sub) {
             $count++;
             $conflict=0;
+            $ispass=DB::select("select top 1 FinalRemarks from dbo.ES_Grades where StudentNo=? and SubjectID=?",array(session()->get('idNumber'),$sub['SubjectID']));
+            if($ispass && $ispass[0]->FinalRemarks=='Passed'){
+                return response()->json(['error' => 'Subject Already Passed']);
+            }
             if(count($enrol)>0){
                 foreach($enrol as $enrol_sub){
                     $result=DB::select("EXEC dbo.sp_CheckSchedConflicts ?,?",array($sub['ScheduleID'],$enrol_sub->ScheduleID));
                     $conflict=$conflict+$result[0]->Conflict;
                     if($result[0]->Conflict >0){
-                        return response()->json([
-                            'error' => "Conflict",
-                            'sub1' => $sub['ScheduleID'],
-                            'sub2' => $enrol_sub->ScheduleID
-                        ]);
+                        return response()->json(['error' => "Conflict detected between schedules: ". $sub['ScheduleID']." and ".$enrol_sub->ScheduleID]);
                     }
                 }
                 if($conflict==0){
@@ -125,11 +130,7 @@ class StudentController extends Controller
                         foreach($preRequisites as $preReq){
                             $ifPass=DB::select("EXEC dbo.ES_GetSubjectPreRequisiteIfPassed ?,?,?",array(session()->get('idNumber'),$preReq->SubjectID,0));
                             if($ifPass==null || $ifPass[0]->Remarks=='Incomplete' || $ifPass[0]->Remarks=='Failed'){
-                                return response()->json([
-                                    'error' => "Failed",
-                                    'remarks' => $ifPass[0]->Remarks,
-                                    'sub' => $sub['ScheduleID']
-                                ]);
+                                return response()->json(['error' => "Failed to meet prerequisites of ScheduleID ".$sub['ScheduleID']]);
                             }
                         }
                         DB::select("EXEC dbo.sp_SaveEnrolledSubjects ?,?,?",array($request->RegID,$sub['ScheduleID'],$count));
