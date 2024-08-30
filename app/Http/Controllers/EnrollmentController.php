@@ -30,4 +30,13 @@ class EnrollmentController extends Controller
         $response=DB::select("EXEC dbo.ES_getFreeClassSchedules_r2 ?,?,?,?,?",$request->data);
         return response()->json($response);
     }
+
+    public function getassessment(Request $request){
+        $response=DB::select("ES_GetTableofFees_ForAssessment ?,?",array($request->template,0));
+        $total=DB::select("select dbo.fn_AssessmentTotalAssessed(?,?) as total",array($request->term,session()->get('idNumber')));
+        return response()->json([
+            'response' => $response,
+            'total' => $total[0]->total
+        ]);
+    }
 }

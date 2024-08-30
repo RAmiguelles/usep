@@ -5,7 +5,7 @@ import Modal from '@/Components/Modal';
 import SecondaryButton from '@/Components/SecondaryButton';
 import Swal from 'sweetalert2';
 
-const BlockSection = ({datas, reload}) => {
+const BlockSection = ({datas, reload, curUnit}) => {
     const [blockSection, setblockSection]=useState([])
     const [classsched, getClasssched]=useState([''])
     const [selectedClassSched, setSelectedClassSched] = useState([])
@@ -55,7 +55,35 @@ const BlockSection = ({datas, reload}) => {
     }
 
     const handleSelectionChange = (selectedBlockScehds) => {
+        let total=curUnit
+        selectedBlockScehds.forEach((item, index)=> {
+            if(item.Registered==item.Limit){
+                selectedBlockScehds.splice(index);
+
+                Swal.fire({
+                    title: 'Error!',
+                    text: item.SubjectTitle+" exceeds the maximum limit",
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#D75D5F',
+                });
+            }
+        //    sum of current unit and subject unit should not be more than max unit
+            if(Number(total+=Number(item.CreditUnits)) > 110){
+                selectedBlockScehds.splice(index);
+                Swal.fire({
+                    title: 'Error!',
+                    text:"You exceeds max unit limit subject: "+item.SubjectTitle+" cannot be add",
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#D75D5F',
+                });
+            }else{
+                total+=Number(item.CreditUnits)
+            }
+        });
         setSelectedClassSched(selectedBlockScehds);
+
     }
 
     const handleSubmit = (e) => {
