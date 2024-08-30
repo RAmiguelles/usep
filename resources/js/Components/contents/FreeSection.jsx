@@ -3,6 +3,7 @@ import FreeSchedule from "@/Components/tables/FreeSchedule";
 import { useState, useEffect } from "react";
 import Modal from '@/Components/Modal';
 import SecondaryButton from '@/Components/SecondaryButton';
+import Swal from 'sweetalert2';
 
 const FreeSection = ({datas, reload}) => {
     const [freeSection, setfreeSection]=useState([])

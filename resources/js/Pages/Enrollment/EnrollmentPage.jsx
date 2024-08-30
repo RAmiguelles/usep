@@ -23,11 +23,13 @@ export default function Main({reg,data,enrollment}) {
     const [profile, setprofile] = useState([]);
     const [loading, setLoading] = useState(true);
     const [reload, setreload] = useState(false);
+    const [curUnit, setcurUnit] = useState(0);
     const [yearLevel, setyearlevel] = useState('');
     const url = `https://api.usep.edu.ph/student/`;
     const handleNavClick = (page) => {
       setActivePage(page);
     };
+    // console.log(reg)
     const getHTTPConfig = (token) => {
         return {
             headers: {
@@ -49,6 +51,7 @@ export default function Main({reg,data,enrollment}) {
                         reg.RegDate = format(date, 'MM/dd/yyyy');
                         setyearlevel(profileResponse.data.yearLevel);
                         setprofile(profileResponse.data);
+                        // console.log(profileResponse.data)
                         // Fetch profile picture only when profile data is ready
                         const profilePicResponse = await axios.get(`${url}getProfilePic/${data.user}/${data.campus}`, getHTTPConfig(data.token));
                         if (profilePicResponse.data) {
@@ -87,6 +90,11 @@ export default function Main({reg,data,enrollment}) {
     const handleChange = (e) =>{
         setyearlevel(e.target.value)
     }
+
+    const CurrentUnit=(e)=>{
+        setcurUnit(e)
+    }
+
     return (
         <AuthenticatedLayout
             header={<h2 className="font-semibold text-xl text-red-500 leading-tight"></h2>}
@@ -188,7 +196,7 @@ export default function Main({reg,data,enrollment}) {
             
             <div className="m-6 flex flex-col shadow-md bg-gray-50 rounded-md">
                 <div className="w-full p-2 bg-primary-dark"><label className="block text-2xl font-bold text-white text-center">List of Enrolled Subject for {reg.YearTerm}</label></div>
-                <EnrollSub data={reg.RegID} reload={reload} isopen={enrollment['isOpen']} load={handlereload}></EnrollSub>
+                <EnrollSub data={reg} reload={reload} isopen={enrollment['isOpen']} load={handlereload} curUnit={CurrentUnit}></EnrollSub>
             </div>
 
             {enrollment['isOpen'] == 1 && <div className="m-6 flex flex-col shadow-md bg-gray-50 rounded-md">
@@ -198,7 +206,7 @@ export default function Main({reg,data,enrollment}) {
                     <button onClick={() => handleNavClick('Page2')}  className={`hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l ${activePage == 'Page2' ? 'bg-gray-400' : 'bg-gray-300'}`}>Free Section</button>
                 </nav>
                 <div className="page-content">
-                    {activePage === 'Page1' && <BlockSection datas={[profile,reg]} reload={handlereload} ></BlockSection>}
+                    {activePage === 'Page1' && <BlockSection datas={[profile,reg]} reload={handlereload} curUnit={curUnit}></BlockSection>}
                     {activePage === 'Page2' && <FreeSection datas={[profile,reg]} reload={handlereload}></FreeSection>}
                 </div>
             </div>}

@@ -8,16 +8,23 @@ import Print from '../print';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {faDownload} from '@fortawesome/free-solid-svg-icons'
 
-const EnrollSub = ({data, reload, isopen, load}) => {
+const EnrollSub = ({data, reload, isopen, load, curUnit}) => {
     const[enrollSubject, setenrollSubject]=useState([]);
     const [selectedSub, setSelectedSub] = useState([]);
     const [showDelete, setShowDelete] = useState(false);
+    const[Assessment, setAssessment]=useState([]);
+    const[Total, setTotal]=useState('');
     const componentRef=useRef();
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const Response = await axios.post(route("getEnrollSubject"),{data});
+                const Response = await axios.post(route("getEnrollSubject"),{data: data.RegID });
                 if (Response.data) {
+                    let total=0
+                    Response.data.forEach((item)=> {
+                        total+=Number(item.CreditUnits)
+                    });
+                    curUnit(total)
                     setenrollSubject(Response.data);
                     load(false)
                 }
@@ -26,7 +33,20 @@ const EnrollSub = ({data, reload, isopen, load}) => {
             }
         };
 
+        const fetchAssessment = async () => {
+            try {
+                const Response = await axios.post(route("getassessment"),{term:data.TermID,template:data.TableofFeeID});
+                if (Response.data) {
+                    setAssessment(Response.data.response);
+                    setTotal(Response.data.total);
+                }
+            } catch (error) {
+                console.error("Error fetching profile data:", error);
+            }
+        };
+
         fetchData();
+        fetchAssessment();
     }, [data,reload]);
 
     const handleSelectionChange = (selectedSubs) => {
@@ -46,14 +66,13 @@ const EnrollSub = ({data, reload, isopen, load}) => {
 
     const printData=useReactToPrint({
         content:()=> componentRef.current,
-        documentTittle:"test",
-        onAfterPrint:()=>allert("success")
+        documentTittle:"COR"
     })
 
 
   return (
     <>
-        <Print componentRef={componentRef} style={{display:'none'}}></Print>
+        <Print componentRef={componentRef} data={[enrollSubject,Assessment,Total]} style={{display:'none'}}></Print>
         <div className="flex items-center justify-between m-4"> {/* Container for label and print button */}
                 {/* <button className="self-end ml-4 text-black font-bold py-2 px-4 rounded" type="button" onClick={printData}><FontAwesomeIcon icon={faDownload}></FontAwesomeIcon>  Print</button> */}
             </div>

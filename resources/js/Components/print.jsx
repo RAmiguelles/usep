@@ -1,5 +1,12 @@
 import React from 'react';
-const Print= ({componentRef}) => {
+const Print= ({componentRef, data=[]}) => {
+    const totals = data[0].reduce((acc, item) => {
+        acc.acadUnits += Number(item.AcadUnits) || 0;
+        acc.labUnits += Number(item.LabUnits) || 0;
+        return acc;
+    }, { acadUnits: 0, labUnits: 0 });
+
+    const totalUnits = totals.acadUnits + totals.labUnits;
   return (
     <>
         <div style={{ display: 'none' }}>
@@ -87,53 +94,84 @@ const Print= ({componentRef}) => {
           <div className="border bg-black" style={{height:'1px', width:'100%'}}></div>
 
           <div class="grid grid-cols-12 gap-6">
-            <div class="col-span-8 bg-white p-4">
+            <div class="col-span-8 bg-white">
                 <h2 class="text-lg font-bold mb-4">Enrolled Subjects</h2>
                 <table class="w-full border-collapse border border-gray-200 text-xs">
                     <thead>
                         <tr class="bg-gray-100">
                             <th class="border border-gray-300 p-2 text-left">Subject Code</th>
                             <th class="border border-gray-300 p-2 text-left">Subject Name</th>
-                            <th class="border border-gray-300 p-2 text-left">Units</th>
+                            <th class="border border-gray-300 p-2 text-left">Lec</th>
+                            <th class="border border-gray-300 p-2 text-left">Lab</th>
                             <th class="border border-gray-300 p-2 text-left">Schedule</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td class="border border-gray-300 p-2">CIVIL101</td>
-                            <td class="border border-gray-300 p-2">Introduction to Civil Engineering</td>
-                            <td class="border border-gray-300 p-2">3</td>
-                            <td class="border border-gray-300 p-2">MWF 9:00 AM - 10:30 AM</td>
-                        </tr>
-                        <tr>
-                            <td class="border border-gray-300 p-2">CIVIL102</td>
-                            <td class="border border-gray-300 p-2">Structural Analysis</td>
-                            <td class="border border-gray-300 p-2">4</td>
-                            <td class="border border-gray-300 p-2">TTh 1:00 PM - 3:00 PM</td>
-                        </tr>
+                    {data[0].map((item, index) => {
+                        const schedules = [];
+                        for (let i = 1; i <= 5; i++) {
+                            const schedule = item[`Sched_${i}`];
+                            if (schedule) {
+                            schedules.push(schedule);
+                            }
+                        }
+                        return (
+                            <tr key={index}>
+                            <td className="border border-gray-300 p-2">{item.SubjectCode}</td>
+                            <td className="border border-gray-300 p-2">{item.SubjectTitle}</td>
+                            <td className="border border-gray-300 p-2">{item.AcadUnits}</td>
+                            <td className="border border-gray-300 p-2">{item.LabUnits}</td>
+                            <td className="border border-gray-300 p-2">
+                                {schedules.length > 0 ? schedules.join(', ') : 'No schedule available'}
+                            </td>
+                            </tr>
+                        );
+                    })}
                     </tbody>
+                    <tfoot>
+                    <tr>
+                        <td className="border border-gray-300 font-bold">Total:</td>
+                        <td className="border border-gray-300"></td>
+                        <td className="border border-gray-300 text-center">{totals.acadUnits}</td>
+                        <td className="border border-gray-300 text-center">{totals.labUnits}</td>
+                        <td className="border border-gray-300"></td>
+                    </tr>
+                    </tfoot>
                 </table>
             </div>
 
-            <div class="col-span-4 bg-white p-4">
+            <div class="col-span-4 bg-white">
                 <h2 class="text-lg font-bold mb-4">Billing Information</h2>
                 <table class="w-full border-collapse border border-gray-200 text-xs">
                     <thead>
                         <tr class="bg-gray-100">
                             <th class="border border-gray-300 p-2 text-left">Description</th>
+                            <th class="border border-gray-300 p-2 text-left">Ammount</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td class="border border-gray-300 p-2">Tuition Fee</td>
+                    {data[1].map((item, index) => {
+                        if (item.AcctName =="Tuition Fee" ) {
+                            item.AcctName="Tuition Fee "+totalUnits+"@"+Number(item.Amount);
+                            item.Amount=Number(item.Amount)*totalUnits
+                        } else if(item.AcctName =="Laboratory Fee"){
+                            item.AcctName="Laboratory Fee "+totals.labUnits+"@"+Number(item.Amount);
+                            item.Amount=Number(item.Amount)*totals.labUnits
+                        }
+                        return(
+                        <tr key={index}>
+                            <td className="border border-gray-300 ">{item.AcctName}</td>
+                            <td className="border border-gray-300 text-right">{ Number(item.Amount)}</td>
                         </tr>
-                        <tr>
-                            <td class="border border-gray-300 p-2">Laboratory Fee</td>
-                        </tr>
-                        <tr>
-                            <td class="border border-gray-300 p-2">Miscellaneous Fees</td>
-                        </tr>
+                        );
+                    })}
                     </tbody>
+                    <tfoot>
+                        <tr>
+                            <td className="border border-gray-300 font-bold">Total : </td>
+                            <td className="border border-gray-300 text-right">{Number(data[2])}</td>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
         </div>
