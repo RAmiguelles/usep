@@ -5,11 +5,13 @@ import { useState } from 'react';
 
 const EnrollSubTable = ({value=[], onSelectionChange,select}) => {
   // const [selectedSubs, setSelectedSubs] = useState([]);
-
   const handleSelectionChange = (e) => {
         // setSelectedSubs(e.value);
         onSelectionChange(e.value);
   };
+  if (value.length === 0) {
+    return <div>No enrolled subject</div>; // Customize this message or component as needed
+  }
   return (
         <DataTable value={value} scrollable selectionMode='checkbox'   selection={select} onSelectionChange={handleSelectionChange} dataKey="SubjectCode" tableStyle={{ minWidth: '50rem' }}     rowClassName='no-data' columnSelection= 'none'>
           <Column selectionMode="multiple" frozen headerStyle={{ width: '3rem' }}></Column>

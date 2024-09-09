@@ -21,13 +21,13 @@ class EnrollmentController extends Controller
     }
 
     public function getBlockClassSchedule(Request $request){
-        $response=DB::select("EXEC dbo.ES_getBlockClassSchedules_r2 ?,?,?,?,?",$request->data);
+        $response=DB::select("EXEC dbo.ES_getBlockClassSchedules ?,?,?,?",$request->data);
 
         return response()->json($response);
     }
 
     public function getFreeClassSchedule(Request $request){
-        $response=DB::select("EXEC dbo.ES_getFreeClassSchedules_r2 ?,?,?,?,?",$request->data);
+        $response=DB::select("EXEC dbo.ES_getFreeClassSchedules ?,?,?,?",$request->data);
         return response()->json($response);
     }
 
