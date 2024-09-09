@@ -18,41 +18,41 @@ const EnrollSub = ({data, reload, isopen, load, curUnit}) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const Response = await axios.post(route("getEnrollSubject"),{data: data.RegID });
-                if (Response.data) {
-                    let total=0
-                    Response.data.forEach((item)=> {
-                        total+=Number(item.CreditUnits)
+                const response = await axios.post(route("getEnrollSubject"), { data: data.RegID });
+                if (response.data) {
+                    let total = 0;
+                    response.data.forEach((item) => {
+                        total += Number(item.CreditUnits);
                     });
-                    curUnit(total)
-                    setenrollSubject(Response.data);
-                    load(false)
+                    curUnit(total);
+                    setenrollSubject(response.data);
+                    load(false);
                 }
             } catch (error) {
-                console.error("Error fetching profile data:", error);
+                console.error("Error fetching enroll subjects:", error);
             }
         };
 
         const fetchAssessment = async () => {
             try {
-                const Response = await axios.post(route("getassessment"),{term:data.TermID,template:data.TableofFeeID});
-                if (Response.data) {
-                    setAssessment(Response.data.response);
-                    setTotal(Response.data.total);
+                const response = await axios.post(route("getassessment"), { term: data.TermID, template: data.TableofFeeID });
+                if (response.data) {
+                    setAssessment(response.data.response);
+                    setTotal(response.data.total);
                 }
             } catch (error) {
-                console.error("Error fetching profile data:", error);
+                console.error("Error fetching assessment data:", error);
             }
         };
 
         fetchData();
         fetchAssessment();
+
     }, [data,reload]);
 
     const handleSelectionChange = (selectedSubs) => {
         setSelectedSub(selectedSubs);
     }
-
 
     const handleDelete = (e) => {
         e.preventDefault();
@@ -80,7 +80,7 @@ const EnrollSub = ({data, reload, isopen, load, curUnit}) => {
             <form action="#" method="post">
                 <EnrollSubTable value={enrollSubject} onSelectionChange={handleSelectionChange} select={selectedSub}></EnrollSubTable>
                 <button type="button" onClick={()=>setShowDelete(true)} disabled={selectedSub.length === 0 || !isopen} className={`text-white hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3 ${selectedSub.length === 0 || !isopen ? 'bg-gray-400' : ' bg-gradient-to-r from-primary-light to-primary-dark'}`}>Remove</button>
-                <button type="button" onClick={printData} className="text-white bg-gradient-to-r from-primary-light to-primary-dark hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3"><FontAwesomeIcon icon={faDownload}></FontAwesomeIcon>  Print</button>
+                <button type="button" onClick={printData} disabled={enrollSubject.length===0 || !isopen } className={`text-white hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3 ${enrollSubject.length===0 || !isopen ? 'bg-gray-400' : ' bg-gradient-to-r from-primary-light to-primary-dark'}`}><FontAwesomeIcon icon={faDownload}></FontAwesomeIcon>  Print</button>
             </form>
         </div>
         

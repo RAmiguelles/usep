@@ -11,8 +11,8 @@ const BlockSection = ({datas, reload, curUnit}) => {
     const [selectedClassSched, setSelectedClassSched] = useState([])
     const [showConfirm,setShowConfirm]=useState(false)
     const params={
-        0:datas[1].CampusID,
-        1:datas[1].TermID,
+        0:datas[0].campusID,
+        1:datas[0].termID,
         2:datas[0].studentID,
         3:datas[0].collegeID,
         4:datas[0].progID
@@ -41,8 +41,7 @@ const BlockSection = ({datas, reload, curUnit}) => {
             0:e.currentTarget.value,
             1:datas[0].studentID,
             2:datas[0].collegeID,
-            3:datas[0].progID,
-            4:datas[1].RegID
+            3:datas[0].progID
         }
         axios.post(route("getBlockClassSchedule"), { data })
         .then(response => {
@@ -68,7 +67,7 @@ const BlockSection = ({datas, reload, curUnit}) => {
                     confirmButtonColor: '#D75D5F',
                 });
             }
-        //    sum of current unit and subject unit should not be more than max unit
+
             if(Number(total+=Number(item.CreditUnits)) > 110){
                 selectedBlockScehds.splice(index);
                 Swal.fire({
@@ -89,8 +88,9 @@ const BlockSection = ({datas, reload, curUnit}) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         setShowConfirm(false)
-        axios.post(route("saveSubjects"), {selectedClassSched, cID : datas[1].CurriculumID,RegID:datas[1].RegID})
+        axios.post(route("saveSubjects"), {selectedClassSched, term: datas[0].termID, cCode:datas[0].curriculumCode, yearLevel:datas[0].yearLevel, RegID:datas[1].RegID})
         .then(response => {
+            console.log(response.data)
             if (response.data.error) {
                 const errorMessage = response.data.error
                 Swal.fire({
@@ -98,9 +98,8 @@ const BlockSection = ({datas, reload, curUnit}) => {
                     text: errorMessage,
                     icon: 'warning',
                     confirmButtonText: 'OK',
-                    confirmButtonColor: '#FFC107',  // Yellow color for warning
+                    confirmButtonColor: '#FFC107', 
                 }).then(() => {
-                    // Actions to perform after user confirms the success alert
                     reload(true);
                     setSelectedClassSched([]);
                 });
@@ -110,13 +109,16 @@ const BlockSection = ({datas, reload, curUnit}) => {
                     text: response.data.message || 'Subjects saved successfully.',
                     icon: 'success',
                     confirmButtonText: 'OK',
-                    confirmButtonColor: '#28a745',  // Green color for success
+                    confirmButtonColor: '#28a745',
                 }).then(() => {
-                    // Actions to perform after user confirms the success alert
+                    if(!datas[1].RegID){
+                        window.location.reload();
+                    }
                     reload(true);
                     setSelectedClassSched([]);
                 });
             }
+            
         }).catch(error => {
             console.error("Error saving subjects:", error);
             Swal.fire({

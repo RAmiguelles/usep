@@ -17,7 +17,7 @@ const LoadingSpinner = () => (
     </div>
 );
 
-export default function Main({reg,data,enrollment}) {
+export default function Main({reg,data,enrollment,info}) {
     const [activePage, setActivePage] = useState('Page1');
     const [profilePic, setprofilePic] = useState('');
     const [profile, setprofile] = useState([]);
@@ -29,7 +29,6 @@ export default function Main({reg,data,enrollment}) {
     const handleNavClick = (page) => {
       setActivePage(page);
     };
-    // console.log(reg)
     const getHTTPConfig = (token) => {
         return {
             headers: {
@@ -45,21 +44,15 @@ export default function Main({reg,data,enrollment}) {
                 setLoading(true); // Set loading to true when fetching starts
 
                 if (data && data.user && data.campus && data.token) {
-                    const profileResponse = await axios.get(`${url}getProfile/${data.user}/${data.campus}`, getHTTPConfig(data.token));
-                    if (profileResponse.data) {
+                    const profilePicResponse = await axios.get(`${url}getProfilePic/${data.user}/${data.campus}`, getHTTPConfig(data.token));
+                    if (profilePicResponse.data) {
                         const date = new Date(reg.RegDate);
-                        reg.RegDate = format(date, 'MM/dd/yyyy');
-                        setyearlevel(profileResponse.data.yearLevel);
-                        setprofile(profileResponse.data);
-                        // console.log(profileResponse.data)
-                        // Fetch profile picture only when profile data is ready
-                        const profilePicResponse = await axios.get(`${url}getProfilePic/${data.user}/${data.campus}`, getHTTPConfig(data.token));
-                        if (profilePicResponse.data) {
-                            setprofilePic(profilePicResponse.data);
-                        }
+                        // reg.RegDate = format(date, 'MM/dd/yyyy');
+                        // setyearlevel(profileResponse.data.yearLevel);
+                        setprofilePic(profilePicResponse.data);
+                        setprofile(info)
                     }
                 }
-
                 setLoading(false); // Set loading to false when fetching is complete
             } catch (error) {
                 console.error("Error fetching profile data:", error);
@@ -206,8 +199,8 @@ export default function Main({reg,data,enrollment}) {
                     <button onClick={() => handleNavClick('Page2')}  className={`hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l ${activePage == 'Page2' ? 'bg-gray-400' : 'bg-gray-300'}`}>Free Section</button>
                 </nav>
                 <div className="page-content">
-                    {activePage === 'Page1' && <BlockSection datas={[profile,reg]} reload={handlereload} curUnit={curUnit}></BlockSection>}
-                    {activePage === 'Page2' && <FreeSection datas={[profile,reg]} reload={handlereload}></FreeSection>}
+                    {activePage === 'Page1' && <BlockSection datas={[info,reg]} reload={handlereload} curUnit={curUnit}></BlockSection>}
+                    {/* {activePage === 'Page2' && <FreeSection datas={info} reload={handlereload}></FreeSection>} */}
                 </div>
             </div>}
             </> 
