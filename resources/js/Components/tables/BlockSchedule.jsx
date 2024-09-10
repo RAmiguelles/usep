@@ -7,17 +7,16 @@ import 'primereact/resources/primereact.min.css';         // Core CSS
 import "./../../../css/style.css"
 import { useState } from 'react';
 
-const BlockSchedule = ({value=[],  onSelectionChange, select}) => {
+const BlockSchedule = ({value=[],allow, onSelectionChange, select}) => {
   const [selectedBlockScehds, setSelectedBlockScehds] = useState([]);
 
   const handleSelectionChange = (e) => {
       setSelectedBlockScehds(e.value);
       onSelectionChange(e.value);
   };
-
   return (
-      <DataTable value={value} scrollable selectionMode='checkbox' selection={select} onSelectionChange={handleSelectionChange} datakey="id" tableStyle={{ minWidth: '50rem' }}>
-          <Column selectionMode={value[0]==""?null: "multiple"} frozen headerStyle={{ width: '3rem'}}></Column>
+      <DataTable value={value} scrollable selectionMode={value[0]=="" || !allow ? null: "checkbox"} selection={select} onSelectionChange={handleSelectionChange} datakey="id" tableStyle={{ minWidth: '50rem' }}>
+          <Column selectionMode={value[0]=="" || !allow ? null: "multiple"} frozen headerStyle={{ width: '3rem'}}></Column>
           <Column datakey="SubjectID" field="ScheduleID" header="ScheduleID" frozen style={{ minWidth: '100px'}}  body={(rowData) => rowData.ScheduleID || 'N/A'}></Column>
           <Column datakey="SubjectID" field="SubjectCode" header="Subject Code" frozen style={{ minWidth: '150px'}}></Column>
           <Column datakey="SubjectID" field="SubjectTitle" header="Subject Title" style={{ minWidth: '400px' }}></Column>

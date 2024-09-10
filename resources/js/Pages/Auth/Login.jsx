@@ -31,9 +31,9 @@ console.log(errors)
         <GuestLayout>
             <Head title="Log in" />
                 <div className="lg:flex">
-                    <div class="flex-1 h-auto pt-6">
-                        <div class="text-5xl text-gray-600 m-3">Hello There!</div>
-                        <div class="text-4xl text-gray-400 m-3">Please login to get started.</div>
+                    <div className="flex-1 h-auto pt-6">
+                        <div className="text-5xl text-gray-600 m-3">Hello There!</div>
+                        <div className="text-4xl text-gray-400 m-3">Please login to get started.</div>
                         {errors && <div className="mb-4 font-medium text-sm text-red-600 delay-300">{errors.status}</div>}
                         <form onSubmit={submit}>
                                     <div className='m-3'>
@@ -96,15 +96,15 @@ console.log(errors)
                         </form>
                         <div className='self-end py-40'>
                             <div style={{height: '64px', width: '0px'}}></div>
-                            <div class="jss33" style={{color: 'rgb(87, 87, 87)', fontWeight: '500', textAlign: 'left'}}>Copyright © 2024. All Rights Reserved.</div>
-                            <div class="jss33" style={{color: 'rgb(87, 87, 87)', fontWeight: '500', textAlign: 'left'}}>
-                                <span class="jss16"><span class="jss33" style={{color: 'rgb(87, 87, 87)', fontWeight:'bold', textDecoration: 'underline'}}>Terms of Use</span></span>&nbsp; | &nbsp;<a class="jss72" target="_blank" rel="noopener noreferrer" href="https://www.usep.edu.ph/usep-data-privacy-statement/">
-                                <span class="jss33" style={{color: 'rgb(87, 87, 87)', fontWeight:'bold', textDecoration: 'underline'}}>Privacy Policy</span></a>
+                            <div className="jss33" style={{color: 'rgb(87, 87, 87)', fontWeight: '500', textAlign: 'left'}}>Copyright © 2024. All Rights Reserved.</div>
+                            <div className="jss33" style={{color: 'rgb(87, 87, 87)', fontWeight: '500', textAlign: 'left'}}>
+                                <span className="jss16"><span className="jss33" style={{color: 'rgb(87, 87, 87)', fontWeight:'bold', textDecoration: 'underline'}}>Terms of Use</span></span>&nbsp; | &nbsp;<a className="jss72" target="_blank" rel="noopener noreferrer" href="https://www.usep.edu.ph/usep-data-privacy-statement/">
+                                <span className="jss33" style={{color: 'rgb(87, 87, 87)', fontWeight:'bold', textDecoration: 'underline'}}>Privacy Policy</span></a>
                             </div>
                         </div>
                     </div>
-                    <div class="flex-1 self-end py-40">
-                        <img class="h-48 w-full object-scale-down md:h-full md:w-full" src="/img/loginImg.png" alt="Modern building architecture"/>
+                    <div className="flex-1 self-end py-40">
+                        <img className="h-48 w-full object-scale-down md:h-full md:w-full" src="/img/loginImg.png" alt="Modern building architecture"/>
                     </div>
                 </div>
             {/* <div className='flex-col'>

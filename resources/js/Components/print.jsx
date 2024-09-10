@@ -93,17 +93,17 @@ const Print= ({componentRef, data=[]}) => {
 
           <div className="border bg-black" style={{height:'1px', width:'100%'}}></div>
 
-          <div class="grid grid-cols-12 gap-6">
-            <div class="col-span-8 bg-white">
-                <h2 class="text-lg font-bold mb-4">Enrolled Subjects</h2>
-                <table class="w-full border-collapse border border-gray-200 text-xs">
+          <div className="grid grid-cols-12 gap-6">
+            <div className="col-span-8 bg-white">
+                <h2 className="text-lg font-bold mb-4">Enrolled Subjects</h2>
+                <table className="w-full border-collapse border border-gray-200 text-xs">
                     <thead>
-                        <tr class="bg-gray-100">
-                            <th class="border border-gray-300 p-2 text-left">Subject Code</th>
-                            <th class="border border-gray-300 p-2 text-left">Subject Name</th>
-                            <th class="border border-gray-300 p-2 text-left">Lec</th>
-                            <th class="border border-gray-300 p-2 text-left">Lab</th>
-                            <th class="border border-gray-300 p-2 text-left">Schedule</th>
+                        <tr className="bg-gray-100">
+                            <th className="border border-gray-300 p-2 text-left">Subject Code</th>
+                            <th className="border border-gray-300 p-2 text-left">Subject Name</th>
+                            <th className="border border-gray-300 p-2 text-left">Lec</th>
+                            <th className="border border-gray-300 p-2 text-left">Lab</th>
+                            <th className="border border-gray-300 p-2 text-left">Schedule</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -140,13 +140,13 @@ const Print= ({componentRef, data=[]}) => {
                 </table>
             </div>
 
-            <div class="col-span-4 bg-white">
-                <h2 class="text-lg font-bold mb-4">Billing Information</h2>
-                <table class="w-full border-collapse border border-gray-200 text-xs">
+            <div className="col-span-4 bg-white">
+                <h2 className="text-lg font-bold mb-4">Billing Information</h2>
+                <table className="w-full border-collapse border border-gray-200 text-xs">
                     <thead>
-                        <tr class="bg-gray-100">
-                            <th class="border border-gray-300 p-2 text-left">Description</th>
-                            <th class="border border-gray-300 p-2 text-left">Ammount</th>
+                        <tr className="bg-gray-100">
+                            <th className="border border-gray-300 p-2 text-left">Description</th>
+                            <th className="border border-gray-300 p-2 text-left">Ammount</th>
                         </tr>
                     </thead>
                     <tbody>

@@ -41,7 +41,9 @@ class StudentController extends Controller
             if ($outstandingbalance[0]->OutstandingBalance > 0) {
                 $recordExists = DB::select("SELECT * FROM ES_RegisterWithBalance WHERE TermID = ? AND StudentNo = ?", [$profile['termID'], session()->get('idNumber')]);
                 if (!isset($recordExists[0])) {
-                    throw new Exception("Please clear all your unpaid balance.");
+                    $allowWithBalance=false;
+                }else{
+                    $allowWithBalance=true;
                 }
             }
             
@@ -83,7 +85,8 @@ class StudentController extends Controller
                 'reg' =>  $registration[0],
                 'data' => $data,
                 'enrollment'=> $isOpenResult[0],
-                'info'=>$profile
+                'info'=>$profile,
+                'allow'=> $allowWithBalance
             ]);
         
         } catch (Exception $e) {
