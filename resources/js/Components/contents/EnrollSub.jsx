@@ -7,6 +7,7 @@ import { useReactToPrint } from 'react-to-print';
 import Print from '../print';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {faDownload} from '@fortawesome/free-solid-svg-icons'
+import Swal from 'sweetalert2';
 
 const EnrollSub = ({data, reload, isopen, load, curUnit}) => {
     const[enrollSubject, setenrollSubject]=useState([]);
@@ -16,38 +17,47 @@ const EnrollSub = ({data, reload, isopen, load, curUnit}) => {
     const[Total, setTotal]=useState('');
     const componentRef=useRef();
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await axios.post(route("getEnrollSubject"), { data: data.RegID });
-                if (response.data) {
-                    let total = 0;
-                    response.data.forEach((item) => {
-                        total += Number(item.CreditUnits);
-                    });
-                    curUnit(total);
-                    setenrollSubject(response.data);
-                    load(false);
+        if(data.RegID){
+            const fetchData = async () => {
+                try {
+                    const response = await axios.post(route("getEnrollSubject"), { data: data.RegID });
+                    if (response.data) {
+                        let total = 0;
+                        response.data.forEach((item) => {
+                            total += Number(item.CreditUnits);
+                        });
+                        curUnit(total);
+                        setenrollSubject(response.data);
+                        load(false);
+                    }
+                } catch (error) {
+                    console.error("Error fetching enroll subjects:", error);
                 }
-            } catch (error) {
-                console.error("Error fetching enroll subjects:", error);
-            }
-        };
-
-        const fetchAssessment = async () => {
-            try {
-                const response = await axios.post(route("getassessment"), { term: data.TermID, template: data.TableofFeeID });
-                if (response.data) {
-                    setAssessment(response.data.response);
-                    setTotal(response.data.total);
+            };
+    
+            const fetchAssessment = async () => {
+                try {
+                    const response = await axios.post(route("getassessment"), { term: data.TermID, template: data.TableofFeeID });
+                    if (response.data) {
+                        setAssessment(response.data.response);
+                        setTotal(response.data.total);
+                    }
+                } catch (error) {
+                    console.error("Error fetching assessment data:", error);
                 }
-            } catch (error) {
-                console.error("Error fetching assessment data:", error);
-            }
-        };
-
-        fetchData();
-        fetchAssessment();
-
+            };
+    
+            fetchData();
+            fetchAssessment();
+        }else{
+            Swal.fire({
+                title: 'Warning!',
+                text: "Ensure that any unpaid balance is settled with the cashier.",
+                icon: 'warning',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#D75D5F',
+            });
+        }
     }, [data,reload]);
 
     const handleSelectionChange = (selectedSubs) => {

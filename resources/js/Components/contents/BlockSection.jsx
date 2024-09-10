@@ -17,7 +17,6 @@ const BlockSection = ({datas, reload, curUnit}) => {
         3:datas[0].collegeID,
         4:datas[0].progID
     }
-
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -143,7 +142,7 @@ const BlockSection = ({datas, reload, curUnit}) => {
             </select>
         <div className="m-4">
             <form>
-                <BlockSchedule value={classsched} onSelectionChange={handleSelectionChange} select={selectedClassSched}></BlockSchedule>
+                <BlockSchedule value={classsched} allow={datas[2]} onSelectionChange={handleSelectionChange} select={selectedClassSched}></BlockSchedule>
                 <button type="button" onClick={()=>setShowConfirm(true)} disabled={selectedClassSched.length == []} className={`text-white hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3 ${selectedClassSched.length == [] ? 'bg-gray-400' : ' bg-gradient-to-r from-primary-light to-primary-dark'}`}>submit</button>
             </form>
         </div>

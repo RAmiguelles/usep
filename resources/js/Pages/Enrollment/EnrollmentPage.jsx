@@ -17,7 +17,7 @@ const LoadingSpinner = () => (
     </div>
 );
 
-export default function Main({reg,data,enrollment,info}) {
+export default function Main({reg,data,enrollment,info,allow}) {
     const [activePage, setActivePage] = useState('Page1');
     const [profilePic, setprofilePic] = useState('');
     const [profile, setprofile] = useState([]);
@@ -115,38 +115,38 @@ export default function Main({reg,data,enrollment,info}) {
             </div>   
             <div className="m-6 flex flex-col shadow-md bg-gray-50 rounded-md items-center bg-white">
                 <div className="w-full p-2 bg-primary-dark"><label className="block text-2xl font-bold text-white text-center">Profile information</label></div>
-                <div class="overflow-x-auto m-3">
-                    <table class="min-w-auto bg-white">
+                <div className="overflow-x-auto m-3">
+                    <table className="min-w-auto bg-white">
                         <tbody>
-                            <tr class="info-cell">
-                                <td class="px-3 py-2 font-bold">Registration No.</td>
-                                <td class="px-3 py-2">:</td>
-                                <td class="px-3 py-2">{reg.RegID}</td>
+                            <tr className="info-cell">
+                                <td className="px-3 py-2 font-bold">Registration No.</td>
+                                <td className="px-3 py-2">:</td>
+                                <td className="px-3 py-2">{reg.RegID}</td>
                             </tr>
-                            <tr class="info-cell">
-                                <td class="px-3 py-2 font-bold">Registration Date</td>
-                                <td class="px-3 py-2">:</td>
-                                <td class="px-3 py-2">{reg.RegDate}</td>
+                            <tr className="info-cell">
+                                <td className="px-3 py-2 font-bold">Registration Date</td>
+                                <td className="px-3 py-2">:</td>
+                                <td className="px-3 py-2">{reg.RegDate}</td>
                             </tr>
-                            <tr class="info-cell">
-                                <td class="px-3 py-2 font-bold">College Name</td>
-                                <td class="px-3 py-2">:</td>
-                                <td class="px-3 py-2">{profile.college}</td>
+                            <tr className="info-cell">
+                                <td className="px-3 py-2 font-bold">College Name</td>
+                                <td className="px-3 py-2">:</td>
+                                <td className="px-3 py-2">{profile.college}</td>
                             </tr>
-                            <tr class="info-cell">
-                                <td class="px-3 py-2 font-bold">Program Name</td>
-                                <td class="px-3 py-2">:</td>
-                                <td class="px-3 py-2">{profile.program}</td>
+                            <tr className="info-cell">
+                                <td className="px-3 py-2 font-bold">Program Name</td>
+                                <td className="px-3 py-2">:</td>
+                                <td className="px-3 py-2">{profile.program}</td>
                             </tr>
-                            <tr class="info-cell">
-                                <td class="px-3 py-2 font-bold">Major Name</td>
-                                <td class="px-3 py-2">:</td>
-                                <td class="px-3 py-2">{profile.major}</td>
+                            <tr className="info-cell">
+                                <td className="px-3 py-2 font-bold">Major Name</td>
+                                <td className="px-3 py-2">:</td>
+                                <td className="px-3 py-2">{profile.major}</td>
                             </tr>
-                            <tr class="info-cell">
-                                <td class="px-3 py-2 font-bold">Year Level Description</td>
-                                <td class="px-3 py-2">:</td>
-                                <td class="px-3 py-2">
+                            <tr className="info-cell">
+                                <td className="px-3 py-2 font-bold">Year Level Description</td>
+                                <td className="px-3 py-2">:</td>
+                                <td className="px-3 py-2">
                                 <select name="" id="" onChange={handleChange} value={yearLevel} className='rounded-xl border-none'>
                                     <option value="1st Year" >1st Year</option>
                                     <option value="2nd Year" >2nd Year</option>
@@ -157,30 +157,30 @@ export default function Main({reg,data,enrollment,info}) {
                                 </select>
                                 </td>
                             </tr>
-                            <tr class="info-cell">
-                                <td class="px-3 py-2 font-bold">Curriculum Name</td>
-                                <td class="px-3 py-2">:</td>
-                                <td class="px-3 py-2">{reg.CurriculumCode}</td>
+                            <tr className="info-cell">
+                                <td className="px-3 py-2 font-bold">Curriculum Name</td>
+                                <td className="px-3 py-2">:</td>
+                                <td className="px-3 py-2">{reg.CurriculumCode}</td>
                             </tr>
-                            <tr class="info-cell">
-                                <td class="px-3 py-2 font-bold">Max. Load</td>
-                                <td class="px-3 py-2">:</td>
-                                <td class="px-3 py-2">{profile.maxUnitsLoad}</td>
+                            <tr className="info-cell">
+                                <td className="px-3 py-2 font-bold">Max. Load</td>
+                                <td className="px-3 py-2">:</td>
+                                <td className="px-3 py-2">{profile.maxUnitsLoad}</td>
                             </tr>
-                            <tr class="info-cell">
-                                <td class="px-3 py-2 font-bold">Status</td>
-                                <td class="px-3 py-2">:</td>
-                                <td class="px-3 py-2">{profile.status}</td>
+                            <tr className="info-cell">
+                                <td className="px-3 py-2 font-bold">Status</td>
+                                <td className="px-3 py-2">:</td>
+                                <td className="px-3 py-2">{profile.status}</td>
                             </tr>
-                            <tr class="info-cell">
-                                <td class="px-3 py-2 font-bold">Gender</td>
-                                <td class="px-3 py-2">:</td>
-                                <td class="px-3 py-2">{profile.sex=='F'? "Female":"Male"}</td>
+                            <tr className="info-cell">
+                                <td className="px-3 py-2 font-bold">Gender</td>
+                                <td className="px-3 py-2">:</td>
+                                <td className="px-3 py-2">{profile.sex=='F'? "Female":"Male"}</td>
                             </tr>
-                            <tr class="info-cell">
-                                <td class="px-3 py-2 font-bold">Scholarship Name</td>
-                                <td class="px-3 py-2">:</td>
-                                <td class="px-3 py-2">{reg.ScholarProviderName}</td>
+                            <tr className="info-cell">
+                                <td className="px-3 py-2 font-bold">Scholarship Name</td>
+                                <td className="px-3 py-2">:</td>
+                                <td className="px-3 py-2">{reg.ScholarProviderName}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -199,7 +199,7 @@ export default function Main({reg,data,enrollment,info}) {
                     <button onClick={() => handleNavClick('Page2')}  className={`hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l ${activePage == 'Page2' ? 'bg-gray-400' : 'bg-gray-300'}`}>Free Section</button>
                 </nav>
                 <div className="page-content">
-                    {activePage === 'Page1' && <BlockSection datas={[info,reg]} reload={handlereload} curUnit={curUnit}></BlockSection>}
+                    {activePage === 'Page1' && <BlockSection datas={[info,reg,allow]} reload={handlereload} curUnit={curUnit}></BlockSection>}
                     {/* {activePage === 'Page2' && <FreeSection datas={info} reload={handlereload}></FreeSection>} */}
                 </div>
             </div>}
