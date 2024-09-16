@@ -13,7 +13,7 @@ const EnrollSubTable = ({value=[], onSelectionChange,select}) => {
     return <div>No enrolled subject</div>; // Customize this message or component as needed
   }
   return (
-        <DataTable value={value} scrollable selectionMode='checkbox'   selection={select} onSelectionChange={handleSelectionChange} dataKey="SubjectCode" tableStyle={{ minWidth: '50rem' }}     rowClassName='no-data' columnSelection= 'none'>
+        <DataTable value={value} scrollable selectionMode='checkbox'   selection={select} onSelectionChange={handleSelectionChange} dataKey="SubjectCode" tableStyle={{ minWidth: '50rem' }}>
           <Column selectionMode="multiple" frozen headerStyle={{ width: '3rem' }}></Column>
           <Column datakey="SubjectID" field="SubjectCode" header="Subject Code" frozen style={{ minWidth: '150px'}} body={(rowData) => rowData.ScheduleID || 'N/A'}></Column>
           <Column datakey="SubjectID" field="SubjectTitle" header="Subject Title" style={{ minWidth: '400px' }}></Column>
