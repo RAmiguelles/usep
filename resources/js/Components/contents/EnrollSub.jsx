@@ -82,7 +82,7 @@ const EnrollSub = ({data, reload, isopen, load, curUnit}) => {
 
   return (
     <>
-        <Print componentRef={componentRef} data={[enrollSubject,Assessment,Total]} style={{display:'none'}}></Print>
+        <Print componentRef={componentRef} data={[enrollSubject,Assessment,Total,data]} style={{display:'none'}}></Print>
         <div className="flex items-center justify-between m-4"> {/* Container for label and print button */}
                 {/* <button className="self-end ml-4 text-black font-bold py-2 px-4 rounded" type="button" onClick={printData}><FontAwesomeIcon icon={faDownload}></FontAwesomeIcon>  Print</button> */}
             </div>

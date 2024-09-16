@@ -5,7 +5,6 @@ const Print= ({componentRef, data=[]}) => {
         acc.labUnits += Number(item.LabUnits) || 0;
         return acc;
     }, { acadUnits: 0, labUnits: 0 });
-
     const totalUnits = totals.acadUnits + totals.labUnits;
   return (
     <>
@@ -13,7 +12,7 @@ const Print= ({componentRef, data=[]}) => {
         <div ref={componentRef} className='m-6 p-6'>
           <div className="" >
             <div className="" >
-              <div className="text-xl" >Registration #<span className=""> 0000239639</span></div>
+              <div className="text-xl" >Registration #<span className=""> {data[3].RegID}</span></div>
             </div>
           </div>
 
@@ -24,39 +23,39 @@ const Print= ({componentRef, data=[]}) => {
               <div className="bg-white">
                   <div className="flex items-center">
                       <h3 className="text-xs font-semibold w-1/3">Campus:</h3>
-                      <p className="flex-1 text-xs">Obrero Campus, Davao City</p>
+                      <p className="flex-1 text-xs">{data[3].CampusName}</p>
                   </div>
                   
                   <div className="flex items-center">
                       <h3 className="text-xs font-semibold w-1/3">College:</h3>
-                      <p className="flex-1 text-xs">College of Engineering</p>
+                      <p className="flex-1 text-xs">{data[3].CollegeName}</p>
                   </div>
                   
                   <div className="flex items-center">
                       <h3 className="text-xs font-semibold w-1/3">Academic Program:</h3>
-                      <p className="flex-1 text-xs">Bachelor of Science in Civil Engineering</p>
+                      <p className="flex-1 text-xs">{data[3].ProgramName}</p>
                   </div>
               </div>
 
               <div className="bg-white">
                   <div className="flex items-center">
                       <h3 className="text-xs font-semibold w-1/3">Major Study:</h3>
-                      <p className="flex-1 text-xs">Structural Engineering</p>
+                      <p className="flex-1 text-xs">{data[3].MajorName}</p>
                   </div>
                   
                   <div className="flex items-center">
                       <h3 className="text-xs font-semibold w-1/3">Academic Year:</h3>
-                      <p className="flex-1 text-xs">2023-2024</p>
+                      <p className="flex-1 text-xs">{data[3].SchoolYear}</p>
                   </div>
                   
                   <div className="flex items-center">
                       <h3 className="text-xs font-semibold w-1/3">Academic Term:</h3>
-                      <p className="flex-1 text-xs">2nd Semester</p>
+                      <p className="flex-1 text-xs">{data[3].SchoolTerm}</p>
                   </div>
                   
                   <div className="flex items-center">
                       <h3 className="text-xs font-semibold w-1/3">Year Level:</h3>
-                      <p className="flex-1 text-xs">3rd Year</p>
+                      <p className="flex-1 text-xs">{data[3].YearLevel}</p>
                   </div>
                   
                   <div className="flex items-center">
@@ -80,7 +79,7 @@ const Print= ({componentRef, data=[]}) => {
               <div className="bg-white mt-1">
                   <div className="flex items-center">
                       <h3 className="text-xs font-semibold w-1/3">Date of Registration:</h3>
-                      <p className="flex-1 text-xs">January 17, 2024 1:15 PM</p>
+                      <p className="flex-1 text-xs">{data[3].RegDate}</p>
                   </div>
                   
                   <div className="flex items-center">

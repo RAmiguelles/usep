@@ -67,17 +67,18 @@ const BlockSection = ({datas, reload, curUnit}) => {
                 });
             }
 
-            if(Number(total+=Number(item.CreditUnits)) > 110){
+            if(Number(total+Number(item.CreditUnits)) > datas[0].maxUnitsLoad){
                 selectedBlockScehds.splice(index);
                 Swal.fire({
                     title: 'Error!',
-                    text:"You exceeds max unit limit subject: "+item.SubjectTitle+" cannot be add",
+                    text:"You exceeds "+datas[0].maxUnitsLoad+" unit limit subject: "+item.SubjectTitle+" cannot be add",
                     icon: 'error',
                     confirmButtonText: 'OK',
                     confirmButtonColor: '#D75D5F',
                 });
             }else{
                 total+=Number(item.CreditUnits)
+                console.log(total)
             }
         });
         setSelectedClassSched(selectedBlockScehds);

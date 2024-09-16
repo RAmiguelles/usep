@@ -55,12 +55,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
         } else {
             setIsCapsLock(false);
         }
-    };
-
-    const handleFocus = (e) => {
-        setIsCapsLock(e.getModifierState('CapsLock'));
-    };
-    
+    };   
     return (
         <>
             <Head title="Welcome" />
@@ -113,7 +108,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                         <div className='w-full h-screen relative bg-gradient-to-r from-gray-200 to-gray-400'>
                           <img className='w-full h-screen object-cover absolute mix-blend-overlay animation-fade' src="img/eagle.jpg" alt="Background"/>
                           <div className='w-full h-screen flex flex-col justify-start items-center absolute'>
-                                  <img className="my-24" src="img/USePLogo.png" alt="" srcset="" />
+                                  <img className="my-24" src="img/USePLogo.png" alt="" srcSet="" />
                                   <div className='text-5xl'>University of Southeastern Philippines</div>
                                   <div className='text-6xl'>Enrollment System</div>
                                   <div className="mt-24">
@@ -133,8 +128,8 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                                                     icon={faSchool}
                                                     className="text-gray-800 px-3 py-2"
                                                 />
-                                                <select name="campus" id="campus" className="focus focus:rounded-md focus:shadow-sm border-2 border-gray-500/50 rounded-md w-80 p-2 " onChange={(e) => setData('campus', e.target.value)}>
-                                                    <option value="" disabled selected>Campus</option>
+                                                <select name="campus" id="campus" defaultValue="0" className="focus focus:rounded-md focus:shadow-sm border-2 border-gray-500/50 rounded-md w-80 p-2 " onChange={(e) => setData('campus', e.target.value)}>
+                                                    <option value="0" disabled hidden>Campus</option>
                                                     <option value="1">Obrero</option>
                                                     <option value="2">Mintal</option>
                                                     <option value="3">Tagum</option>
@@ -177,7 +172,6 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                                                         type={showPassword ? 'text' : 'password'}
                                                         name="password"
                                                         onKeyDown={handleKeyDown}
-                                                        onFocus={handleFocus}
                                                         value={data.password}
                                                         className="block w-full border-none rounded-md pl-10 pr-12"
                                                         autoComplete="current-password"
