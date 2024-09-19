@@ -11,7 +11,12 @@ use Illuminate\Support\Facades\DB;
 class EnrollmentController extends Controller
 {
     public function getBlockSection(Request $request){
-        $response=DB::select("EXEC dbo.ES_getBlockSections ?,?,?,?,?",$request->params); #Params CampusID, TermID, StudentNo, CollegeID, ProgID
+        $response=DB::select("EXEC dbo.ES_getBlockSections_test ?,?,?,?,?",$request->params); #Params CampusID, TermID, StudentNo, CollegeID, ProgID
+        return response()->json($response);
+    }
+
+    public function getSection(Request $request){
+        $response=DB::select("EXEC dbo.CUSTOM_ES_getBlockSections ?,?,?,?,?",$request->params); #Params CampusID, TermID, StudentNo, CollegeID, ProgID
         return response()->json($response);
     }
 

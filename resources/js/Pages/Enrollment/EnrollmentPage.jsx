@@ -8,6 +8,8 @@ import { Column } from 'primereact/column';
 import BlockSection from "@/Components/contents/BlockSection";
 import FreeSection from "@/Components/contents/FreeSection";
 import EnrollSub from '@/Components/contents/EnrollSub';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {faDownload} from '@fortawesome/free-solid-svg-icons'
 import { format } from 'date-fns';
 import Swal from 'sweetalert2';
 
@@ -24,7 +26,6 @@ export default function Main({reg,data,enrollment,info,allow}) {
     const [loading, setLoading] = useState(true);
     const [reload, setreload] = useState(false);
     const [curUnit, setcurUnit] = useState(0);
-    const [yearLevel, setyearlevel] = useState('');
     const url = `https://api.usep.edu.ph/student/`;
     const handleNavClick = (page) => {
       setActivePage(page);
@@ -62,7 +63,7 @@ export default function Main({reg,data,enrollment,info,allow}) {
 
         fetchData();
     },[data]);
-
+    
     useEffect(() => {
         if (!enrollment['isOpen']) {
             Swal.fire({
@@ -146,16 +147,7 @@ export default function Main({reg,data,enrollment,info,allow}) {
                             <tr className="info-cell">
                                 <td className="px-3 py-2 font-bold">Year Level Description</td>
                                 <td className="px-3 py-2">:</td>
-                                <td className="px-3 py-2">
-                                <select name="" id="" onChange={handleChange} value={yearLevel} className='rounded-xl border-none'>
-                                    <option value="1st Year" >1st Year</option>
-                                    <option value="2nd Year" >2nd Year</option>
-                                    <option value="3rd Year" >3rd Year</option>
-                                    <option value="4th Year" >4th Year</option>
-                                    <option value="5th Year" >5th Year</option>
-   
-                                </select>
-                                </td>
+                                <td className="px-3 py-2">{profile.yearLevel} <FontAwesomeIcon icon={faDownload}></FontAwesomeIcon></td>
                             </tr>
                             <tr className="info-cell">
                                 <td className="px-3 py-2 font-bold">Curriculum Name</td>

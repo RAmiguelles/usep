@@ -1,3 +1,7 @@
 .p-checkbox-box {
     border: 2px solid #a6b3bd !important;
 }
+.disabled-row {
+    opacity: 0.5; /* Make the row look disabled */
+    pointer-events: none; /* Prevent interaction */
+}

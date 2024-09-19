@@ -71,6 +71,7 @@ const EnrollSub = ({data, reload, isopen, load, curUnit}) => {
             setenrollSubject(response.data);
             setSelectedSub([])
             setShowDelete(false)
+            load(true)
         })
     }
 
@@ -101,11 +102,11 @@ const EnrollSub = ({data, reload, isopen, load, curUnit}) => {
                     <p>Are you sure you want to delete this item?</p>
                 </div>
                 <div className='w-auto flex justify-center'>
-                    <SecondaryButton className="m-2" onClick={()=>setShowDelete(false)}>
-                    Close
-                    </SecondaryButton>
-                    <SecondaryButton className="m-2" onClick={handleDelete}>
+                <SecondaryButton className="m-2" onClick={handleDelete}>
                     Confirm
+                    </SecondaryButton>
+                    <SecondaryButton className="m-2" onClick={()=>setShowDelete(false)}>
+                    Cancel
                     </SecondaryButton>
                 </div>
             </div>
