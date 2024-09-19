@@ -23,6 +23,7 @@ Route::middleware('User')->group(function () {
 
     Route::get('/enrollment', [EnrollmentController::class, 'index'])->name('enrollment.index');
     Route::post('/getBlockSection', [EnrollmentController::class, 'getBlockSection'])->name('getBlockSection');
+    Route::post('/getSection', [EnrollmentController::class, 'getSection'])->name('getSection');
     Route::post('/getFreeSection', [EnrollmentController::class, 'getFreeSection'])->name('getFreeSection');
     Route::post('/getBlockClassSchedule', [EnrollmentController::class, 'getBlockClassSchedule'])->name('getBlockClassSchedule');
     Route::post('/getFreeClassSchedule', [EnrollmentController::class, 'getFreeClassSchedule'])->name('getFreeClassSchedule');

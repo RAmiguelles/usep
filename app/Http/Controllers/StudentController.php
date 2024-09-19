@@ -130,7 +130,7 @@ class StudentController extends Controller
             $conflict=0;
             $ispass=DB::select("select top 1 FinalRemarks from dbo.ES_Grades where StudentNo=? and SubjectID=?",array(session()->get('idNumber'),$sub['SubjectID'])); #filter if already pass the subject
             if($ispass && $ispass[0]->FinalRemarks=='Passed'){
-                return response()->json(['error' => 'Subject Already Passed']);
+                return response()->json(['error' => 'Subject '.$sub['SubjectCode'].' Already Passed']);
             }
             if(count($enrol)>0){
                 foreach($enrol as $enrol_sub){

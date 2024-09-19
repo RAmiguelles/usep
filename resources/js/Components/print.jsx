@@ -1,11 +1,46 @@
 import React from 'react';
+import { useState, useEffect } from "react";
 const Print= ({componentRef, data=[]}) => {
-    const totals = data[0].reduce((acc, item) => {
-        acc.acadUnits += Number(item.AcadUnits) || 0;
-        acc.labUnits += Number(item.LabUnits) || 0;
-        return acc;
-    }, { acadUnits: 0, labUnits: 0 });
-    const totalUnits = totals.acadUnits + totals.labUnits;
+    const [totals,settotals]=useState([])
+    const [totalAssessmentFee,settotalAssessmentFee]=useState(0)
+    const [tablefee,settablefee]=useState([])
+    useEffect(() => {
+        const loadData = async () => {
+            const units=data[0].reduce((acc, item) => {
+                acc.acadUnits += Number(item.AcadUnits) || 0;
+                acc.labUnits += Number(item.LabUnits) || 0;
+                return acc;
+            }, { acadUnits: 0, labUnits: 0 });
+            settotals(units)
+
+            const newData = data[1].map(item => {
+                let updatedItem = { ...item };
+
+                if (updatedItem.AcctName === "Tuition Fee") {
+                    updatedItem.AcctName = `Tuition Fee ${units.acadUnits + units.labUnits}@${Number(updatedItem.Amount)}`;
+                    updatedItem.Amount = Number(updatedItem.Amount) * (units.acadUnits + units.labUnits);
+                } else if (updatedItem.AcctName === "Laboratory Fee") {
+                    updatedItem.AcctName = `Laboratory Fee ${units.labUnits}@${Number(updatedItem.Amount)}`;
+                    updatedItem.Amount = Number(updatedItem.Amount) * units.labUnits;
+                }
+
+                return updatedItem;
+            });
+            settablefee(newData)
+
+            const Fee= newData.reduce((total, item) => {
+                if (item.AcctName === "Tuition Fee") {
+                    return total + Number(item.Amount) * (totals.acadUnits+totals.labUnits);
+                } else if (item.AcctName === "Laboratory Fee") {
+                    return total + Number(item.Amount) * totals.labUnits;
+                }
+                return total + Number(item.Amount);
+            }, 0).toFixed(2)
+            settotalAssessmentFee(Fee)
+
+        };
+        loadData();
+    }, [data[0]]);
   return (
     <>
         <div style={{ display: 'none' }}>
@@ -67,12 +102,12 @@ const Print= ({componentRef, data=[]}) => {
               <div className="bg-white mt-1">
                   <div className="flex items-center">
                       <h3 className="text-xs font-semibold w-1/3">Lecture Units:</h3>
-                      <p className="flex-1 text-xs">17 Units</p>
+                      <p className="flex-1 text-xs">{totals.acadUnits}</p>
                   </div>
                   
                   <div className="flex items-center">
                       <h3 className="text-xs font-semibold w-1/3">Laboratory Units:</h3>
-                      <p className="flex-1 text-xs">3 Units</p>
+                      <p className="flex-1 text-xs">{totals.labUnits}</p>
                   </div>
               </div>
 
@@ -149,26 +184,17 @@ const Print= ({componentRef, data=[]}) => {
                         </tr>
                     </thead>
                     <tbody>
-                    {data[1].map((item, index) => {
-                        if (item.AcctName =="Tuition Fee" ) {
-                            item.AcctName="Tuition Fee "+totalUnits+"@"+Number(item.Amount);
-                            item.Amount=Number(item.Amount)*totalUnits
-                        } else if(item.AcctName =="Laboratory Fee"){
-                            item.AcctName="Laboratory Fee "+totals.labUnits+"@"+Number(item.Amount);
-                            item.Amount=Number(item.Amount)*totals.labUnits
-                        }
-                        return(
-                        <tr key={index}>
-                            <td className="border border-gray-300 ">{item.AcctName}</td>
-                            <td className="border border-gray-300 text-right">{ Number(item.Amount)}</td>
-                        </tr>
-                        );
-                    })}
+                    {tablefee.map((item, index) => (
+                    <tr key={index}>
+                        <td className="border border-gray-300">{item.AcctName}</td>
+                        <td className="border border-gray-300 text-right">{Number(item.Amount).toFixed(2)}</td>
+                    </tr>
+                    ))}
                     </tbody>
                     <tfoot>
                         <tr>
                             <td className="border border-gray-300 font-bold">Total : </td>
-                            <td className="border border-gray-300 text-right">{Number(data[2])}</td>
+                            <td className="border border-gray-300 text-right">{totalAssessmentFee}</td>
                         </tr>
                     </tfoot>
                 </table>
