@@ -9,7 +9,7 @@ import BlockSection from "@/Components/contents/BlockSection";
 import FreeSection from "@/Components/contents/FreeSection";
 import EnrollSub from '@/Components/contents/EnrollSub';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {faDownload} from '@fortawesome/free-solid-svg-icons'
+import {faArrowsRotate} from '@fortawesome/free-solid-svg-icons'
 import { format } from 'date-fns';
 import Swal from 'sweetalert2';
 
@@ -43,7 +43,8 @@ export default function Main({reg,data,enrollment,info,allow}) {
         const fetchData = async () => {
             try {
                 setLoading(true); // Set loading to true when fetching starts
-
+                const test = await axios.get(`https://api.usep.edu.ph/enrollment/getDashboardInfo/${data.user}/${data.campus}`, getHTTPConfig(data.token));
+                DB::connection(session()->get('db'))->(test)
                 if (data && data.user && data.campus && data.token) {
                     const profilePicResponse = await axios.get(`${url}getProfilePic/${data.user}/${data.campus}`, getHTTPConfig(data.token));
                     if (profilePicResponse.data) {
@@ -147,7 +148,7 @@ export default function Main({reg,data,enrollment,info,allow}) {
                             <tr className="info-cell">
                                 <td className="px-3 py-2 font-bold">Year Level Description</td>
                                 <td className="px-3 py-2">:</td>
-                                <td className="px-3 py-2">{profile.yearLevel} <FontAwesomeIcon icon={faDownload}></FontAwesomeIcon></td>
+                                <td className="px-3 py-2" onClick={()=>{alert(info.studentID)}}>{profile.yearLevel} <FontAwesomeIcon icon={faArrowsRotate}></FontAwesomeIcon></td>
                             </tr>
                             <tr className="info-cell">
                                 <td className="px-3 py-2 font-bold">Curriculum Name</td>

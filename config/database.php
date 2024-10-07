@@ -94,7 +94,7 @@ return [
             'sslmode' => 'prefer',
         ],
 
-        'sqlsrv' => [
+        'sqlsrv_1' => [
             'driver' => 'sqlsrv',
             'url' => env('DB_URL'),
             'host' => env('DB_HOST', 'localhost'),
@@ -102,6 +102,22 @@ return [
             'database' => env('DB_DATABASE', 'laravel'),
             'username' => env('DB_USERNAME', 'root'),
             'password' => env('DB_PASSWORD', ''),
+            'charset' => env('DB_CHARSET', 'Latin1'),
+            'collation' => env('DB_COLLATION', 'SQL_Latin1_General_CP1_CI_AS'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            // 'encrypt' => env('DB_ENCRYPT', 'yes'),
+            // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
+        ],
+
+        'sqlsrv_7' => [
+            'driver' => 'sqlsrv',
+            'url' => env('DB_URL'),
+            'host' => env('DB_HOST_2', 'localhost'),
+            // 'port' => env('DB_PORT', '1433'),
+            'database' => env('DB_DATABASE_2', 'laravel'),
+            'username' => env('DB_USERNAME_2', 'root'),
+            'password' => env('DB_PASSWORD_2', ''),
             'charset' => env('DB_CHARSET', 'Latin1'),
             'collation' => env('DB_COLLATION', 'SQL_Latin1_General_CP1_CI_AS'),
             'prefix' => '',

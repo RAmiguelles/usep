@@ -40,7 +40,7 @@ const Print= ({componentRef, data=[]}) => {
 
         };
         loadData();
-    }, [data[0]]);
+    }, [data]);
   return (
     <>
         <div style={{ display: 'none' }}>
