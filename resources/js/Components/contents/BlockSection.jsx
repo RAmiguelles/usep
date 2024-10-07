@@ -8,8 +8,8 @@ import Swal from 'sweetalert2';
 const BlockSection = ({datas, reload, curUnit}) => {
     const [blockSection, setblockSection]=useState([])
     const [classsched, getClasssched]=useState([''])
-    const [selectedClassSched, setSelectedClassSched] = useState([])
-    const [showConfirm,setShowConfirm]=useState(false)
+    // const [selectedClassSched, setSelectedClassSched] = useState([])
+    // const [showConfirm,setShowConfirm]=useState(false)
     const [curSection,setcurSection]=useState([])
     const [enrolledSub,setenrolledSub]=useState([])
     const params={
@@ -30,7 +30,7 @@ const BlockSection = ({datas, reload, curUnit}) => {
                     const Response2 = await axios.post(route("getSection"),{params});
                     if (Response2.data) {
                         setcurSection(Response2.data[0])
-                        test(Response2.data[0].SectionID)
+                        Section(Response2.data[0].SectionID)
                     }
                 }
             } catch (error) {
@@ -56,8 +56,7 @@ const BlockSection = ({datas, reload, curUnit}) => {
         fetchData();
     }, [datas]);
 
-
-    const test=(e)=>{
+    const Section=(e)=>{
         let val = e.currentTarget ? e.currentTarget.value : e;
         const data={
             0:val,
@@ -71,7 +70,6 @@ const BlockSection = ({datas, reload, curUnit}) => {
                 return a.SubjectCode.localeCompare(b.SubjectCode);
             });
             getClasssched(sortedData);
-            setSelectedClassSched([]);
         })
         .catch(error => {
             console.error('Error fetching data:', error);
@@ -106,25 +104,22 @@ const BlockSection = ({datas, reload, curUnit}) => {
                 total+=Number(item.CreditUnits)
             }
         });
-        setSelectedClassSched(selectedBlockScehds);
+        Submit(selectedBlockScehds);
     }
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        setShowConfirm(false)
-        axios.post(route("saveSubjects"), {selectedClassSched, term: datas[0].termID, cCode:datas[0].curriculumCode, yearLevel:datas[0].yearLevel, RegID:datas[1].RegID})
+    const Submit = (e) => {
+        axios.post(route("saveSubjects"), {e, term: datas[0].termID, yearLevel:datas[0].yearLevel, RegID:datas[1].RegID})
         .then(response => {
+            console.log(response)
             if (response.data.error) {
-                const errorMessage = response.data.error
+                const errorMessage = response.data.error.split('\n').join('<br />');
                 Swal.fire({
-                    title: 'Conflict!',
-                    text: errorMessage,
+                    html:errorMessage,
                     icon: 'warning',
                     confirmButtonText: 'OK',
                     confirmButtonColor: '#FFC107', 
                 }).then(() => {
                     reload(true);
-                    setSelectedClassSched([]);
                 });
             } else {
                 Swal.fire({
@@ -138,7 +133,6 @@ const BlockSection = ({datas, reload, curUnit}) => {
                         window.location.reload();
                     }
                     reload(true);
-                    setSelectedClassSched([]);
                 });
             }
             
@@ -156,7 +150,7 @@ const BlockSection = ({datas, reload, curUnit}) => {
   return (
     <>
         <label htmlFor="blocksection" className="block  text-base font-medium text-gray-900 dark:text-white m-4">Block Section</label>
-            <select id="blocksection" onChange={test} className=" m-4 w-1/4 block px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            <select id="blocksection" onChange={Section} className=" m-4 w-1/4 block px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             {blockSection.map((row, rowIndex) => (
                 <option key={rowIndex} id={row.SectionID} value={row.SectionID} selected={row.SectionName === curSection.SectionName}>
                     {row.SectionName}
@@ -165,27 +159,9 @@ const BlockSection = ({datas, reload, curUnit}) => {
             </select>
         <div className="m-4">
             <form>
-                <BlockSchedule value={classsched} allow={datas[2]} onSelectionChange={handleSelectionChange} select={selectedClassSched} subs={enrolledSub}></BlockSchedule>
-                <button type="button" onClick={()=>setShowConfirm(true)} disabled={selectedClassSched.length == []} className={`text-white hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3 ${selectedClassSched.length == [] ? 'bg-gray-400' : ' bg-gradient-to-r from-primary-light to-primary-dark'}`}>submit</button>
+                <BlockSchedule value={classsched} onSelectionChange={handleSelectionChange} subs={enrolledSub}></BlockSchedule>
             </form>
         </div>
-
-        <Modal show={showConfirm} maxWidth='md'>
-            <div className='p-0 m-3'>
-                <div className='flex flex-column items-center justify-center p-3'>
-                    <img className="self-center" src="/img/warning.png" alt="Warning" />
-                    <p>Are you sure you want to Add this item?</p>
-                </div>
-                <div className='w-auto flex justify-center'>
-                    <SecondaryButton className="m-2" onClick={handleSubmit}>
-                    Confirm
-                    </SecondaryButton>
-                    <SecondaryButton className="m-2" onClick={()=>setShowConfirm(false)}>
-                    Cancel
-                    </SecondaryButton>
-                </div>
-            </div>
-        </Modal>
     </>
   );
 };

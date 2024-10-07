@@ -12,7 +12,7 @@ class Registration extends Model
     protected $table = 'dbo.ES_RegistrationDetails';
 
     protected function getPreRequisites($id, $cur, $subID){
-        $response=DB::select("select * from dbo.sis_getPrerequisite(?,?,?)");
+        $response=DB::connection(session()->get('db'))->select("select * from dbo.sis_getPrerequisite(?,?,?)");
         return ($response);
     }
 }

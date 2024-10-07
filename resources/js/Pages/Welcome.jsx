@@ -131,9 +131,9 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                                                 <select name="campus" id="campus" defaultValue="0" className="focus focus:rounded-md focus:shadow-sm border-2 border-gray-500/50 rounded-md w-80 p-2 " onChange={(e) => setData('campus', e.target.value)}>
                                                     <option value="0" disabled hidden>Campus</option>
                                                     <option value="1">Obrero</option>
-                                                    <option value="2">Mintal</option>
-                                                    <option value="3">Tagum</option>
-                                                    <option value="4">Mabini</option>
+                                                    <option value="6">Mintal</option>
+                                                    <option value="7">Tagum</option>
+                                                    <option value="8">Mabini</option>
                                                 </select>
                                             </div>
                                             <InputError message={errors.campus} className="mt-2" />

@@ -17,7 +17,7 @@ class ES_Student extends Model
 
     public function SaveSubject($RegID, $Schedule, $Seq)
     { 
-        DB::select("EXEC dbo.sp_SaveEnrolledSubjects ?,?,?",array($RegID,$Schedule,$Seq));
+        DB::connection(session()->get('db'))->select("EXEC dbo.sp_SaveEnrolledSubjects ?,?,?",array($RegID,$Schedule,$Seq));
         return $RegID;
     }
 }
