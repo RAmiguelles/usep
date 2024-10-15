@@ -11,7 +11,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {faPlus} from '@fortawesome/free-solid-svg-icons'
 
 
-const BlockSchedule = ({value=[], onSelectionChange, subs}) => {
+const BlockSchedule = ({value=[], onSelectionChange, subs, allow}) => {
   const[disabledSubjectCodes,setdisabledSubjectCodes]=useState([])
   const getVisibleColumns = (data) => {
     const columns = [];
@@ -44,7 +44,7 @@ const BlockSchedule = ({value=[], onSelectionChange, subs}) => {
   }
   return (
       <DataTable value={value} scrollable datakey="id" tableStyle={{ minWidth: '50rem' }} rowClassName={(data) => disabledSubjectCodes.includes(data.SubjectCode) ? 'disabled-row' : ''}>
-          <Column 
+          {allow && <Column 
             header={
               <button 
                 onClick={
@@ -72,7 +72,7 @@ const BlockSchedule = ({value=[], onSelectionChange, subs}) => {
             )} 
             frozen 
             headerStyle={{ width: '3rem' }} 
-          />
+          />}
           <Column datakey="SubjectID" field="SubjectCode" header="Subject Code" frozen style={{ minWidth: '150px'}}></Column>
           <Column datakey="SubjectID" field="SubjectTitle" header="Subject Title" style={{ minWidth: '250px' }}></Column>
           <Column datakey="SubjectID" field="AcadUnits" header="Lec Unit" style={{ minWidth: '100px' }}></Column>
