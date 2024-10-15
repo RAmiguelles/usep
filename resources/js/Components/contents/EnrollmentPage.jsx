@@ -63,17 +63,30 @@ export default function Main({reg,data,enrollment,info,allow}) {
         fetchData();
     },[data]);
     
-    if (!enrollment['isOpen']) {
-        Swal.fire({
-            title: 'Enrollment Closed',
-            text: `The Enrollment for ${reg.YearTerm} has been closed since ${enrollment['EndEnrollment']}`,
-            icon: 'info',
-            confirmButtonText: 'Continue',
-            confirmButtonColor: '#D75D5F',
-            iconColor: '#D75D5F',
+    useEffect(() => {
+        if (!enrollment['isOpen']) {
+            Swal.fire({
+                title: 'Enrollment Closed',
+                text: `The Enrollment for ${reg.YearTerm} has been closed since ${enrollment['EndEnrollment']}`,
+                icon: 'info',
+                confirmButtonText: 'Continue',
+                confirmButtonColor: '#D75D5F',
+                iconColor: '#D75D5F',
+            })
+        }
+    }, [enrollment]);
+
+    const checkYearLevel=()=>{
+        data={
+            0:206,
+            1:"2020-00831",
+            2:3
+        }
+        axios.post(route("checkYearLevel"),{data})
+        .then(response =>{
+            console.log(response)
         })
     }
- 
     const handlereload = (x) =>{
         setreload(x)
     }
@@ -105,7 +118,7 @@ export default function Main({reg,data,enrollment,info,allow}) {
                             </div>
                             <div className="text-2xl text-primary-dark">{profile.studentID}</div>
     
-                            <div className="text-2xl text-gray-800 font-semibold" >{profile.StudentName}</div>
+                            <div className="text-2xl text-gray-800 font-semibold" >{profile.fullName}</div>
                             <div className="text-2xl text-gray-800 font-semibold" >{profile.Ms365Username}</div>
                         </div>
                     </div>
@@ -129,32 +142,32 @@ export default function Main({reg,data,enrollment,info,allow}) {
                             <tr className="info-cell">
                                 <td className="px-3 py-2 font-bold">College Name</td>
                                 <td className="px-3 py-2">:</td>
-                                <td className="px-3 py-2">{profile.CollegeName}</td>
+                                <td className="px-3 py-2">{profile.college}</td>
                             </tr>
                             <tr className="info-cell">
                                 <td className="px-3 py-2 font-bold">Program Name</td>
                                 <td className="px-3 py-2">:</td>
-                                <td className="px-3 py-2">{profile.ProgramName}</td>
+                                <td className="px-3 py-2">{profile.program}</td>
                             </tr>
                             <tr className="info-cell">
                                 <td className="px-3 py-2 font-bold">Major Name</td>
                                 <td className="px-3 py-2">:</td>
-                                <td className="px-3 py-2">{profile.MajorStudy}</td>
+                                <td className="px-3 py-2">{profile.major}</td>
                             </tr>
                             <tr className="info-cell">
                                 <td className="px-3 py-2 font-bold">Year Level Description</td>
                                 <td className="px-3 py-2">:</td>
-                                <td className="px-3 py-2" >{profile.YearLevel}</td>
+                                <td className="px-3 py-2" onClick={checkYearLevel}>{profile.yearLevel} <FontAwesomeIcon icon={faArrowsRotate}></FontAwesomeIcon></td>
                             </tr>
                             <tr className="info-cell">
                                 <td className="px-3 py-2 font-bold">Curriculum Name</td>
                                 <td className="px-3 py-2">:</td>
-                                <td className="px-3 py-2">{profile.CurriculumCode}</td>
+                                <td className="px-3 py-2">{reg.CurriculumCode}</td>
                             </tr>
                             <tr className="info-cell">
                                 <td className="px-3 py-2 font-bold">Max. Load</td>
                                 <td className="px-3 py-2">:</td>
-                                <td className="px-3 py-2">{profile.MaxUnitsLoad}</td>
+                                <td className="px-3 py-2">{profile.maxUnitsLoad}</td>
                             </tr>
                             <tr className="info-cell">
                                 <td className="px-3 py-2 font-bold">Status</td>
@@ -164,7 +177,7 @@ export default function Main({reg,data,enrollment,info,allow}) {
                             <tr className="info-cell">
                                 <td className="px-3 py-2 font-bold">Gender</td>
                                 <td className="px-3 py-2">:</td>
-                                <td className="px-3 py-2">{profile.Gender=='F'? "Female":"Male"}</td>
+                                <td className="px-3 py-2">{profile.sex=='F'? "Female":"Male"}</td>
                             </tr>
                             <tr className="info-cell">
                                 <td className="px-3 py-2 font-bold">Scholarship Name</td>

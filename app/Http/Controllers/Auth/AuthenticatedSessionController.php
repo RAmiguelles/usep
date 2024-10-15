@@ -43,6 +43,7 @@ class AuthenticatedSessionController extends Controller
             'password' => $request->password,
             'campusID' => $request->campus,
         ];
+        $request->session()->put('db','sqlsrv_'.$request->campus);
         $response = Http::withHeaders([
             'X-CSRF-TOKEN' => $csrfToken,
             'Content-Type' => 'application/json',
