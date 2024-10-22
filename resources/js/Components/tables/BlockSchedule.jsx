@@ -85,7 +85,7 @@ const BlockSchedule = ({value=[], onSelectionChange, subs, allow}) => {
             body={(rowData) => {
               // Check if the SubjectCode is in the disabledSubjectCodes array
               if (disabledSubjectCodes.includes(rowData.SubjectCode)) {
-                  return 'Selected';
+                  return 'Enrolled';
               }
               // Return a default value (e.g., empty string) if not selected
               return ''; 

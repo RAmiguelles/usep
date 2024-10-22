@@ -40,7 +40,7 @@ class StudentController extends Controller
             // } else {
             //     throw new Exception('Unable to fetch profile data');
             // }
-
+            
             $profileQuery=DB::connection(session()->get('db'))->select(
                 "SELECT TOP 1
                 S.StudentNo ,
@@ -55,8 +55,10 @@ class StudentController extends Controller
                 dbo.fn_ProgramCode(S.ProgID) AS ProgramCode ,
                 dbo.fn_ProgramName(S.ProgID) AS ProgramName ,
                 dbo.fn_MajorName(s.MajorDiscID) AS MajorStudy ,
-                S.YearLevelID ,
-                dbo.fn_YearLevel(S.YearLevelID) AS YearLevel ,
+                -- S.YearLevelID ,
+                -- dbo.fn_YearLevel(S.YearLevelID) AS YearLevel ,
+               (select YearLevelID from [dbo].[fn_getAutoYearLevel_OES_2]('2020-00831',3)) AS YearLevelID,
+               (select YearLevel from [dbo].[fn_getAutoYearLevel_OES_2]('2020-00831',3)) AS YearLevel,
                 S.Gender ,
                 s.CurriculumID ,
                 dbo.fn_CurriculumCode(s.CurriculumID) AS CurriculumCode ,
@@ -73,10 +75,11 @@ class StudentController extends Controller
                 ForeignStudent ,
                 dbo.fn_CurricularYearLevel2(s.StudentNo, s.ProgID, s.YearLevelID) AS cYearLevelID ,
                 dbo.fn_YearLevel(dbo.fn_CurricularYearLevel2(s.StudentNo, s.ProgID,
-                                                             s.YearLevelID)) AS cYearLevel ,
-                MaxUnitsLoad,
+                s.YearLevelID)) AS cYearLevel ,
+                S.MaxUnitsLoad,
                 S.CampusID,
-            (Select dbo.fn_DefaultTermID()) AS TermID
+                CAST(dbo.fn_TotalCreditUnitsEarned_OES(S.StudentNo) AS INT) AS UnitsEarned,
+                dbo.fn_DefaultTermID() AS TermID
                 FROM    ES_Students S
                 WHERE   S.StudentNo = ?
                 ",
@@ -132,10 +135,13 @@ class StudentController extends Controller
                     END
                 END
                 SELECT @isOpen AS isOpen, @enrollmentStartDate AS StartEnrollment, @enrollmentEndDate AS EndEnrollment ;";
-    
-            $isOpenResult = DB::connection(session()->get('db'))->select($query, [$profile->TermID,session()->get('campusID')]);
-            $isOpenResult[0]->isOpen=$isOpenResult[0]->isOpen==0? false : true;
-            } 
+            
+
+                $isOpenResult = DB::connection(session()->get('db'))->select($query, [$profile->TermID,session()->get('campusID')]);
+                $isOpenResult[0]->isOpen=$isOpenResult[0]->isOpen==0? false : true;
+            } else{
+                $isOpenResult[0]=['isOpen'=>false];
+            }
 
             return Inertia::render('Enrollment/EnrollmentPage', [
                 'reg' =>  $registration[0],

@@ -106,14 +106,13 @@ export default function Main({reg,data,enrollment,info,allow}) {
                             <div className="text-2xl text-primary-dark">{profile.studentID}</div>
     
                             <div className="text-2xl text-gray-800 font-semibold" >{profile.StudentName}</div>
-                            <div className="text-2xl text-gray-800 font-semibold" >{profile.Ms365Username}</div>
                         </div>
                     </div>
                 </div>
             </div>   
             <div className="m-6 flex flex-col shadow-md bg-gray-50 rounded-md items-center bg-white">
                 <div className="w-full p-2 bg-primary-dark"><label className="block text-2xl font-bold text-white text-center">Profile information</label></div>
-                <div className="overflow-x-auto m-3">
+                <div className=" m-3">
                     <table className="min-w-auto bg-white">
                         <tbody>
                             <tr className="info-cell">
@@ -173,6 +172,21 @@ export default function Main({reg,data,enrollment,info,allow}) {
                             </tr>
                         </tbody>
                     </table>
+                    <h1 className='px-3 py-2 font-bold text-xl'>Overall Progress:</h1>
+                    <div className="flex flex-col items-center">
+                        <div className="flex justify-between w-full">
+                            <div className='font-bold'><p className='text-lg'>{profile.UnitsEarned} <span className='text-xs'>Units Earned</span></p></div>
+                            <div className='font-bold'><p className='text-lg'>{profile.CurrTotalCreditUnits} <span className='text-xs'>Total Units</span></p></div>
+                        </div>
+                        <div className="w-full h-6 bg-gray-200 rounded-full dark:bg-gray-700 mt-2">
+                            <div 
+                                className="h-6 bg-gradient-to-r from-green-500 to-green-600 text-xl font-medium text-gray-700 text-center p-0.5 leading-none dark:bg-blue-500 rounded-full" 
+                                style={{ width: ((profile.UnitsEarned / profile.CurrTotalCreditUnits)*100) + "%" }}
+                            >
+                                {((profile.UnitsEarned / profile.CurrTotalCreditUnits)*100).toFixed(2)+'%'}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
