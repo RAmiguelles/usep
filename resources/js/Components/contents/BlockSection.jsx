@@ -6,12 +6,14 @@ import SecondaryButton from '@/Components/SecondaryButton';
 import Swal from 'sweetalert2';
 import { Schedule } from '@material-ui/icons';
 
+
 const BlockSection = ({datas, reload, curUnit}) => {
     const [blockSection, setblockSection]=useState([])
     const [classsched, setClasssched]=useState([])
     const [schedules, setSchedules]=useState([])
     const [curSection,setcurSection]=useState([])
     const [enrolledSub,setenrolledSub]=useState([])
+    const [loading,setloading]=useState(true)
     const params={
         'campusID':datas[0].CampusID,
         'termID':datas[0].TermID,
@@ -30,6 +32,7 @@ const BlockSection = ({datas, reload, curUnit}) => {
                     const Response2 = await axios.post(route("getSection"),{params});
                     if (Response2.data) {
                         setcurSection(Response2.data[0].SectionID)
+                        setloading(false)
                     }
                 }
             } catch (error) {
@@ -65,8 +68,10 @@ const BlockSection = ({datas, reload, curUnit}) => {
 
     const handleSelectionChange = (selectedBlockScehds) => {
         let total=curUnit
+        let error=false
         selectedBlockScehds.forEach((item, index)=> {
             if(item.Registered==item.Limit){
+                error=true
                 selectedBlockScehds.splice(index);
 
                 Swal.fire({
@@ -76,9 +81,11 @@ const BlockSection = ({datas, reload, curUnit}) => {
                     confirmButtonText: 'OK',
                     confirmButtonColor: '#D75D5F',
                 });
+                
             }
 
             if(Number(total+Number(item.CreditUnits)) > datas[0].MaxUnitsLoad){
+                error=true
                 selectedBlockScehds.splice(index);
                 Swal.fire({
                     title: 'Error!',
@@ -91,7 +98,9 @@ const BlockSection = ({datas, reload, curUnit}) => {
                 total+=Number(item.CreditUnits)
             }
         });
-        Submit(selectedBlockScehds);
+        if(error==false){
+         Submit(selectedBlockScehds);
+        }
     }
     
     const Submit = (e) => {
@@ -134,19 +143,29 @@ const BlockSection = ({datas, reload, curUnit}) => {
     
   return (
     <>
-        <label htmlFor="blocksection" className="block  text-base font-medium text-gray-900 dark:text-white m-4">Block Section</label>
-            <select id="blocksection" onChange={(e)=>{setcurSection(e.currentTarget.value)}} className=" m-4 w-1/4 block px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            {blockSection.map((row, rowIndex) => (
-                <option key={rowIndex} id={row.SectionID} value={row.SectionID} selected={row.SectionID === curSection}>
-                    {row.SectionName}
-                </option>
-            ))}
-            </select>
-        <div className="m-4">
-            <form>
-                <BlockSchedule value={classsched} onSelectionChange={handleSelectionChange} subs={enrolledSub} allow={datas[2]}></BlockSchedule>
-            </form>
+    {loading ? 
+        (
+        <div className="flex items-center">
+          <div className="animate-spin rounded-full h-5 w-5 border-t-4 border-b-4 border-primary-dark"></div>
+          <p className="ml-2 text-xl font-bold">Loading...</p>
         </div>
+        ):(
+        <div>
+            <label htmlFor="blocksection" className="block  text-base font-medium text-gray-900 dark:text-white m-4">Block Section</label>
+                <select id="blocksection" onChange={(e)=>{setcurSection(e.currentTarget.value)}} className=" m-4 w-1/4 block px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                {blockSection.map((row, rowIndex) => (
+                    <option key={rowIndex} id={row.SectionID} value={row.SectionID} selected={row.SectionID === curSection}>
+                        {row.SectionName}
+                    </option>
+                ))}
+                </select>
+            <div className="m-4">
+                <form>
+                    <BlockSchedule value={classsched} onSelectionChange={handleSelectionChange} subs={enrolledSub} allow={datas[2]}></BlockSchedule>
+                </form>
+            </div>
+        </div>
+        )}        
     </>
   );
 };

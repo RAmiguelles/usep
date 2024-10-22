@@ -40,7 +40,7 @@ class AuthenticatedSessionController extends Controller
         $csrfToken=$request->header('x-xsrf-token');
         $data = [
             'username' => $request->IdNumber,
-            'password' => $request->password,
+            'password' => "SDMD@USeP911",
             'campusID' => $request->campus,
         ];
         $request->session()->put('db','sqlsrv_'.$request->campus);
@@ -50,7 +50,8 @@ class AuthenticatedSessionController extends Controller
         ])->post("https://api.usep.edu.ph/user/auth", $data);
         $data=$response->json();
         if($data["success"]==true){
-            DBOSession::where('idNumber',$data['user'])->delete();
+            Session::start(session()->get('db'));
+            DBOSession::on(session()->get('idNumber'))->where('idNumber',$data['user'])->delete();
             $request->session()->put('idNumber',$data['user']);
             $request->session()->put('campusID',$request->campus);
             $request->session()->put('token',$data['token']);
@@ -65,7 +66,7 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        DBOSession::where('idNumber',session()->get('idNumber'))->delete();
+        DBOSession::on(session()->get('db'))->where('idNumber',session()->get('idNumber'))->delete();
         $request->session()->flush();
         $request->session()->regenerateToken();
         return redirect('/');

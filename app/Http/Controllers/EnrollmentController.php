@@ -7,7 +7,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
-
+use App\Models\Subject;
 class EnrollmentController extends Controller
 {
     public function getBlockSection(Request $request){
@@ -94,14 +94,37 @@ class EnrollmentController extends Controller
         $filteredResponse = [];
 
         foreach ($response as $item) {
-            $ispass = DB::connection(session()->get('db'))->select(
-                "SELECT TOP 1 FinalRemarks FROM dbo.ES_Grades WHERE StudentNo = ? AND SubjectID = ?",
-                [session()->get('idNumber'), $item->SubjectID]
-            );
-            if (!$ispass || $ispass[0]->FinalRemarks !== 'Passed') {
-                $inCurriculum=DB::connection(session()->get('db'))->select("EXEC dbo.sp_Reg_CheckSubjectInTheCurriculum_r2 ?,?,?", [session()->get('idNumber'),session()->get('curriculumID'),$item->SubjectID]);
-                if($inCurriculum){
-                    $filteredResponse[] = $item;  
+            // $inCurriculum=DB::connection(session()->get('db'))->select("EXEC dbo.sp_Reg_CheckSubjectInTheCurriculum_r2 ?,?,?", [session()->get('idNumber'),session()->get('curriculumID'),$item->SubjectID]);
+            // if($inCurriculum){
+            //     $ispass = DB::connection(session()->get('db'))->select(
+            //         "SELECT TOP 1 FinalRemarks FROM dbo.ES_Grades WHERE StudentNo = ? AND SubjectID = ?",
+            //         [session()->get('idNumber'), $item->SubjectID]
+            //     );
+            //     if (!$ispass || $ispass[0]->FinalRemarks !== 'Passed') {
+            //             $filteredResponse[] = $item;  
+            //     }
+            // }
+
+            $inCurriculum=DB::connection(session()->get('db'))->select("EXEC dbo.sp_Reg_CheckSubjectInTheCurriculum_r2 ?,?,?", [session()->get('idNumber'),session()->get('curriculumID'),$item->SubjectID]);
+            if($inCurriculum){
+                $ispass = DB::connection(session()->get('db'))->select(
+                    "SELECT TOP 1 FinalRemarks FROM dbo.ES_Grades WHERE StudentNo = ? AND SubjectID = ?",
+                    [session()->get('idNumber'), $item->SubjectID]
+                );
+                if (!$ispass || $ispass[0]->FinalRemarks !== 'Passed') {
+                    $preRequisites=Subject::getPreRequisites($item->SubjectID);
+                    if($preRequisites!=null){
+                        $pass=true;
+                        foreach($preRequisites as $preReq){
+                            $ifPass=DB::connection(session()->get('db'))->select("EXEC dbo.ES_GetSubjectPreRequisiteIfPassed ?,?,?",array(session()->get('idNumber'),$preReq->SubjectID,0));
+                            if(count($ifPass)==0 || $ifPass[0]->Remarks=='Incomplete' || $ifPass[0]->Remarks=='Failed'){
+                                $pass=false;
+                            }
+                        }
+                        if($pass){
+                            $filteredResponse[] = $item; 
+                        } 
+                    }else{$filteredResponse[] = $item;}
                 }
             }
         }
