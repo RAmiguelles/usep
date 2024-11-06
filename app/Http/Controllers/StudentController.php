@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ES_Student;
+use App\Models\Registration;
 use App\Models\Subject;
 use App\Models\User;
 use Inertia\Inertia;
@@ -113,40 +114,22 @@ class StudentController extends Controller
             $result=DB::connection(session()->get('db'))->select("EXEC dbo.CUSTOM_isUndergrad ?,?",[session()->get('idNumber'),session()->get('campusID')]);
 
             if($result[0]->Result==1){
-                // $isOpen=DB::connection(session()->get('db'))->select("EXEC dbo.CUSTOM_isEnrollmentOpen ?,?",[$registration[0]->TermID,session()->get('campusID')]);
-                $query = "
-                DECLARE @isOpen BIT;
-                DECLARE @enrollmentStartDate DATE;
-                DECLARE @enrollmentEndDate DATE;
-    
-                SET @isOpen = 0;
-    
-                SELECT 
-                    @enrollmentStartDate = StartEnrollment,
-                    @enrollmentEndDate = EndEnrollment
-                FROM ES_AYTermConfig
-                WHERE TermID = ? AND CampusID = ?;
-    
-                IF @enrollmentStartDate IS NOT NULL AND @enrollmentEndDate IS NOT NULL
-                BEGIN
-                    IF GETDATE() BETWEEN @enrollmentStartDate AND @enrollmentEndDate
-                    BEGIN
-                        SET @isOpen = 1;
-                    END
-                END
-                SELECT @isOpen AS isOpen, @enrollmentStartDate AS StartEnrollment, @enrollmentEndDate AS EndEnrollment ;";
-            
-
-                $isOpenResult = DB::connection(session()->get('db'))->select($query, [$profile->TermID,session()->get('campusID')]);
-                $isOpenResult[0]->isOpen=$isOpenResult[0]->isOpen==0? false : true;
+                $IsPerCollegeEnrollment = DB::connection(session()->get('db'))->select("SELECT IsPerCollegeEnrollment FROM ES_AYTerm WHERE TermID = ?", array($profile->TermID));
+                $IsPerCollegeEnrollmentValue = $IsPerCollegeEnrollment[0]->IsPerCollegeEnrollment;
+                
+                if ($IsPerCollegeEnrollmentValue == 1) {
+                    $isOpenResult=Registration::perCollegeisOpen($profile->TermID);
+                } else {
+                    $isOpenResult=Registration::isOpen($profile->TermID);
+                }
             } else{
-                $isOpenResult[0]=['isOpen'=>false];
+                $isOpenResult=['isOpen'=>false];
             }
 
             return Inertia::render('Enrollment/EnrollmentPage', [
                 'reg' =>  $registration[0],
                 'data' => $data,
-                'enrollment'=> $isOpenResult[0],
+                'enrollment'=> $isOpenResult,
                 'info'=>$profile,
                 'allow'=> $allowWithBalance
             ]);
@@ -231,15 +214,4 @@ class StudentController extends Controller
         }
         return response()->json(['message' => 'Subjects saved successfully']);
     }
-
-    public function checkYearLevel(Request $request){
-        # select * from ES_Retention
-        # SELECT dbo.fn_computeMaxUnitsLoad(206,'2020-00831',)
-        #select dbo.fn_GetMaxLoadUnits_r2('2022-00112',206,3)
-        # [dbo].[sp_GetEnrollmentInfo]
-        $yearlevelid=User::yearLevelID("3rd year");
-        return  $yearlevelid;
-    }
-
-
 }

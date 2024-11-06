@@ -80,7 +80,6 @@ const EnrollSub = ({data, reload, isopen, load, curUnit}) => {
         documentTittle:"COR"
     })
 
-
   return (
     <>
         <Print componentRef={componentRef} data={[enrollSubject,Assessment,Total,data]} style={{display:'none'}}></Print>

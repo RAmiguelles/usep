@@ -19,6 +19,6 @@ class CheckUser
         if(session()->get('idNumber')){
             return $next($request);
         }
-        return Redirect::route('welcome');
+        return back();
     }
 }
