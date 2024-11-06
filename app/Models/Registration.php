@@ -15,4 +15,41 @@ class Registration extends Model
         $response=DB::connection(session()->get('db'))->select("select * from dbo.sis_getPrerequisite(?,?,?)");
         return ($response);
     }
+
+    protected function isOpen($termID){
+        $query = " SELECT 
+                StartEnrollment, 
+                EndEnrollment, 
+                CASE 
+                    WHEN GETDATE() BETWEEN StartEnrollment AND EndEnrollment THEN 1 
+                    ELSE 0 
+                END AS isOpen
+                FROM 
+                    ES_AYTermConfig
+                WHERE 
+                    TermID = ?;
+                    ";
+        $isOpenResult = DB::connection(session()->get('db'))->select($query, [$termID,session()->get('campusID')]);
+        $isOpenResult[0]->isOpen=$isOpenResult[0]->isOpen==0? false : true;
+        return $isOpenResult[0];
+    }
+
+    protected function perCollegeisOpen($termID){
+        $query = " SELECT 
+                StartEnrollment, 
+                EndEnrollment, 
+                CASE 
+                    WHEN GETDATE() BETWEEN StartEnrollment AND EndEnrollment THEN 1 
+                    ELSE 0 
+                END AS isOpen
+                FROM 
+                    ES_College_Enrollment
+                WHERE 
+                    TermID = ?;
+                    ";
+        $isOpenResult = DB::connection(session()->get('db'))->select($query, [$termID,session()->get('campusID')]);
+        $isOpenResult[0]->isOpen=$isOpenResult[0]->isOpen==0? false : true;
+        return $isOpenResult[0];
+    }
+
 }

@@ -18,6 +18,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'ifUser' => \App\Http\Middleware\IfAuth::class,
             'User' => \App\Http\Middleware\CheckUser::class,
+            'admin' => \App\Http\Middleware\admin::class,
+            'client' => \App\Http\Middleware\Client::class,
         ]);
         //
     })

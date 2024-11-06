@@ -40,6 +40,18 @@ export default function Main({reg,data,enrollment,info,allow}) {
         };
     };
     useEffect(() => {
+
+        if (!enrollment['isOpen']) {
+            Swal.fire({
+                title: 'Enrollment Closed',
+                text: `The Enrollment for ${reg.YearTerm} has been closed since ${enrollment['EndEnrollment']}`,
+                icon: 'info',
+                confirmButtonText: 'Continue',
+                confirmButtonColor: '#D75D5F',
+                iconColor: '#D75D5F',
+            })
+        }
+
         const fetchData = async () => {
             try {
                 setLoading(true); // Set loading to true when fetching starts
@@ -62,18 +74,7 @@ export default function Main({reg,data,enrollment,info,allow}) {
 
         fetchData();
     },[data]);
-    
-    if (!enrollment['isOpen']) {
-        Swal.fire({
-            title: 'Enrollment Closed',
-            text: `The Enrollment for ${reg.YearTerm} has been closed since ${enrollment['EndEnrollment']}`,
-            icon: 'info',
-            confirmButtonText: 'Continue',
-            confirmButtonColor: '#D75D5F',
-            iconColor: '#D75D5F',
-        })
-    }
- 
+     
     const handlereload = (x) =>{
         setreload(x)
     }

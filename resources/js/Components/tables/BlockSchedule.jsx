@@ -43,7 +43,12 @@ const BlockSchedule = ({value=[], onSelectionChange, subs, allow}) => {
     alert("test")
   }
   return (
-      <DataTable value={value} scrollable datakey="id" tableStyle={{ minWidth: '50rem' }} rowClassName={(data) => disabledSubjectCodes.includes(data.SubjectCode) ? 'disabled-row' : ''}>
+      <DataTable className="p-2 font-medium border-spacing-2" value={value} scrollable datakey="id" tableStyle={{ minWidth: '50rem'}} 
+        rowClassName={(data) => {
+          const isDisabled = disabledSubjectCodes.includes(data.SubjectCode);
+          return `border-y-2 hover:bg-gray-100 hover:text-black ${isDisabled ? 'disabled-row' : ''}`;
+        }}
+      >
           {allow && <Column 
             header={
               <button 
@@ -73,7 +78,7 @@ const BlockSchedule = ({value=[], onSelectionChange, subs, allow}) => {
             frozen 
             headerStyle={{ width: '3rem' }} 
           />}
-          <Column datakey="SubjectID" field="SubjectCode" header="Subject Code" frozen style={{ minWidth: '150px'}}></Column>
+          <Column datakey="SubjectID" field="SubjectCode" header="Subject Code" style={{ minWidth: '150px'}}></Column>
           <Column datakey="SubjectID" field="SubjectTitle" header="Subject Title" style={{ minWidth: '250px' }}></Column>
           <Column datakey="SubjectID" field="AcadUnits" header="Lec Unit" style={{ minWidth: '100px' }}></Column>
           <Column datakey="SubjectID" field="LabUnits" header="Lab Unit" style={{ minWidth: '100px' }}></Column>
@@ -81,7 +86,7 @@ const BlockSchedule = ({value=[], onSelectionChange, subs, allow}) => {
           {columns.map((col, index) => (
           <Column key={index} field={col.field} header={col.header} style={{ minWidth: '300px' }}></Column>
           ))}
-                    <Column datakey="SubjectID" field="remark" header="Remark" frozen style={{ minWidth: '150px'}} 
+          <Column datakey="SubjectID" field="remark" header="Remark" style={{ minWidth: '150px'}} 
             body={(rowData) => {
               // Check if the SubjectCode is in the disabledSubjectCodes array
               if (disabledSubjectCodes.includes(rowData.SubjectCode)) {
