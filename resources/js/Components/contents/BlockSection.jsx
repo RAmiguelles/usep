@@ -8,12 +8,16 @@ import { Schedule } from '@material-ui/icons';
 
 
 const BlockSection = ({datas, reload, curUnit}) => {
-    const [blockSection, setblockSection]=useState([])
-    const [classsched, setClasssched]=useState([])
-    const [schedules, setSchedules]=useState([])
-    const [curSection,setcurSection]=useState([])
+    // const [blockSection, setblockSection]=useState([])
+    // const [classsched, setClasssched]=useState([])
+    // const [schedules, setSchedules]=useState([])
+    // const [curSection,setcurSection]=useState([])
     const [enrolledSub,setenrolledSub]=useState([])
     const [loading,setloading]=useState(true)
+    const [scheds,setscheds]=useState([])
+    const [Availablescheds,setAvailablescheds]=useState([])
+    const [defaultAvailableScheds,setDefaultAvailableScheds]=useState([])
+    const [searchQuery, setSearchQuery] = useState('');
     const params={
         'campusID':datas[0].CampusID,
         'termID':datas[0].TermID,
@@ -23,17 +27,32 @@ const BlockSection = ({datas, reload, curUnit}) => {
     }
 
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchData = async () => {                                                         //get blocksection
             try {
                 const Response = await axios.post(route("getBlockSection"),{params});
                 if (Response.data) {
-                    setblockSection(Response.data['sections']);
-                    setSchedules(Response.data['schedules']);
-                    const Response2 = await axios.post(route("getSection"),{params});
-                    if (Response2.data) {
-                        setcurSection(Response2.data[0].SectionID)
-                        setloading(false)
-                    }
+                    // setblockSection(Response.data['sections']);
+                    // setSchedules(Response.data['schedules']);
+                    const schedules= Response.data['schedules'];
+                    const test =Response.data['sections'].filter(item => item.ProgCode === datas[0].ProgramCode).map(item => item.SectionID);
+                    const Mscheds=[] 
+                    const Ascheds=[]
+                    Object.entries(schedules).forEach(([key, value]) => {
+                        if (test.includes(key)) {
+                            Mscheds.push(...value)
+                        }else{
+                            Ascheds.push(...value)
+                        }
+                    });
+                    setscheds(Mscheds)
+                    setAvailablescheds(Ascheds)
+                    setDefaultAvailableScheds(Ascheds)
+                    setloading(false)
+                    // const Response2 = await axios.post(route("getSection"),{params});
+                    // if (Response2.data) {
+                    //     setcurSection(Response2.data[0].SectionID)
+                    //     setloading(false)
+                    // }
                 }
             } catch (error) {
                 console.error("Error fetching profile data:", error);
@@ -58,32 +77,10 @@ const BlockSection = ({datas, reload, curUnit}) => {
         fetchData();
     }, [datas]);
 
-    useEffect(() => {
-        const Section=()=>{
-            setClasssched(schedules[curSection])
-    
-        }
-        Section()
-    },[curSection]);
-
     const handleSelectionChange = (selectedBlockScehds) => {
         let total=curUnit
         let error=false
         selectedBlockScehds.forEach((item, index)=> {
-            if(item.Registered==item.Limit){
-                error=true
-                selectedBlockScehds.splice(index);
-
-                Swal.fire({
-                    title: 'Error!',
-                    text: item.SubjectTitle+" exceeds the maximum limit",
-                    icon: 'error',
-                    confirmButtonText: 'OK',
-                    confirmButtonColor: '#D75D5F',
-                });
-                
-            }
-
             if(Number(total+Number(item.CreditUnits)) > datas[0].MaxUnitsLoad){
                 error=true
                 selectedBlockScehds.splice(index);
@@ -140,6 +137,16 @@ const BlockSection = ({datas, reload, curUnit}) => {
             });
         });
     }
+
+    const filterData = (e) => {
+        const searchQuery = e.target.value
+        setSearchQuery(searchQuery)
+        const filter=defaultAvailableScheds.filter(item =>
+            item.SubjectCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.SubjectTitle.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        setAvailablescheds(filter)
+      };
     
   return (
     <>
@@ -151,18 +158,44 @@ const BlockSection = ({datas, reload, curUnit}) => {
         </div>
         ):(
         <div>
-            <label htmlFor="blocksection" className="block  text-base font-medium text-gray-900 dark:text-white m-4">Block Section</label>
-                <select id="blocksection" onChange={(e)=>{setcurSection(e.currentTarget.value)}} className=" m-4 w-1/4 block px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                {blockSection.map((row, rowIndex) => (
-                    <option key={rowIndex} id={row.SectionID} value={row.SectionID} selected={row.SectionID === curSection}>
-                        {row.SectionName}
-                    </option>
-                ))}
-                </select>
-            <div className="m-4">
-                <form>
-                    <BlockSchedule value={classsched} onSelectionChange={handleSelectionChange} subs={enrolledSub} allow={datas[2]}></BlockSchedule>
-                </form>
+            <div className='m-4 p-2 border border-2 rounded-xl hover:border-2 hover:shadow-md'>
+                <label className="block  text-base font-medium text-gray-900 dark:text-white m-4">CLASS SCHEDULE FOR #course</label>
+                    {/* <select id="blocksection" onChange={(e)=>{setcurSection(e.currentTarget.value)}} className=" m-4 w-1/4 block px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                    {blockSection.map((row, rowIndex) => (
+                        <option key={rowIndex} id={row.SectionID} value={row.SectionID} selected={row.SectionID === curSection}>
+                            {row.SectionName}
+                        </option>
+                    ))}
+                    </select> */}
+                <div className="m-4">
+                    <form>
+                        <BlockSchedule value={scheds} onSelectionChange={handleSelectionChange} subs={enrolledSub} allow={datas[2]}></BlockSchedule>
+                    </form>
+                </div>
+            </div>
+
+            <div className='m-4 p-2 border border-2 rounded-xl mt-12 hover:border-2 hover:shadow-md'>
+                <label className="block  text-base font-medium text-gray-900 dark:text-white m-4 ">CLASS SCHEDULE FOR #course</label>
+                    {/* <select id="blocksection" onChange={(e)=>{setcurSection(e.currentTarget.value)}} className=" m-4 w-1/4 block px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                    {blockSection.map((row, rowIndex) => (
+                        <option key={rowIndex} id={row.SectionID} value={row.SectionID} selected={row.SectionID === curSection}>
+                            {row.SectionName}
+                        </option>
+                    ))}
+                    </select> */}
+                <div className="m-4">
+                    <div className="flex justify-content-between justify-end mr-6">
+                        <input
+                            value={searchQuery}
+                            onChange={(e) =>filterData(e)}
+                            placeholder="Search by name or country"
+                            className="p-inputtext-sm"
+                        />
+                    </div>
+                    <form>
+                        <BlockSchedule value={Availablescheds} onSelectionChange={handleSelectionChange} subs={enrolledSub} allow={datas[2]}></BlockSchedule>
+                    </form>
+                </div>
             </div>
         </div>
         )}        

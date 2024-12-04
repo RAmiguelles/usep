@@ -116,7 +116,8 @@ class AdminController extends Controller
             ];
 
             $condition = [
-                'TermID' => $request->data['TermID']
+                'TermID' => $request->data['TermID'],
+                'CollegeID' => $request->data['CollegeID'],
             ];
     
             DB::connection(session()->get('db'))->table('ES_College_Enrollment')
