@@ -26,6 +26,7 @@ class StudentController extends Controller
                 'token' => session()->get('token'),
                 'campus' => session()->get('campusID'),
             ];
+
             // $headers = [
             //     'Authorization' =>$data['token'],
             //     'Content-Type' => 'application/json',
@@ -58,8 +59,8 @@ class StudentController extends Controller
                 dbo.fn_MajorName(s.MajorDiscID) AS MajorStudy ,
                 -- S.YearLevelID ,
                 -- dbo.fn_YearLevel(S.YearLevelID) AS YearLevel ,
-               (select YearLevelID from [dbo].[fn_getAutoYearLevel_OES_2]('2020-00831',3)) AS YearLevelID,
-               (select YearLevel from [dbo].[fn_getAutoYearLevel_OES_2]('2020-00831',3)) AS YearLevel,
+               (select YearLevelID from [dbo].[fn_getAutoYearLevel_OES_2](S.StudentNo,2)) AS YearLevelID,
+               (select YearLevel from [dbo].[fn_getAutoYearLevel_OES_2](S.StudentNo,2)) AS YearLevel,
                 S.Gender ,
                 s.CurriculumID ,
                 dbo.fn_CurriculumCode(s.CurriculumID) AS CurriculumCode ,
@@ -80,7 +81,7 @@ class StudentController extends Controller
                 S.MaxUnitsLoad,
                 S.CampusID,
                 CAST(dbo.fn_TotalCreditUnitsEarned_OES(S.StudentNo) AS INT) AS UnitsEarned,
-                dbo.fn_DefaultTermID() AS TermID
+                dbo.fn_DefaultTermID_OES() AS TermID
                 FROM    ES_Students S
                 WHERE   S.StudentNo = ?
                 ",
@@ -93,7 +94,7 @@ class StudentController extends Controller
             }else{
                 throw new Exception('Unable to fetch profile data');
             }
-
+    
             $outstandingbalance = DB::connection(session()->get('db'))->select("EXEC dbo.CUSTOM_ES_GetOutstandingBalanceFromStudentLedger ?", [session()->get('idNumber')]);
             if ($outstandingbalance[0]->OutstandingBalance > 0) {
                 $recordExists = DB::connection(session()->get('db'))->select("SELECT * FROM ES_RegisterWithBalance WHERE TermID = ? AND StudentNo = ?", [$profile->TermID, session()->get('idNumber')]);
@@ -112,20 +113,20 @@ class StudentController extends Controller
             } 
 
             $result=DB::connection(session()->get('db'))->select("EXEC dbo.CUSTOM_isUndergrad ?,?",[session()->get('idNumber'),session()->get('campusID')]);
-
             if($result[0]->Result==1){
                 $IsPerCollegeEnrollment = DB::connection(session()->get('db'))->select("SELECT IsPerCollegeEnrollment FROM ES_AYTerm WHERE TermID = ?", array($profile->TermID));
                 $IsPerCollegeEnrollmentValue = $IsPerCollegeEnrollment[0]->IsPerCollegeEnrollment;
-                
                 if ($IsPerCollegeEnrollmentValue == 1) {
-                    $isOpenResult=Registration::perCollegeisOpen($profile->TermID);
+                    $isOpenResult=Registration::perCollegeisOpen($profile->TermID,$profile->CollegeID);
+                    if(!$isOpenResult){
+                        $isOpenResult=Registration::isOpen($profile->TermID);
+                    }
                 } else {
                     $isOpenResult=Registration::isOpen($profile->TermID);
                 }
             } else{
                 $isOpenResult=['isOpen'=>false];
             }
-
             return Inertia::render('Enrollment/EnrollmentPage', [
                 'reg' =>  $registration[0],
                 'data' => $data,
@@ -138,7 +139,7 @@ class StudentController extends Controller
             session()->flush();
             session()->regenerateToken();
             
-            return redirect('/')->withErrors(['status' => 'Error: ' . $e->getMessage()]);
+            return redirect('/')->withErrors(['status' => 'Error: ' . "ERROR"]);
         }
     }
 
@@ -177,41 +178,72 @@ class StudentController extends Controller
         $sortedData = collect($request->e)->sortBy('Cntr')->values()->all();
 
         foreach ($sortedData as $sub) {
-            $preRequisites=Subject::getPreRequisites($sub['SubjectID']);
             $count++;
             $conflict=0;
-            $ispass=DB::connection(session()->get('db'))->select("select top 1 FinalRemarks from dbo.ES_Grades where StudentNo=? and SubjectID=?",array(session()->get('idNumber'),$sub['SubjectID'])); #filter if already pass the subject
-            
-            if($ispass && $ispass[0]->FinalRemarks=='Passed'){
-                return response()->json(['error' => 'Subject '.$sub['SubjectCode'].' Already Passed']);
-            }
-            
+
             if(count($enrol)>0){
                 foreach($enrol as $enrol_sub){
                     $result=DB::connection(session()->get('db'))->select("EXEC dbo.sp_CheckSchedConflicts ?,?",array($sub['ScheduleID'],$enrol_sub->ScheduleID)); #filter conflict
                     $conflict=$conflict+$result[0]->Conflict;
                     if($result[0]->Conflict >0){
-                        return response()->json(['error' => "Conflict detected between schedules: ". $sub['ScheduleID']." and ".$enrol_sub->ScheduleID]);
+                        return response()->json(['error' => "Conflict detected between schedules: ". $sub['SubjectCode']." and ".$enrol_sub->SubjectTitle]);
                     }
                 }
             }
-            
-            if($preRequisites!=null){
-                $requesites="";
-                foreach($preRequisites as $preReq){
-                    $ifPass=DB::connection(session()->get('db'))->select("EXEC dbo.ES_GetSubjectPreRequisiteIfPassed ?,?,?",array(session()->get('idNumber'),$preReq->SubjectID,0));
-                    $requesites .= "\n- " . $preReq->SubjectCode . ' ' . (count($ifPass) == 0 ? '' : $ifPass[0]->Remarks);
-                    if(count($ifPass)==0 || $ifPass[0]->Remarks=='Incomplete' || $ifPass[0]->Remarks=='Failed'){
-                        return response()->json([
-                            'error' => "Failed to meet prerequisites of ScheduleID ".$sub['SubjectCode'].$requesites
-                        ]);
-                    }
-                }
-                DB::connection(session()->get('db'))->statement("EXEC dbo.sp_SaveEnrolledSubjects ?,?,?",array($RegID,$sub['ScheduleID'],$count));
-            }else{
-                DB::connection(session()->get('db'))->statement("EXEC dbo.sp_SaveEnrolledSubjects ?,?,?",array($RegID,$sub['ScheduleID'],$count));     
-            }
+            DB::connection(session()->get('db'))->statement("EXEC dbo.sp_SaveEnrolledSubjects ?,?,?",array($RegID,$sub['ScheduleID'],$count));     
         }
         return response()->json(['message' => 'Subjects saved successfully']);
     }
+
+    // public function saveSubjects(Request $request){
+    //     if(!$request->RegID){
+    //         $response = DB::connection(session()->get('db'))->statement("EXEC dbo.CUSTOM_sp_SaveEnrollment ?,?,?,?,?,?,?,?",array(session()->get('idNumber'),intval($request->term),session()->get('campus'),0,0,0,1,intval($request->yearLevelID))); # saveEnrollment array($request->info['studentID'],intval($request->info['termID']),$request->info['campusID'],0,0,0,1,ES_Student::YearLevelID($request->info['yearLevel']))
+    //         $regID = DB::connection(session()->get('db'))->select("EXEC dbo.CUSTOM_ES_GetCurrentStudReg ?", [session()->get('idNumber')]);
+    //         $RegID=$regID[0]->regID;
+    //     }else{
+    //         $RegID=$request->RegID;
+    //     }
+
+    //     $enrol = Subject::getEnrolledSubject($request->RegID);
+    //     $count=count($enrol);
+    //     $sortedData = collect($request->e)->sortBy('Cntr')->values()->all();
+
+    //     foreach ($sortedData as $sub) {
+    //         $preRequisites=Subject::getPreRequisites($sub['SubjectID']);
+    //         $count++;
+    //         $conflict=0;
+    //         $ispass=DB::connection(session()->get('db'))->select("select top 1 FinalRemarks from dbo.ES_Grades where StudentNo=? and SubjectID=?",array(session()->get('idNumber'),$sub['SubjectID'])); #filter if already pass the subject
+            
+    //         if($ispass && $ispass[0]->FinalRemarks=='Passed'){
+    //             return response()->json(['error' => 'Subject '.$sub['SubjectCode'].' Already Passed']);
+    //         }
+            
+    //         if(count($enrol)>0){
+    //             foreach($enrol as $enrol_sub){
+    //                 $result=DB::connection(session()->get('db'))->select("EXEC dbo.sp_CheckSchedConflicts ?,?",array($sub['ScheduleID'],$enrol_sub->ScheduleID)); #filter conflict
+    //                 $conflict=$conflict+$result[0]->Conflict;
+    //                 if($result[0]->Conflict >0){
+    //                     return response()->json(['error' => "Conflict detected between schedules: ". $sub['SubjectCode']." and ".$enrol_sub->SubjectTitle]);
+    //                 }
+    //             }
+    //         }
+            
+    //         if($preRequisites!=null){
+    //             $requesites="";
+    //             foreach($preRequisites as $preReq){
+    //                 $ifPass=DB::connection(session()->get('db'))->select("EXEC dbo.ES_GetSubjectPreRequisiteIfPassed ?,?,?",array(session()->get('idNumber'),$preReq->SubjectID,0));
+    //                 $requesites .= "\n- " . $preReq->SubjectCode . ' ' . (count($ifPass) == 0 ? '' : $ifPass[0]->Remarks);
+    //                 if(count($ifPass)==0 || $ifPass[0]->Remarks=='Incomplete' || $ifPass[0]->Remarks=='Failed'){
+    //                     return response()->json([
+    //                         'error' => "Failed to meet prerequisites of ScheduleID ".$sub['SubjectCode'].$requesites
+    //                     ]);
+    //                 }
+    //             }
+    //             DB::connection(session()->get('db'))->statement("EXEC dbo.sp_SaveEnrolledSubjects ?,?,?",array($RegID,$sub['ScheduleID'],$count));
+    //         }else{
+    //             DB::connection(session()->get('db'))->statement("EXEC dbo.sp_SaveEnrolledSubjects ?,?,?",array($RegID,$sub['ScheduleID'],$count));     
+    //         }
+    //     }
+    //     return response()->json(['message' => 'Subjects saved successfully']);
+    // }
 }

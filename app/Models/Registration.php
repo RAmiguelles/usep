@@ -34,7 +34,7 @@ class Registration extends Model
         return $isOpenResult[0];
     }
 
-    protected function perCollegeisOpen($termID){
+    protected function perCollegeisOpen($termID,$colID){
         $query = " SELECT 
                 StartEnrollment, 
                 EndEnrollment, 
@@ -45,9 +45,12 @@ class Registration extends Model
                 FROM 
                     ES_College_Enrollment
                 WHERE 
-                    TermID = ?;
+                    TermID = ? AND CollegeID=?;
                     ";
-        $isOpenResult = DB::connection(session()->get('db'))->select($query, [$termID,session()->get('campusID')]);
+        $isOpenResult = DB::connection(session()->get('db'))->select($query, [$termID,$colID]);
+        if(!$isOpenResult){
+            return false;
+        }
         $isOpenResult[0]->isOpen=$isOpenResult[0]->isOpen==0? false : true;
         return $isOpenResult[0];
     }

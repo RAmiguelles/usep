@@ -39,10 +39,8 @@ const BlockSchedule = ({value=[], onSelectionChange, subs, allow}) => {
     subjectcode()
   },[subs])
 
-  const handleSelectAll=()=>{
-    alert("test")
-  }
   return (
+    <>
       <DataTable className="p-2 font-medium border-spacing-2" value={value} scrollable datakey="id" tableStyle={{ minWidth: '50rem'}} 
         rowClassName={(data) => {
           const isDisabled = disabledSubjectCodes.includes(data.SubjectCode);
@@ -51,7 +49,7 @@ const BlockSchedule = ({value=[], onSelectionChange, subs, allow}) => {
       >
           {allow && <Column 
             header={
-              <button 
+              <button type="button"
                 onClick={
                   (e)=>{
                     e.preventDefault()
@@ -65,6 +63,7 @@ const BlockSchedule = ({value=[], onSelectionChange, subs, allow}) => {
             }
             body={(rowData) => (
                 <button 
+                    type='button'
                     onClick={(e) => {
                       e.preventDefault()
                       onSelectionChange([rowData]);
@@ -97,6 +96,7 @@ const BlockSchedule = ({value=[], onSelectionChange, subs, allow}) => {
             }}
           ></Column>
       </DataTable>
+    </>
   );
 };
 
