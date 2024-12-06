@@ -75,22 +75,21 @@ const EnrollSub = ({data, reload, isopen, load, curUnit}) => {
         })
     }
 
-    const printData=useReactToPrint({
-        content:()=> componentRef.current,
-        documentTittle:"COR"
-    })
+    // const printData=useReactToPrint({
+    //     content:()=> componentRef.current,
+    //     documentTittle:"COR"
+    // })
 
   return (
     <>
-        <Print componentRef={componentRef} data={[enrollSubject,Assessment,Total,data]} style={{display:'none'}}></Print>
+        {/* <Print componentRef={componentRef} data={[enrollSubject,Assessment,Total,data]} style={{display:'none'}}></Print> */}
         <div className="flex items-center justify-between m-4"> {/* Container for label and print button */}
-                {/* <button className="self-end ml-4 text-black font-bold py-2 px-4 rounded" type="button" onClick={printData}><FontAwesomeIcon icon={faDownload}></FontAwesomeIcon>  Print</button> */}
             </div>
         <div className="m-4">
             <form action="#" method="post">
                 <EnrollSubTable value={enrollSubject} onSelectionChange={handleSelectionChange} select={selectedSub}></EnrollSubTable>
                 <button type="button" onClick={()=>setShowDelete(true)} disabled={selectedSub.length === 0 || !isopen} className={`text-white hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3 ${selectedSub.length === 0 || !isopen ? 'bg-gray-400' : ' bg-gradient-to-r from-primary-light to-primary-dark'}`}>Remove</button>
-                <button type="button" onClick={printData} disabled={enrollSubject.length===0 || !isopen } className={`text-white hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3 ${enrollSubject.length===0 || !isopen ? 'bg-gray-400' : ' bg-gradient-to-r from-primary-light to-primary-dark'}`}><FontAwesomeIcon icon={faDownload}></FontAwesomeIcon>  Print</button>
+                {/* <button type="button" onClick={printData} disabled={enrollSubject.length===0 || !isopen } className={`text-white hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3 ${enrollSubject.length===0 || !isopen ? 'bg-gray-400' : ' bg-gradient-to-r from-primary-light to-primary-dark'}`}><FontAwesomeIcon icon={faDownload}></FontAwesomeIcon>  Print</button> */}
             </form>
         </div>
         

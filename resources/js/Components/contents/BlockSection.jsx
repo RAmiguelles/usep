@@ -25,13 +25,11 @@ const BlockSection = ({datas, reload, curUnit}) => {
         'collegeID':datas[0].CollegeID,
         'progID':datas[0].ProgID
     }
-
     useEffect(() => {
         const fetchData = async () => {                                                         //get blocksection
             try {
                 const Response = await axios.post(route("getBlockSection"),{params});
                 if (Response.data) {
-                    // setblockSection(Response.data['sections']);
                     // setSchedules(Response.data['schedules']);
                     const schedules= Response.data['schedules'];
                     const test =Response.data['sections'].filter(item => item.ProgCode === datas[0].ProgramCode).map(item => item.SectionID);
@@ -48,17 +46,16 @@ const BlockSection = ({datas, reload, curUnit}) => {
                     setAvailablescheds(Ascheds)
                     setDefaultAvailableScheds(Ascheds)
                     setloading(false)
-                    // const Response2 = await axios.post(route("getSection"),{params});
-                    // if (Response2.data) {
-                    //     setcurSection(Response2.data[0].SectionID)
-                    //     setloading(false)
-                    // }
                 }
             } catch (error) {
                 console.error("Error fetching profile data:", error);
             }
         };
 
+        fetchData();
+    }, []);
+
+    useEffect(() => {
         if(datas[1].RegID){
             const enrolledSubject = async () => {
                 try {
@@ -73,8 +70,6 @@ const BlockSection = ({datas, reload, curUnit}) => {
 
             enrolledSubject();
         }
-
-        fetchData();
     }, [datas]);
 
     const handleSelectionChange = (selectedBlockScehds) => {
@@ -103,6 +98,7 @@ const BlockSection = ({datas, reload, curUnit}) => {
     const Submit = (e) => {
         axios.post(route("saveSubjects"), {e, term: datas[0].TermID, yearLevel:datas[0].YearLevelID, RegID:datas[1].RegID})
         .then(response => {
+            console.log("test")
             if (response.data.error) {
                 const errorMessage = response.data.error.split('\n').join('<br />');
                 Swal.fire({
@@ -110,7 +106,9 @@ const BlockSection = ({datas, reload, curUnit}) => {
                     icon: 'warning',
                     confirmButtonText: 'OK',
                     confirmButtonColor: '#FFC107', 
-                })
+                }).then(() => {
+                    reload(true);
+                });
             } else {
                 Swal.fire({
                     title: 'Success!',
@@ -147,7 +145,6 @@ const BlockSection = ({datas, reload, curUnit}) => {
         )
         setAvailablescheds(filter)
       };
-    
   return (
     <>
     {loading ? 
@@ -159,7 +156,7 @@ const BlockSection = ({datas, reload, curUnit}) => {
         ):(
         <div>
             <div className='m-4 p-2 border border-2 rounded-xl hover:border-2 hover:shadow-md'>
-                <label className="block  text-base font-medium text-gray-900 dark:text-white m-4">CLASS SCHEDULE FOR #course</label>
+                <label className="block  text-base font-medium text-gray-900 dark:text-white m-4">CLASS SCHEDULE FOR {datas[0].ProgramCode}</label>
                     {/* <select id="blocksection" onChange={(e)=>{setcurSection(e.currentTarget.value)}} className=" m-4 w-1/4 block px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                     {blockSection.map((row, rowIndex) => (
                         <option key={rowIndex} id={row.SectionID} value={row.SectionID} selected={row.SectionID === curSection}>
@@ -175,7 +172,7 @@ const BlockSection = ({datas, reload, curUnit}) => {
             </div>
 
             <div className='m-4 p-2 border border-2 rounded-xl mt-12 hover:border-2 hover:shadow-md'>
-                <label className="block  text-base font-medium text-gray-900 dark:text-white m-4 ">CLASS SCHEDULE FOR #course</label>
+                <label className="block  text-base font-medium text-gray-900 dark:text-white m-4 ">AVAILABLE CLASS SCHEDULE</label>
                     {/* <select id="blocksection" onChange={(e)=>{setcurSection(e.currentTarget.value)}} className=" m-4 w-1/4 block px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                     {blockSection.map((row, rowIndex) => (
                         <option key={rowIndex} id={row.SectionID} value={row.SectionID} selected={row.SectionID === curSection}>
@@ -189,7 +186,7 @@ const BlockSection = ({datas, reload, curUnit}) => {
                             value={searchQuery}
                             onChange={(e) =>filterData(e)}
                             placeholder="Search by name or country"
-                            className="p-inputtext-sm"
+                            className="p-inputtext-xl"
                         />
                     </div>
                     <form>
