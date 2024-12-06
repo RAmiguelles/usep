@@ -166,31 +166,32 @@ class StudentController extends Controller
 
     public function saveSubjects(Request $request){
         if(!$request->RegID){
-            $response = DB::connection(session()->get('db'))->statement("EXEC dbo.CUSTOM_sp_SaveEnrollment ?,?,?,?,?,?,?,?",array(session()->get('idNumber'),intval($request->term),session()->get('campus'),0,0,0,1,intval($request->yearLevelID))); # saveEnrollment array($request->info['studentID'],intval($request->info['termID']),$request->info['campusID'],0,0,0,1,ES_Student::YearLevelID($request->info['yearLevel']))
-            $regID = DB::connection(session()->get('db'))->select("EXEC dbo.CUSTOM_ES_GetCurrentStudReg ?", [session()->get('idNumber')]);
+            $response = DB::connection(session()->get('db'))
+                            ->statement("EXEC dbo.CUSTOM_sp_SaveEnrollment ?,?,?,?,?,?,?,?",array(session()->get('idNumber'),intval($request->term),session()->get('campus'),0,0,0,1,intval($request->yearLevelID))); # saveEnrollment array($request->info['studentID'],intval($request->info['termID']),$request->info['campusID'],0,0,0,1,ES_Student::YearLevelID($request->info['yearLevel']))
+            $regID = DB::connection(session()->get('db'))
+                        ->select("EXEC dbo.CUSTOM_ES_GetCurrentStudReg ?", [session()->get('idNumber')]);
             $RegID=$regID[0]->regID;
         }else{
             $RegID=$request->RegID;
         }
-
-        $enrol = Subject::getEnrolledSubject($request->RegID);
-        $count=count($enrol);
         $sortedData = collect($request->e)->sortBy('Cntr')->values()->all();
 
         foreach ($sortedData as $sub) {
+            $enrol = Subject::getEnrolledSubject($request->RegID);
+            $count=count($enrol);                                        #for sequence
             $count++;
-            $conflict=0;
-
             if(count($enrol)>0){
                 foreach($enrol as $enrol_sub){
-                    $result=DB::connection(session()->get('db'))->select("EXEC dbo.sp_CheckSchedConflicts ?,?",array($sub['ScheduleID'],$enrol_sub->ScheduleID)); #filter conflict
-                    $conflict=$conflict+$result[0]->Conflict;
-                    if($result[0]->Conflict >0){
+                    $result=DB::connection(session()->get('db'))
+                                ->select("EXEC dbo.sp_CheckSchedConflicts ?,?",array($sub['ScheduleID'],$enrol_sub->ScheduleID)); #filter conflict
+                    if($result[0]->Conflict >0 || $enrol_sub->SubjectID == $sub['SubjectID']){
+                        $count--;
                         return response()->json(['error' => "Conflict detected between schedules: ". $sub['SubjectCode']." and ".$enrol_sub->SubjectTitle]);
                     }
                 }
             }
-            DB::connection(session()->get('db'))->statement("EXEC dbo.sp_SaveEnrolledSubjects ?,?,?",array($RegID,$sub['ScheduleID'],$count));     
+            DB::connection(session()->get('db'))
+                ->statement("EXEC dbo.sp_SaveEnrolledSubjects ?,?,?",array($RegID,$sub['ScheduleID'],$count));     
         }
         return response()->json(['message' => 'Subjects saved successfully']);
     }

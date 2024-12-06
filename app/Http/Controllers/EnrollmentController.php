@@ -108,15 +108,15 @@ class EnrollmentController extends Controller
             $inCurriculum=DB::connection(session()->get('db'))->select("EXEC dbo.sp_Reg_CheckSubjectInTheCurriculum_r2 ?,?,?", [session()->get('idNumber'),session()->get('curriculumID'),$item->SubjectID]);
             if($inCurriculum){
                 $ispass = DB::connection(session()->get('db'))->select(
-                    "SELECT TOP 1 FinalRemarks FROM dbo.ES_Grades WHERE StudentNo = ? AND SubjectID = ?",
-                    [session()->get('idNumber'), $item->SubjectID]
+                    "SELECT TOP 1 FinalRemarks FROM dbo.ES_Grades WHERE StudentNo = ? AND (SubjectID = ? OR EquivalentSubjectID=?)",
+                    [session()->get('idNumber'), $item->SubjectID, $item->SubjectID]
                 );
                 if (!$ispass || $ispass[0]->FinalRemarks !== 'Passed') {
                     $preRequisites=Subject::getPreRequisites($item->SubjectID);
                     if($preRequisites!=null){
                         $pass=true;
                         foreach($preRequisites as $preReq){
-                            $ifPass=DB::connection(session()->get('db'))->select("EXEC dbo.ES_GetSubjectPreRequisiteIfPassed ?,?,?",array(session()->get('idNumber'),$preReq->SubjectID,0));
+                            $ifPass=DB::connection(session()->get('db'))->select("EXEC dbo.ES_GetSubjectPreRequisiteIfPassed ?,?,?",array(session()->get('idNumber'),0,$preReq->SubjectID));
                             if(count($ifPass)==0 || $ifPass[0]->Remarks=='Incomplete' || $ifPass[0]->Remarks=='Failed'){
                                 $pass=false;
                             }

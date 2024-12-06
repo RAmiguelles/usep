@@ -31,7 +31,6 @@ const BlockSchedule = ({value=[], onSelectionChange, subs, allow}) => {
     return columns;
   };
   const columns = getVisibleColumns(value);
-
   useEffect(() => {
     const subjectcode=()=>{
       setdisabledSubjectCodes(subs.map(sub => sub.SubjectCode));
@@ -79,17 +78,21 @@ const BlockSchedule = ({value=[], onSelectionChange, subs, allow}) => {
           />}
           <Column datakey="SubjectID" field="SubjectCode" header="Subject Code" style={{ minWidth: '150px'}}></Column>
           <Column datakey="SubjectID" field="SubjectTitle" header="Subject Title" style={{ minWidth: '250px' }}></Column>
+          <Column datakey="SubjectID" field="SectionName" header="Section" style={{ minWidth: '250px' }}></Column>
           <Column datakey="SubjectID" field="AcadUnits" header="Lec Unit" style={{ minWidth: '100px' }}></Column>
           <Column datakey="SubjectID" field="LabUnits" header="Lab Unit" style={{ minWidth: '100px' }}></Column>
           <Column datakey="SubjectID" field="CreditUnits" header="Credit Unit" style={{ minWidth: '100px' }}></Column>
           {columns.map((col, index) => (
           <Column key={index} field={col.field} header={col.header} style={{ minWidth: '300px' }}></Column>
           ))}
+          <Column datakey="SubjectID"  header="Available slots" style={{ minWidth: '100px' }} body={(rowData) => (rowData.Registered+"/"+rowData.Limit )}></Column>
           <Column datakey="SubjectID" field="remark" header="Remark" style={{ minWidth: '150px'}} 
             body={(rowData) => {
               // Check if the SubjectCode is in the disabledSubjectCodes array
               if (disabledSubjectCodes.includes(rowData.SubjectCode)) {
                   return 'Enrolled';
+              }else if(rowData.Registered == rowData.Limit){
+                return 'Full';
               }
               // Return a default value (e.g., empty string) if not selected
               return ''; 
