@@ -90,7 +90,7 @@ class EnrollmentController extends Controller
     }
 
     public function getBlockClassSchedule(Request $request) {
-        $response = DB::connection(session()->get('db'))->select("EXEC dbo.ES_getBlockClassSchedules ?,?,?,?", $request->data);
+        $response = DB::connection(session()->get('db'))->select("EXEC dbo.ES_getBlockClassSchedules_OES ?,?,?,?", $request->data);
         $filteredResponse = [];
 
         foreach ($response as $item) {

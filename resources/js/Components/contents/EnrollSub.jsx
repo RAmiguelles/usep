@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {faDownload} from '@fortawesome/free-solid-svg-icons'
 import Swal from 'sweetalert2';
 
-const EnrollSub = ({data, reload, isopen, load, curUnit}) => {
+const EnrollSub = ({data, reload, isopen, load, curUnit, isallow}) => {
     const[enrollSubject, setenrollSubject]=useState([]);
     const [selectedSub, setSelectedSub] = useState([]);
     const [showDelete, setShowDelete] = useState(false);
@@ -35,20 +35,20 @@ const EnrollSub = ({data, reload, isopen, load, curUnit}) => {
                 }
             };
     
-            const fetchAssessment = async () => {
-                try {
-                    const response = await axios.post(route("getassessment"), { term: data.TermID, template: data.TableofFeeID });
-                    if (response.data) {
-                        setAssessment(response.data.response);
-                        setTotal(response.data.total);
-                    }
-                } catch (error) {
-                    console.error("Error fetching assessment data:", error);
-                }
-            };
+            // const fetchAssessment = async () => {
+            //     try {
+            //         const response = await axios.post(route("getassessment"), { term: data.TermID, template: data.TableofFeeID });
+            //         if (response.data) {
+            //             setAssessment(response.data.response);
+            //             setTotal(response.data.total);
+            //         }
+            //     } catch (error) {
+            //         console.error("Error fetching assessment data:", error);
+            //     }
+            // };
     
             fetchData();
-            fetchAssessment();
+            // fetchAssessment();
         }else{
             Swal.fire({
                 title: 'Warning!',
@@ -58,7 +58,7 @@ const EnrollSub = ({data, reload, isopen, load, curUnit}) => {
                 confirmButtonColor: '#D75D5F',
             });
         }
-    }, [data,reload]);
+    }, [reload]);
 
     const handleSelectionChange = (selectedSubs) => {
         setSelectedSub(selectedSubs);
@@ -71,7 +71,22 @@ const EnrollSub = ({data, reload, isopen, load, curUnit}) => {
             setenrollSubject(response.data);
             setSelectedSub([])
             setShowDelete(false)
-            load(true)
+            Swal.fire({
+                title: 'Success!',
+                text: "Schedules removed",
+                icon: 'success',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#28a745',
+            }).then(() => {
+                load(true);
+            });
+        })
+    }
+
+    const isFinal = () => {
+        axios.post(route("isFinal"), {regID:data.RegID})
+        .then(response => {
+            window.location.reload();   
         })
     }
 
@@ -88,7 +103,8 @@ const EnrollSub = ({data, reload, isopen, load, curUnit}) => {
         <div className="m-4">
             <form action="#" method="post">
                 <EnrollSubTable value={enrollSubject} onSelectionChange={handleSelectionChange} select={selectedSub}></EnrollSubTable>
-                <button type="button" onClick={()=>setShowDelete(true)} disabled={selectedSub.length === 0 || !isopen} className={`text-white hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3 ${selectedSub.length === 0 || !isopen ? 'bg-gray-400' : ' bg-gradient-to-r from-primary-light to-primary-dark'}`}>Remove</button>
+                <button type="button" onClick={()=>setShowDelete(true)} disabled={selectedSub.length === 0 || !isopen || isallow} className={`text-white hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3 ${selectedSub.length === 0 || !isopen || isallow ? 'bg-gray-400' : ' bg-gradient-to-r from-primary-light to-primary-dark'}`}>Remove</button>
+                <button type="button" onClick={()=>isFinal()} disabled={enrollSubject.length === 0 || !isopen || isallow} className={`text-white hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3 ${enrollSubject.length === 0 || !isopen || isallow ? 'bg-gray-400' : ' bg-gradient-to-r from-primary-light to-primary-dark'}`}>Submit</button>
                 {/* <button type="button" onClick={printData} disabled={enrollSubject.length===0 || !isopen } className={`text-white hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3 ${enrollSubject.length===0 || !isopen ? 'bg-gray-400' : ' bg-gradient-to-r from-primary-light to-primary-dark'}`}><FontAwesomeIcon icon={faDownload}></FontAwesomeIcon>  Print</button> */}
             </form>
         </div>

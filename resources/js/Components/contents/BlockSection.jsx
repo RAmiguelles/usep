@@ -46,6 +46,15 @@ const BlockSection = ({datas, reload, curUnit}) => {
                     setAvailablescheds(Ascheds)
                     setDefaultAvailableScheds(Ascheds)
                     setloading(false)
+                    if(datas[3]==true){
+                        Swal.fire({
+                            title: 'Success!',
+                            text: 'Registration submitted',
+                            icon: 'success',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#28a745',
+                        })
+                    }
                 }
             } catch (error) {
                 console.error("Error fetching profile data:", error);
@@ -98,7 +107,6 @@ const BlockSection = ({datas, reload, curUnit}) => {
     const Submit = (e) => {
         axios.post(route("saveSubjects"), {e, term: datas[0].TermID, yearLevel:datas[0].YearLevelID, RegID:datas[1].RegID})
         .then(response => {
-            console.log("test")
             if (response.data.error) {
                 const errorMessage = response.data.error.split('\n').join('<br />');
                 Swal.fire({
@@ -135,7 +143,6 @@ const BlockSection = ({datas, reload, curUnit}) => {
             });
         });
     }
-
     const filterData = (e) => {
         const searchQuery = e.target.value
         setSearchQuery(searchQuery)
@@ -149,9 +156,17 @@ const BlockSection = ({datas, reload, curUnit}) => {
     <>
     {loading ? 
         (
-        <div className="flex items-center">
-          <div className="animate-spin rounded-full h-5 w-5 border-t-4 border-b-4 border-primary-dark"></div>
-          <p className="ml-2 text-xl font-bold">Loading...</p>
+        // <div className="flex items-center">
+        //   <div className="animate-spin rounded-full h-5 w-5 border-t-4 border-b-4 border-primary-dark"></div>
+        //   <p className="ml-2 text-xl font-bold">Loading...</p>
+        // </div>
+        <div className="fixed inset-0 flex items-center justify-center bg-white">
+            <div class='flex space-x-2 justify-center items-center bg-white h-screen dark:invert'>
+                <span class='sr-only'>Loading...</span>
+                <div class='h-8 w-8 bg-black rounded-full animate-bounce [animation-delay:-0.3s]'></div>
+                <div class='h-8 w-8 bg-black rounded-full animate-bounce [animation-delay:-0.15s]'></div>
+                <div class='h-8 w-8 bg-black rounded-full animate-bounce'></div>
+            </div>
         </div>
         ):(
         <div>
@@ -166,7 +181,7 @@ const BlockSection = ({datas, reload, curUnit}) => {
                     </select> */}
                 <div className="m-4">
                     <form>
-                        <BlockSchedule value={scheds} onSelectionChange={handleSelectionChange} subs={enrolledSub} allow={datas[2]}></BlockSchedule>
+                        <BlockSchedule value={scheds} onSelectionChange={handleSelectionChange} subs={enrolledSub} allow={[datas[2],datas[3]]}></BlockSchedule>
                     </form>
                 </div>
             </div>
@@ -190,7 +205,7 @@ const BlockSection = ({datas, reload, curUnit}) => {
                         />
                     </div>
                     <form>
-                        <BlockSchedule value={Availablescheds} onSelectionChange={handleSelectionChange} subs={enrolledSub} allow={datas[2]}></BlockSchedule>
+                        <BlockSchedule value={Availablescheds} onSelectionChange={handleSelectionChange} subs={enrolledSub} allow={[datas[2],datas[3]]}></BlockSchedule>
                     </form>
                 </div>
             </div>

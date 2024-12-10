@@ -22,6 +22,7 @@ Route::middleware('User')->group(function () {
         Route::post('/student/getEnrollSubject', [StudentController::class, 'getEnrollSubject'])->name('getEnrollSubject');
         Route::post('/deleteSubjects', [StudentController::class, 'deleteSubjects'])->name('deleteSubjects');
         Route::post('/saveSubjects', [StudentController::class, 'saveSubjects'])->name('saveSubjects');
+        Route::post('/isFinal', [StudentController::class, 'isFinal'])->name('isFinal');
 
         Route::get('/enrollment', [EnrollmentController::class, 'index'])->name('enrollment.index');
         Route::post('/getBlockSection', [EnrollmentController::class, 'getBlockSection'])->name('getBlockSection');
