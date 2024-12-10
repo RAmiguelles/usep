@@ -19,7 +19,7 @@ const LoadingSpinner = () => (
     </div>
 );
 
-export default function Main({reg,data,enrollment,info,allow}) {
+export default function Main({reg,data,enrollment,info,allow,final}) {
     const [activePage, setActivePage] = useState('Page1');
     const [profilePic, setprofilePic] = useState('');
     const [profile, setprofile] = useState([]);
@@ -65,13 +65,12 @@ export default function Main({reg,data,enrollment,info,allow}) {
                         setprofile(info)
                     }
                 }
-                setLoading(false); // Set loading to false when fetching is complete
+                    setLoading(false); // Set loading to false when fetching is complete
             } catch (error) {
                 console.error("Error fetching profile data:", error);
                 setLoading(false); // Set loading to false on error
             }
         };
-
         fetchData();
     },[data]);
      
@@ -193,17 +192,17 @@ export default function Main({reg,data,enrollment,info,allow}) {
             
             <div className="m-6 flex flex-col shadow-md bg-gray-50 rounded-md">
                 <div className="w-full p-2 bg-primary-dark"><label className="block text-2xl font-bold text-white text-center">List of Enrolled Subject for {reg.YearTerm}</label></div>
-                <EnrollSub data={reg} reload={reload} isopen={enrollment['isOpen']} load={handlereload} curUnit={CurrentUnit}></EnrollSub>
+                <EnrollSub data={reg} reload={reload} isopen={enrollment['isOpen']} load={handlereload} curUnit={CurrentUnit} isallow={final.isFinal}></EnrollSub>
             </div>
 
             {enrollment['isOpen'] == 1 && <div className="m-6 flex flex-col shadow-md bg-gray-50 rounded-md">
                 <div className="w-full p-2 bg-primary-dark"><label className="block text-2xl font-bold text-white text-center">List of Sections for {reg.YearTerm}</label></div>
-                <nav className="nav-bar m-4">
+                {/* <nav className="nav-bar m-4">
                     <button onClick={() => handleNavClick('Page1')} className={`hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l ${activePage == 'Page1' ? 'bg-gray-400' : 'bg-gray-300'}`}>Block Section</button>
                     <button onClick={() => handleNavClick('Page2')}  className={`hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l ${activePage == 'Page2' ? 'bg-gray-400' : 'bg-gray-300'}`}>Free Section</button>
-                </nav>
+                </nav> */}
                 <div className="page-content">
-                    {activePage === 'Page1' && <BlockSection datas={[info,reg,allow]} reload={handlereload} curUnit={curUnit}></BlockSection>}
+                    {activePage === 'Page1' && <BlockSection datas={[info,reg,allow,final.isFinal]} reload={handlereload} curUnit={curUnit}></BlockSection>}
                     {/* {activePage === 'Page2' && <FreeSection datas={info} reload={handlereload}></FreeSection>} */}
                 </div>
             </div>}

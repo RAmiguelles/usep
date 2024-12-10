@@ -16,8 +16,18 @@ class Subject extends Model
     }
 
     protected function getEnrolledSubject($regID){
-        $response=DB::connection(session()->get('db'))->select("EXEC dbo.ES_GetEnrolledSubjects '".$regID."'");
+        $response=DB::connection(session()->get('db'))->select("EXEC dbo.ES_GetEnrolledSubjects_OES'".$regID."'");
         return ($response);
+    }
+
+    protected function EnrolledSubisFinal($regID){
+        $response=DB::connection(session()->get('db'))->select("EXEC dbo.ES_GetEnrolledSubjects_OES'".$regID."'");
+        foreach($response as $res){
+            if($res->isFinal==1){
+                return (true);
+            }
+        }
+        return (false);
     }
 
     protected function GetSubjectPreRequisiteIfPassed($subjectID,$subjectEquivalentID=0){

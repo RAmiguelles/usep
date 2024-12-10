@@ -45,46 +45,45 @@ class StudentController extends Controller
             
             $profileQuery=DB::connection(session()->get('db'))->select(
                 "SELECT TOP 1
-                S.StudentNo ,
-                S.LastName, 
-                S.FirstName, 
-                S.MiddleName,
-                S.LastName + ', ' + S.FirstName + ' ' + S.MiddleInitial AS StudentName ,
-                S.ProgID ,
-                dbo.fn_ProgramCollegeID(S.ProgID) AS CollegeID ,
-                dbo.fn_ProgramCollegeCode(S.ProgID) AS CollegeCode ,
-                dbo.fn_ProgramCollegeName(S.ProgID) AS CollegeName ,
-                dbo.fn_ProgramCode(S.ProgID) AS ProgramCode ,
-                dbo.fn_ProgramName(S.ProgID) AS ProgramName ,
-                dbo.fn_MajorName(s.MajorDiscID) AS MajorStudy ,
-                -- S.YearLevelID ,
-                -- dbo.fn_YearLevel(S.YearLevelID) AS YearLevel ,
-               (select YearLevelID from [dbo].[fn_getAutoYearLevel_OES_2](S.StudentNo,2)) AS YearLevelID,
-               (select YearLevel from [dbo].[fn_getAutoYearLevel_OES_2](S.StudentNo,2)) AS YearLevel,
-                S.Gender ,
-                s.CurriculumID ,
-                dbo.fn_CurriculumCode(s.CurriculumID) AS CurriculumCode ,
-                CONVERT(VARCHAR(12), s.DateOfBirth, 107) Birthdate ,
-                dbo.fn_StudentHomeAddress(s.studentno) AS [Address] ,
-                CONVERT(VARCHAR(12), s.DateAdmitted, 107) AS DateAdmitted ,
-                dbo.fn_CurrTotalSubjects(s.CurriculumID) AS TotalCurriculumSubjects ,
-                dbo.[fn_CurrTotalCreditUnits](s.CurriculumID) AS CurrTotalCreditUnits ,
-                s.TblFeesID ,
-                dbo.fn_TemplateCode(s.TblFeesID) AS FeesTemplate ,
-                dbo.[fn_TemplateTermID](s.TblFeesID) AS FeesTermID ,
-                s.StatusID ,
-                dbo.fn_StudentStatus(S.StatusID) AS [Status] ,
-                ForeignStudent ,
-                dbo.fn_CurricularYearLevel2(s.StudentNo, s.ProgID, s.YearLevelID) AS cYearLevelID ,
-                dbo.fn_YearLevel(dbo.fn_CurricularYearLevel2(s.StudentNo, s.ProgID,
-                s.YearLevelID)) AS cYearLevel ,
-                S.MaxUnitsLoad,
-                S.CampusID,
-                CAST(dbo.fn_TotalCreditUnitsEarned_OES(S.StudentNo) AS INT) AS UnitsEarned,
-                dbo.fn_DefaultTermID_OES() AS TermID
+                    S.StudentNo ,
+                    S.LastName, 
+                    S.FirstName, 
+                    S.MiddleName,
+                    S.LastName + ', ' + S.FirstName + ' ' + S.MiddleInitial AS StudentName ,
+                    S.ProgID ,
+                    dbo.fn_ProgramCollegeID(S.ProgID) AS CollegeID ,
+                    dbo.fn_ProgramCollegeCode(S.ProgID) AS CollegeCode ,
+                    dbo.fn_ProgramCollegeName(S.ProgID) AS CollegeName ,
+                    dbo.fn_ProgramCode(S.ProgID) AS ProgramCode ,
+                    dbo.fn_ProgramName(S.ProgID) AS ProgramName ,
+                    dbo.fn_MajorName(s.MajorDiscID) AS MajorStudy ,
+                    -- S.YearLevelID ,
+                    -- dbo.fn_YearLevel(S.YearLevelID) AS YearLevel ,
+                    (select YearLevelID from [dbo].[fn_getAutoYearLevel_OES_2](S.StudentNo,2)) AS YearLevelID,
+                    (select YearLevel from [dbo].[fn_getAutoYearLevel_OES_2](S.StudentNo,2)) AS YearLevel,
+                    S.Gender ,
+                    s.CurriculumID ,
+                    dbo.fn_CurriculumCode(s.CurriculumID) AS CurriculumCode ,
+                    CONVERT(VARCHAR(12), s.DateOfBirth, 107) Birthdate ,
+                    dbo.fn_StudentHomeAddress(s.studentno) AS [Address] ,
+                    CONVERT(VARCHAR(12), s.DateAdmitted, 107) AS DateAdmitted ,
+                    dbo.fn_CurrTotalSubjects(s.CurriculumID) AS TotalCurriculumSubjects ,
+                    dbo.[fn_CurrTotalCreditUnits](s.CurriculumID) AS CurrTotalCreditUnits ,
+                    s.TblFeesID ,
+                    dbo.fn_TemplateCode(s.TblFeesID) AS FeesTemplate ,
+                    dbo.[fn_TemplateTermID](s.TblFeesID) AS FeesTermID ,
+                    s.StatusID ,
+                    dbo.fn_StudentStatus(S.StatusID) AS [Status] ,
+                    ForeignStudent ,
+                    dbo.fn_CurricularYearLevel2(s.StudentNo, s.ProgID, s.YearLevelID) AS cYearLevelID ,
+                    dbo.fn_YearLevel(dbo.fn_CurricularYearLevel2(s.StudentNo, s.ProgID,
+                    s.YearLevelID)) AS cYearLevel ,
+                    S.MaxUnitsLoad,
+                    S.CampusID,
+                    CAST(dbo.fn_TotalCreditUnitsEarned_OES(S.StudentNo) AS INT) AS UnitsEarned,
+                    dbo.fn_DefaultTermID_OES() AS TermID
                 FROM    ES_Students S
-                WHERE   S.StudentNo = ?
-                ",
+                WHERE   S.StudentNo = ?",
                 [$data['user']]
             );
 
@@ -95,9 +94,11 @@ class StudentController extends Controller
                 throw new Exception('Unable to fetch profile data');
             }
     
-            $outstandingbalance = DB::connection(session()->get('db'))->select("EXEC dbo.CUSTOM_ES_GetOutstandingBalanceFromStudentLedger ?", [session()->get('idNumber')]);
+            $outstandingbalance = DB::connection(session()->get('db'))
+                                    ->select("EXEC dbo.CUSTOM_ES_GetOutstandingBalanceFromStudentLedger ?", [session()->get('idNumber')]);
             if ($outstandingbalance[0]->OutstandingBalance > 0) {
-                $recordExists = DB::connection(session()->get('db'))->select("SELECT * FROM ES_RegisterWithBalance WHERE TermID = ? AND StudentNo = ?", [$profile->TermID, session()->get('idNumber')]);
+                $recordExists = DB::connection(session()->get('db'))
+                                    ->select("SELECT * FROM ES_RegisterWithBalance WHERE TermID = ? AND StudentNo = ?", [$profile->TermID, session()->get('idNumber')]);
                 if (!isset($recordExists[0])) {
                     $allowWithBalance=false;
                 }else{
@@ -105,17 +106,23 @@ class StudentController extends Controller
                 }
             }
             
-            $regID = DB::connection(session()->get('db'))->select("EXEC dbo.CUSTOM_ES_GetCurrentStudReg ?", [session()->get('idNumber')]);
+            $regID = DB::connection(session()->get('db'))
+                        ->select("EXEC dbo.CUSTOM_ES_GetCurrentStudReg ?", [session()->get('idNumber')]);
             $registration[0] = [];
 
             if ($regID || isset($regID[0]->regID)) {
-                $registration = DB::connection(session()->get('db'))->select("EXEC dbo.ES_GetStudentRegistration_r2 ?, ?", [$regID[0]->regID, session()->get('idNumber')]);
+                $registration = DB::connection(session()->get('db'))
+                                    ->select("EXEC dbo.ES_GetStudentRegistration_r2 ?, ?", [$regID[0]->regID, session()->get('idNumber')]);
             } 
 
-            $result=DB::connection(session()->get('db'))->select("EXEC dbo.CUSTOM_isUndergrad ?,?",[session()->get('idNumber'),session()->get('campusID')]);
+            $result=DB::connection(session()->get('db'))
+                        ->select("EXEC dbo.CUSTOM_isUndergrad ?,?",[session()->get('idNumber'),session()->get('campusID')]);
+
             if($result[0]->Result==1){
-                $IsPerCollegeEnrollment = DB::connection(session()->get('db'))->select("SELECT IsPerCollegeEnrollment FROM ES_AYTerm WHERE TermID = ?", array($profile->TermID));
+                $IsPerCollegeEnrollment = DB::connection(session()->get('db'))
+                                            ->select("SELECT IsPerCollegeEnrollment FROM ES_AYTerm WHERE TermID = ?", array($profile->TermID));
                 $IsPerCollegeEnrollmentValue = $IsPerCollegeEnrollment[0]->IsPerCollegeEnrollment;
+
                 if ($IsPerCollegeEnrollmentValue == 1) {
                     $isOpenResult=Registration::perCollegeisOpen($profile->TermID,$profile->CollegeID);
                     if(!$isOpenResult){
@@ -124,21 +131,32 @@ class StudentController extends Controller
                 } else {
                     $isOpenResult=Registration::isOpen($profile->TermID);
                 }
+
             } else{
                 $isOpenResult=['isOpen'=>false];
             }
+
+            $final=["isFinal"=>false, "status"=>""];
+            if($regID || isset($regID[0]->regID)){
+                $isFinal=Subject::EnrolledSubisFinal($regID[0]->regID);
+                if($isFinal){
+                    $final=["isFinal"=>$isFinal, "status"=>"submitted"];
+                }
+            }
+
             return Inertia::render('Enrollment/EnrollmentPage', [
                 'reg' =>  $registration[0],
                 'data' => $data,
                 'enrollment'=> $isOpenResult,
                 'info'=>$profile,
-                'allow'=> $allowWithBalance
+                'allow'=> $allowWithBalance,
+                'final'=> $final
             ]);
+
         
         } catch (Exception $e) {
             session()->flush();
             session()->regenerateToken();
-            
             return redirect('/')->withErrors(['status' => 'Error: ' . "ERROR"]);
         }
     }
@@ -162,6 +180,18 @@ class StudentController extends Controller
         $response = $this->getEnrollSubject(new Request(['data' => $sub['RegID']]));
         return response()->json($response->original);
 
+    }
+
+    public function isFinal(Request $request){
+        try {
+            $sql="UPDATE ES_RegistrationDetails 
+                    SET isFinal = 1 
+                    WHERE RegID = ?";
+            DB::connection(session()->get('db'))->statement($sql, [$request->regID]);
+            return response()->json(['message' => 'Success']);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
     }
 
     public function saveSubjects(Request $request){

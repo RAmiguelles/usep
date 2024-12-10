@@ -37,7 +37,6 @@ const BlockSchedule = ({value=[], onSelectionChange, subs, allow}) => {
     }
     subjectcode()
   },[subs])
-
   return (
     <>
       <DataTable className="p-2 font-medium border-spacing-2" value={value} scrollable datakey="id" tableStyle={{ minWidth: '50rem'}} 
@@ -46,7 +45,7 @@ const BlockSchedule = ({value=[], onSelectionChange, subs, allow}) => {
           return `border-y-2 hover:bg-gray-100 hover:text-black ${isDisabled ? 'disabled-row' : ''}`;
         }}
       >
-          {allow && <Column 
+          {(allow[0] && !allow[1]) && <Column 
             header={
               <button type="button"
                 onClick={
