@@ -42,7 +42,7 @@ class StudentController extends Controller
             // } else {
             //     throw new Exception('Unable to fetch profile data');
             // }
-            
+            $status=[];
             $profileQuery=DB::connection(session()->get('db'))->select(
                 "SELECT TOP 1
                     S.StudentNo ,
@@ -105,7 +105,8 @@ class StudentController extends Controller
                     $allowWithBalance=true;
                 }
             }
-            
+            $status["allowWithBalance"]=$allowWithBalance;
+
             $regID = DB::connection(session()->get('db'))
                         ->select("EXEC dbo.CUSTOM_ES_GetCurrentStudReg ?", [session()->get('idNumber')]);
             $registration[0] = [];
@@ -135,7 +136,7 @@ class StudentController extends Controller
             } else{
                 $isOpenResult=['isOpen'=>false];
             }
-
+            $status["isOpen"]=$isOpenResult;
             $final=["isFinal"=>false, "status"=>""];
             if($regID || isset($regID[0]->regID)){
                 $isFinal=Subject::EnrolledSubisFinal($regID[0]->regID);
@@ -147,10 +148,11 @@ class StudentController extends Controller
             return Inertia::render('Enrollment/EnrollmentPage', [
                 'reg' =>  $registration[0],
                 'data' => $data,
-                'enrollment'=> $isOpenResult,
+                // 'enrollment'=> $isOpenResult,
                 'info'=>$profile,
-                'allow'=> $allowWithBalance,
-                'final'=> $final
+                // 'allow'=> $allowWithBalance,
+                // 'final'=> $final
+                'status'=>$status
             ]);
 
         
@@ -195,86 +197,61 @@ class StudentController extends Controller
     }
 
     public function saveSubjects(Request $request){
-        if(!$request->RegID){
-            $response = DB::connection(session()->get('db'))
-                            ->statement("EXEC dbo.CUSTOM_sp_SaveEnrollment ?,?,?,?,?,?,?,?",array(session()->get('idNumber'),intval($request->term),session()->get('campus'),0,0,0,1,intval($request->yearLevelID))); # saveEnrollment array($request->info['studentID'],intval($request->info['termID']),$request->info['campusID'],0,0,0,1,ES_Student::YearLevelID($request->info['yearLevel']))
+        // if(!$request->RegID){
+        //     $response = DB::connection(session()->get('db'))
+        //                     ->statement("EXEC dbo.CUSTOM_sp_SaveEnrollment ?,?,?,?,?,?,?,?",array(session()->get('idNumber'),intval($request->term),session()->get('campus'),0,0,0,1,intval($request->yearLevelID))); # saveEnrollment array($request->info['studentID'],intval($request->info['termID']),$request->info['campusID'],0,0,0,1,ES_Student::YearLevelID($request->info['yearLevel']))
+        //     $regID = DB::connection(session()->get('db'))
+        //                 ->select("EXEC dbo.CUSTOM_ES_GetCurrentStudReg ?", [session()->get('idNumber')]);
+        //     $RegID=$regID[0]->regID;
+        // }else{
+        //     $RegID=$request->RegID;
+        // }
+        $sortedData = collect($request->subject)->sortBy('Cntr')->values()->all();
+        $enrol=[];
+        $error=[];
+        
+        foreach ($sortedData as $sub) {
+            // $enrol = Subject::getEnrolledSubject($request->RegID);
+            $count=count($enrol);                                        #for sequence
+            $count++;
+            $conflict=false;
+            if(count($enrol)>0){
+                foreach($enrol as $key => $value){
+                    $result=DB::connection(session()->get('db'))
+                                ->select("EXEC dbo.sp_CheckSchedConflicts ?,?",array($sub['ScheduleID'],$value['ScheduleID'])); #filter conflict
+                    if($result[0]->Conflict >0 || $value['SubjectID'] == $sub['SubjectID']){
+                        $count--;
+                        $error[]= $sub['SubjectCode']." in ".$value['SubjectTitle'];
+                        $conflict=true;
+                        continue;
+                    }
+                }
+                if(!$conflict){
+                    $sub['count'] = $count;
+                    $enrol[]=$sub;
+                }
+            }else{
+                $sub['count'] = $count;
+                $enrol[]=$sub;
+            }
+            // DB::connection(session()->get('db'))
+            //     ->statement("EXEC dbo.sp_SaveEnrolledSubjects ?,?,?",array($RegID,$sub['ScheduleID'],$count));     
+        }
+        if (count($error) > 0) {
+            return response()->json([$enrol,$error]);
+        } else {
+            DB::connection(session()->get('db'))
+                        ->statement("EXEC dbo.CUSTOM_sp_SaveEnrollment ?,?,?,?,?,?,?,?",array(session()->get('idNumber'),intval($request->term),session()->get('campus'),0,0,0,1,intval($request->yearLevelID))); # saveEnrollment array($request->info['studentID'],intval($request->info['termID']),$request->info['campusID'],0,0,0,1,ES_Student::YearLevelID($request->info['yearLevel']))
             $regID = DB::connection(session()->get('db'))
                         ->select("EXEC dbo.CUSTOM_ES_GetCurrentStudReg ?", [session()->get('idNumber')]);
             $RegID=$regID[0]->regID;
-        }else{
-            $RegID=$request->RegID;
-        }
-        $sortedData = collect($request->e)->sortBy('Cntr')->values()->all();
 
-        foreach ($sortedData as $sub) {
-            $enrol = Subject::getEnrolledSubject($request->RegID);
-            $count=count($enrol);                                        #for sequence
-            $count++;
-            if(count($enrol)>0){
-                foreach($enrol as $enrol_sub){
-                    $result=DB::connection(session()->get('db'))
-                                ->select("EXEC dbo.sp_CheckSchedConflicts ?,?",array($sub['ScheduleID'],$enrol_sub->ScheduleID)); #filter conflict
-                    if($result[0]->Conflict >0 || $enrol_sub->SubjectID == $sub['SubjectID']){
-                        $count--;
-                        return response()->json(['error' => "Conflict detected between schedules: ". $sub['SubjectCode']." and ".$enrol_sub->SubjectTitle]);
-                    }
-                }
+            foreach($enrol as $en){
+                DB::connection(session()->get('db'))
+                ->statement("EXEC dbo.sp_SaveEnrolledSubjects ?,?,?",array($RegID,$en['ScheduleID'],$en['count']));   
             }
-            DB::connection(session()->get('db'))
-                ->statement("EXEC dbo.sp_SaveEnrolledSubjects ?,?,?",array($RegID,$sub['ScheduleID'],$count));     
+            return response()->json(['message' => 'Subjects saved successfully']);
         }
-        return response()->json(['message' => 'Subjects saved successfully']);
+
     }
-
-    // public function saveSubjects(Request $request){
-    //     if(!$request->RegID){
-    //         $response = DB::connection(session()->get('db'))->statement("EXEC dbo.CUSTOM_sp_SaveEnrollment ?,?,?,?,?,?,?,?",array(session()->get('idNumber'),intval($request->term),session()->get('campus'),0,0,0,1,intval($request->yearLevelID))); # saveEnrollment array($request->info['studentID'],intval($request->info['termID']),$request->info['campusID'],0,0,0,1,ES_Student::YearLevelID($request->info['yearLevel']))
-    //         $regID = DB::connection(session()->get('db'))->select("EXEC dbo.CUSTOM_ES_GetCurrentStudReg ?", [session()->get('idNumber')]);
-    //         $RegID=$regID[0]->regID;
-    //     }else{
-    //         $RegID=$request->RegID;
-    //     }
-
-    //     $enrol = Subject::getEnrolledSubject($request->RegID);
-    //     $count=count($enrol);
-    //     $sortedData = collect($request->e)->sortBy('Cntr')->values()->all();
-
-    //     foreach ($sortedData as $sub) {
-    //         $preRequisites=Subject::getPreRequisites($sub['SubjectID']);
-    //         $count++;
-    //         $conflict=0;
-    //         $ispass=DB::connection(session()->get('db'))->select("select top 1 FinalRemarks from dbo.ES_Grades where StudentNo=? and SubjectID=?",array(session()->get('idNumber'),$sub['SubjectID'])); #filter if already pass the subject
-            
-    //         if($ispass && $ispass[0]->FinalRemarks=='Passed'){
-    //             return response()->json(['error' => 'Subject '.$sub['SubjectCode'].' Already Passed']);
-    //         }
-            
-    //         if(count($enrol)>0){
-    //             foreach($enrol as $enrol_sub){
-    //                 $result=DB::connection(session()->get('db'))->select("EXEC dbo.sp_CheckSchedConflicts ?,?",array($sub['ScheduleID'],$enrol_sub->ScheduleID)); #filter conflict
-    //                 $conflict=$conflict+$result[0]->Conflict;
-    //                 if($result[0]->Conflict >0){
-    //                     return response()->json(['error' => "Conflict detected between schedules: ". $sub['SubjectCode']." and ".$enrol_sub->SubjectTitle]);
-    //                 }
-    //             }
-    //         }
-            
-    //         if($preRequisites!=null){
-    //             $requesites="";
-    //             foreach($preRequisites as $preReq){
-    //                 $ifPass=DB::connection(session()->get('db'))->select("EXEC dbo.ES_GetSubjectPreRequisiteIfPassed ?,?,?",array(session()->get('idNumber'),$preReq->SubjectID,0));
-    //                 $requesites .= "\n- " . $preReq->SubjectCode . ' ' . (count($ifPass) == 0 ? '' : $ifPass[0]->Remarks);
-    //                 if(count($ifPass)==0 || $ifPass[0]->Remarks=='Incomplete' || $ifPass[0]->Remarks=='Failed'){
-    //                     return response()->json([
-    //                         'error' => "Failed to meet prerequisites of ScheduleID ".$sub['SubjectCode'].$requesites
-    //                     ]);
-    //                 }
-    //             }
-    //             DB::connection(session()->get('db'))->statement("EXEC dbo.sp_SaveEnrolledSubjects ?,?,?",array($RegID,$sub['ScheduleID'],$count));
-    //         }else{
-    //             DB::connection(session()->get('db'))->statement("EXEC dbo.sp_SaveEnrolledSubjects ?,?,?",array($RegID,$sub['ScheduleID'],$count));     
-    //         }
-    //     }
-    //     return response()->json(['message' => 'Subjects saved successfully']);
-    // }
 }

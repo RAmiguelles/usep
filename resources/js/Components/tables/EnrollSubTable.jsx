@@ -2,8 +2,10 @@ import React from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {faMinus} from '@fortawesome/free-solid-svg-icons'
 
-const EnrollSubTable = ({value=[], onSelectionChange,select}) => {
+const EnrollSubTable = ({value=[], onSelectionChange, TUnit, allow}) => {
 
   const getVisibleColumns = (data) => {
     const columns = [];
@@ -22,25 +24,43 @@ const EnrollSubTable = ({value=[], onSelectionChange,select}) => {
 
     return columns;
   };
-  const columns = getVisibleColumns(value);
 
-  const handleSelectionChange = (e) => {
-        onSelectionChange(e.value);
-  };
+  const columns = getVisibleColumns(value);
+  
+  // const handleSelectionChange = (e) => {
+  //       onSelectionChange(e.value);
+  // };
+
   if (value.length === 0) {
     return <div>No enrolled subject</div>; // Customize this message or component as needed
   }
   return (
-        <DataTable value={value} scrollable selectionMode='checkbox'   selection={select} onSelectionChange={handleSelectionChange} dataKey="SubjectCode" tableStyle={{ minWidth: '50rem' }}>
-          <Column selectionMode="multiple" frozen headerStyle={{ width: '3rem' }}></Column>
-          {/* <Column datakey="SubjectID" field="SubjectCode" header="Subject Code" frozen style={{ minWidth: '150px'}} body={(rowData) => rowData.ScheduleID || 'N/A'}></Column> */}
+        <DataTable value={value} scrollable dataKey="ScheduleID" tableStyle={{ minWidth: '50rem' }}>
+          {(allow) && <Column 
+            body={(rowData) => (
+                <button 
+                    type='button'
+                    onClick={(e) => {
+                      e.preventDefault()
+                      onSelectionChange([rowData]);
+                    }} 
+                    disabled={false}
+                    className='p-2 transition-transform duration-200 hover:scale-150 hover:text-red-800 scale-75 font-bold'
+                >
+                  <FontAwesomeIcon icon={faMinus} />
+                </button>
+            )} 
+            frozen 
+            headerStyle={{ width: '3rem' }} 
+          />}
+          
           <Column datakey="SubjectID" field="SubjectTitle" header="Subject Title" style={{ minWidth: '400px' }}></Column>
-          {/* <Column datakey="SubjectID" field="LectHrs" header="Lec Unit" style={{ minWidth: '100px' }}></Column>
-          <Column datakey="SubjectID" field="LabUnits" header="Lab Unit" style={{ minWidth: '100px' }}></Column> */}
+          <Column datakey="SubjectID" field="SectionName" header="Section" style={{ minWidth: '250px' }}></Column>
+          <Column datakey="SubjectID" field="CreditUnits" header="CreditUnits" footer={TUnit} style={{ minWidth: '100px' }}></Column>
           {columns.map((col, index) => (
           <Column key={index} field={col.field} header={col.header} style={{ minWidth: '300px' }}></Column>
           ))}
-          {/* <Column datakey="SubjectID" field="FacultyName" header="Faculty" style={{ minWidth: '200px' }}></Column> */}
+     
         </DataTable>
   );
 };

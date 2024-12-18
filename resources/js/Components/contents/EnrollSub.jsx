@@ -9,13 +9,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {faDownload} from '@fortawesome/free-solid-svg-icons'
 import Swal from 'sweetalert2';
 
-const EnrollSub = ({data, reload, isopen, load, curUnit, isallow}) => {
+const EnrollSub = ({data, curUnit, isopen, load, reload}) => {
     const[enrollSubject, setenrollSubject]=useState([]);
     const [selectedSub, setSelectedSub] = useState([]);
     const [showDelete, setShowDelete] = useState(false);
     const[Assessment, setAssessment]=useState([]);
     const[Total, setTotal]=useState('');
     const componentRef=useRef();
+    
     useEffect(() => {
         if(data.RegID){
             const fetchData = async () => {

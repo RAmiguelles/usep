@@ -105,8 +105,8 @@ class EnrollmentController extends Controller
             //     }
             // }
 
-            $inCurriculum=DB::connection(session()->get('db'))->select("EXEC dbo.sp_Reg_CheckSubjectInTheCurriculum_r2 ?,?,?", [session()->get('idNumber'),session()->get('curriculumID'),$item->SubjectID]);
-            if($inCurriculum){
+            $inCurriculum=DB::connection(session()->get('db'))->select("EXEC dbo.sp_Reg_CheckSubjectInTheCurriculum ?,?,?", [session()->get('idNumber'),session()->get('curriculumID'),$item->SubjectID]);
+            if($inCurriculum!=null){
                 $ispass = DB::connection(session()->get('db'))->select(
                     "SELECT TOP 1 FinalRemarks FROM dbo.ES_Grades WHERE StudentNo = ? AND (SubjectID = ? OR EquivalentSubjectID=?)",
                     [session()->get('idNumber'), $item->SubjectID, $item->SubjectID]
