@@ -1,6 +1,7 @@
 import React from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
+import { Button } from 'primereact/button';
 import 'primereact/resources/themes/lara-light-blue/theme.css';  // Theme
 import 'primereact/resources/primereact.min.css';         // Core CSS
 // import 'primeicons/primeicons.css';    
@@ -31,6 +32,8 @@ const BlockSchedule = ({value=[], onSelectionChange, subs, allow}) => {
     return columns;
   };
   const columns = getVisibleColumns(value);
+  const paginatorLeft = <Button type="button" icon="pi pi-refresh" text />;
+  const paginatorRight = <Button type="button" icon="pi pi-download" text />;
   useEffect(() => {
     const subjectcode=()=>{
       setdisabledSubjectCodes(subs.map(sub => sub.SubjectCode));
@@ -39,26 +42,25 @@ const BlockSchedule = ({value=[], onSelectionChange, subs, allow}) => {
   },[subs])
   return (
     <>
-      <DataTable className="p-2 font-medium border-spacing-2" value={value} scrollable datakey="id" tableStyle={{ minWidth: '50rem'}} 
+      <DataTable 
+        className="p-2 font-medium border-spacing-2" 
+        value={value} 
+        paginator 
+        rows={5} 
+        rowsPerPageOptions={[5, 10, 25, 50]} 
+        scrollable  
+        datakey="id" 
+        tableStyle={{ minWidth: '50rem',minHeight : '484px'}} 
+        paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+        currentPageReportTemplate="{first} to {last} of {totalRecords}" 
+        paginatorLeft={paginatorLeft} 
+        paginatorRight={paginatorRight}
         rowClassName={(data) => {
           const isDisabled = disabledSubjectCodes.includes(data.SubjectCode);
           return `border-y-2 hover:bg-gray-100 hover:text-black ${isDisabled ? 'disabled-row' : ''}`;
         }}
       >
-          {(allow[0] && !allow[1]) && <Column 
-            header={
-              <button type="button"
-                onClick={
-                  (e)=>{
-                    e.preventDefault()
-                    const allsub = value.filter(item => !disabledSubjectCodes.includes(item.SubjectCode));
-                    onSelectionChange(allsub)
-                  }
-                } 
-                className='p-2 transition-transform duration-200 hover:scale-150 hover:text-green-500 scale-75'> 
-                  <FontAwesomeIcon icon={faPlus} />
-              </button>
-            }
+          {(allow) && <Column 
             body={(rowData) => (
                 <button 
                     type='button'
@@ -75,17 +77,17 @@ const BlockSchedule = ({value=[], onSelectionChange, subs, allow}) => {
             frozen 
             headerStyle={{ width: '3rem' }} 
           />}
-          <Column datakey="SubjectID" field="SubjectCode" header="Subject Code" style={{ minWidth: '150px'}}></Column>
-          <Column datakey="SubjectID" field="SubjectTitle" header="Subject Title" style={{ minWidth: '250px' }}></Column>
-          <Column datakey="SubjectID" field="SectionName" header="Section" style={{ minWidth: '250px' }}></Column>
-          <Column datakey="SubjectID" field="AcadUnits" header="Lec Unit" style={{ minWidth: '100px' }}></Column>
-          <Column datakey="SubjectID" field="LabUnits" header="Lab Unit" style={{ minWidth: '100px' }}></Column>
-          <Column datakey="SubjectID" field="CreditUnits" header="Credit Unit" style={{ minWidth: '100px' }}></Column>
+          <Column datakey="SubjectID" field="SubjectCode" header="Subject Code" style={{ minWidth: '150px',minHeight : '82.2px'}}></Column>
+          <Column datakey="SubjectID" field="SubjectTitle" header="Subject Title" style={{ minWidth: '250px' ,minHeight : '82.2px'}}></Column>
+          <Column datakey="SubjectID" field="SectionName" header="Section" style={{ minWidth: '250px' ,minHeight : '82.2px'}}></Column>
+          <Column datakey="SubjectID" field="AcadUnits" header="Lec Unit" style={{ minWidth: '100px' ,minHeight : '82.2px'}}></Column>
+          <Column datakey="SubjectID" field="LabUnits" header="Lab Unit" style={{ minWidth: '100px' ,minHeight : '82.2px'}}></Column>
+          <Column datakey="SubjectID" field="CreditUnits" header="Credit Unit" style={{ minWidth: '100px' ,minHeight : '82.2px'}}></Column>
           {columns.map((col, index) => (
-          <Column key={index} field={col.field} header={col.header} style={{ minWidth: '300px' }}></Column>
+          <Column key={index} field={col.field} header={col.header} style={{ minWidth: '300px' ,minHeight : '82.2px'}}></Column>
           ))}
-          <Column datakey="SubjectID"  header="Available slots" style={{ minWidth: '100px' }} body={(rowData) => (rowData.Registered+"/"+rowData.Limit )}></Column>
-          <Column datakey="SubjectID" field="remark" header="Remark" style={{ minWidth: '150px'}} 
+          <Column datakey="SubjectID"  header="Available slots" style={{ minWidth: '100px' ,minHeight : '82.2px'}} body={(rowData) => (rowData.Registered+"/"+rowData.Limit )}></Column>
+          <Column datakey="SubjectID" field="remark" header="Remark" style={{ minWidth: '150px',maxHeight : '82.2px'}} 
             body={(rowData) => {
               // Check if the SubjectCode is in the disabledSubjectCodes array
               if (disabledSubjectCodes.includes(rowData.SubjectCode)) {
