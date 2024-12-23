@@ -137,13 +137,13 @@ class StudentController extends Controller
                 $isOpenResult=['isOpen'=>false];
             }
             $status["isOpen"]=$isOpenResult;
-            $final=["isFinal"=>false, "status"=>""];
-            if($regID || isset($regID[0]->regID)){
-                $isFinal=Subject::EnrolledSubisFinal($regID[0]->regID);
-                if($isFinal){
-                    $final=["isFinal"=>$isFinal, "status"=>"submitted"];
-                }
-            }
+            // $final=["isFinal"=>false, "status"=>""];
+            // if($regID || isset($regID[0]->regID)){
+            //     $isFinal=Subject::EnrolledSubisFinal($regID[0]->regID);
+            //     if($isFinal){
+            //         $final=["isFinal"=>$isFinal, "status"=>"submitted"];
+            //     }
+            // }
 
             return Inertia::render('Enrollment/EnrollmentPage', [
                 'reg' =>  $registration[0],
@@ -211,7 +211,18 @@ class StudentController extends Controller
         $error=[];
         
         foreach ($sortedData as $sub) {
-            // $enrol = Subject::getEnrolledSubject($request->RegID);
+            $isExceeded=DB::connection(session()->get('db'))
+                        ->select("SELECT 
+                                    CASE 
+                                        WHEN dbo.fn_GetNbrRegistered(?) < dbo.fn_ClassLimit(?) 
+                                        THEN 0
+                                        ELSE 1
+                                    END AS isExceeded;",array($sub['ScheduleID'],$sub['ScheduleID'])
+                                );
+            if($isExceeded[0]->isExceeded =="1"){
+                $error=['error' => $sub['SubjectTitle']. ' No Available Slot'];
+                return response()->json($error);
+            }
             $count=count($enrol);                                        #for sequence
             $count++;
             $conflict=false;
@@ -221,7 +232,7 @@ class StudentController extends Controller
                                 ->select("EXEC dbo.sp_CheckSchedConflicts ?,?",array($sub['ScheduleID'],$value['ScheduleID'])); #filter conflict
                     if($result[0]->Conflict >0 || $value['SubjectID'] == $sub['SubjectID']){
                         $count--;
-                        $error[]= $sub['SubjectCode']." in ".$value['SubjectTitle'];
+                        $error[]= $sub['SubjectTitle']." conflict with ".$value['SubjectTitle'];
                         $conflict=true;
                         continue;
                     }
@@ -241,7 +252,7 @@ class StudentController extends Controller
             return response()->json([$enrol,$error]);
         } else {
             DB::connection(session()->get('db'))
-                        ->statement("EXEC dbo.CUSTOM_sp_SaveEnrollment ?,?,?,?,?,?,?,?",array(session()->get('idNumber'),intval($request->term),session()->get('campus'),0,0,0,1,intval($request->yearLevelID))); # saveEnrollment array($request->info['studentID'],intval($request->info['termID']),$request->info['campusID'],0,0,0,1,ES_Student::YearLevelID($request->info['yearLevel']))
+                        ->statement("EXEC dbo.CUSTOM_sp_SaveEnrollment ?,?,?,?,?,?,?,?",array(session()->get('idNumber'),intval($request->term),session()->get('campusID'),0,0,0,1,intval($request->yearLevelID))); # saveEnrollment array($request->info['studentID'],intval($request->info['termID']),$request->info['campusID'],0,0,0,1,ES_Student::YearLevelID($request->info['yearLevel']))
             $regID = DB::connection(session()->get('db'))
                         ->select("EXEC dbo.CUSTOM_ES_GetCurrentStudReg ?", [session()->get('idNumber')]);
             $RegID=$regID[0]->regID;
