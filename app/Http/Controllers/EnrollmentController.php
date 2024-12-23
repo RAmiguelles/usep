@@ -90,7 +90,7 @@ class EnrollmentController extends Controller
     }
 
     public function getBlockClassSchedule(Request $request) {
-        $response = DB::connection(session()->get('db'))->select("EXEC dbo.ES_getBlockClassSchedules_OES ?,?,?,?", $request->data);
+        $response = DB::connection(session()->get('db'))->select("EXEC dbo.ES_getBlockClassSchedules ?,?,?,?", $request->data);
         $filteredResponse = [];
 
         foreach ($response as $item) {
@@ -100,7 +100,7 @@ class EnrollmentController extends Controller
             //         "SELECT TOP 1 FinalRemarks FROM dbo.ES_Grades WHERE StudentNo = ? AND SubjectID = ?",
             //         [session()->get('idNumber'), $item->SubjectID]
             //     );
-            //     if (!$ispass || $ispass[0]->FinalRemarks !== 'Passed') {
+            //     if (!$ispass || $ispass[0]->FinalRemarks !== 'Passed') {20241061
             //             $filteredResponse[] = $item;  
             //     }
             // }

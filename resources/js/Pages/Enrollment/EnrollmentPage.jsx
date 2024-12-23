@@ -26,6 +26,7 @@ export default function Main({reg,data,enrollment,info,status}) {
     const [profilePic, setprofilePic] = useState('');
     const [profile, setprofile] = useState([]);
     const [subject, setSubject] = useState([]);
+    const [major, setMajor] = useState([]);
     const [loading, setLoading] = useState(true);
     const [show, setshow] = useState(false);
     const [curUnit, setcurUnit] = useState(0);
@@ -65,6 +66,14 @@ export default function Main({reg,data,enrollment,info,status}) {
                 confirmButtonColor: '#D75D5F',
             })
         }
+        const Major=()=>{
+            const stopWords = ["and", "the", "of", "a", "an"];
+            const words = info.MajorStudy.split(" ");
+            const firstLetters =words.filter(word => !stopWords.includes(word.toLowerCase())).map(word => word.charAt(0).toUpperCase());
+            const result = firstLetters.join("");
+            setMajor(result)
+        }
+        Major();
         const fetchData = async () => {
             try {
                 setLoading(true); // Set loading to true when fetching starts
@@ -92,7 +101,10 @@ export default function Main({reg,data,enrollment,info,status}) {
         const totalAcadUnits = subs.reduce((total, sub) => total + parseFloat(sub.CreditUnits), 0);
         setcurUnit(totalAcadUnits)
     }
-    async function offersubject(subs){
+    async function offersubject(subjects){
+        const subs=subjects.filter(item =>
+            item.Registered < item.Limit
+        )
         if((Object.entries(reg).length > 0)){
             try {
                 const response = await axios.post(route("getEnrollSubject"), { data: reg.RegID });
@@ -104,8 +116,17 @@ export default function Main({reg,data,enrollment,info,status}) {
                 console.error("Error fetching enroll subjects:", error);
             }
         }else{
-            setSubject(subs)
-            Maxlimit(subs)
+            const filter=subs.filter(item =>
+                item.SectionName.toLowerCase().includes(major.toLowerCase())
+            )
+            if(filter.length > 0){
+                setSubject(filter)
+                Maxlimit(filter)
+            }else{
+                setSubject(subs)
+                Maxlimit(subs)
+            }
+
         }
     }
     function addSubject(sub){
@@ -132,6 +153,7 @@ export default function Main({reg,data,enrollment,info,status}) {
         }else{
             axios.post(route("saveSubjects"), {subject, term: info.TermID, yearLevel:info.YearLevelID,})
             .then(response => {
+                console.log(response)
                 if (response.data.error) {
                     const errorMessage = response.data.error.split('\n').join('<br />');
                     Swal.fire({
@@ -140,16 +162,16 @@ export default function Main({reg,data,enrollment,info,status}) {
                         confirmButtonText: 'OK',
                         confirmButtonColor: '#FFC107', 
                     }).then(() => {
-                        alert("test")
+                        window.location.reload();
                     });
                 } else {
                     if(response.data[1]){
                         const errorMessages = response.data[1].map((error, index) => `${index + 1}. ${error}`).join("<br><br>");
                         console.log(errorMessages)
                         Swal.fire({
-                            title: 'Error!',
+                            title: 'Conflict!',
                             html: `There was a problem saving the subjects. Please try again.<br><br>${errorMessages}`, 
-                            icon: 'error',
+                            icon: 'warning',
                             confirmButtonText: 'OK',
                             confirmButtonColor: '#D75D5F',
                           });
@@ -321,8 +343,7 @@ export default function Main({reg,data,enrollment,info,status}) {
                 </div>
             </div>
 
-            {status.isOpen['isOpen'] == 1 &&
-                    <BlockSection info={info} CurSubject={subject} listOfSubject={offersubject} addsubject={addSubject} allow={(!(Object.entries(reg).length > 0))} show={show} setshow={()=>{setshow(false)}}></BlockSection>}
+            <BlockSection info={info} CurSubject={subject} listOfSubject={offersubject} addsubject={addSubject} allow={(!(Object.entries(reg).length > 0))} show={show} setshow={()=>{setshow(false)}}></BlockSection>
 
             </> 
         )}

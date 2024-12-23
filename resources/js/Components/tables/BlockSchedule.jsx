@@ -57,7 +57,7 @@ const BlockSchedule = ({value=[], onSelectionChange, subs, allow}) => {
         paginatorRight={paginatorRight}
         rowClassName={(data) => {
           const isDisabled = disabledSubjectCodes.includes(data.SubjectCode);
-          return `border-y-2 hover:bg-gray-100 hover:text-black ${isDisabled ? 'disabled-row' : ''}`;
+          return `border-y-2 hover:bg-gray-100 hover:text-black ${isDisabled || data.Registered >= data.Limit ? 'disabled-row' : ''}`;
         }}
       >
           {(allow) && <Column 
@@ -68,7 +68,7 @@ const BlockSchedule = ({value=[], onSelectionChange, subs, allow}) => {
                       e.preventDefault()
                       onSelectionChange([rowData]);
                     }} 
-                    disabled={disabledSubjectCodes.includes(rowData.SubjectCode)}
+                    disabled={disabledSubjectCodes.includes(rowData.SubjectCode) || rowData.Registered >= rowData.Limit}
                     className='p-2 transition-transform duration-200 hover:scale-150 hover:text-green-500 scale-75'
                 >
                   <FontAwesomeIcon icon={faPlus} />

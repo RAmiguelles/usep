@@ -57,6 +57,7 @@ const EnrollSubTable = ({value=[], onSelectionChange, TUnit, allow}) => {
           <Column datakey="SubjectID" field="SubjectTitle" header="Subject Title" style={{ minWidth: '400px' }}></Column>
           <Column datakey="SubjectID" field="SectionName" header="Section" style={{ minWidth: '250px' }}></Column>
           <Column datakey="SubjectID" field="CreditUnits" header="CreditUnits" footer={TUnit} style={{ minWidth: '100px' }}></Column>
+          <Column datakey="SubjectID"  header="Available slots" style={{ minWidth: '100px' ,minHeight : '82.2px'}} body={(rowData) => (rowData.Registered+"/"+rowData.Limit )}></Column>
           {columns.map((col, index) => (
           <Column key={index} field={col.field} header={col.header} style={{ minWidth: '300px' }}></Column>
           ))}

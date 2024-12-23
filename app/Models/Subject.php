@@ -16,7 +16,7 @@ class Subject extends Model
     }
 
     protected function getEnrolledSubject($regID){
-        $response=DB::connection(session()->get('db'))->select("EXEC dbo.ES_GetEnrolledSubjects_OES'".$regID."'");
+        $response=DB::connection(session()->get('db'))->select("EXEC dbo.ES_GetEnrolledSubjects'".$regID."'");
         return ($response);
     }
 
