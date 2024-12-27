@@ -31,6 +31,7 @@ Route::middleware('User')->group(function () {
         Route::post('/getBlockClassSchedule', [EnrollmentController::class, 'getBlockClassSchedule'])->name('getBlockClassSchedule');
         Route::post('/getFreeClassSchedule', [EnrollmentController::class, 'getFreeClassSchedule'])->name('getFreeClassSchedule');
         Route::post('/assessment', [EnrollmentController::class, 'getassessment'])->name('getassessment');
+        Route::post('/checkconflict', [EnrollmentController::class, 'CheckConflict'])->name('checkconflict');
     });
 
     Route::middleware('admin')->group(function () {

@@ -47,6 +47,7 @@ class StudentController extends Controller
                 "SELECT TOP 1
                     S.StudentNo ,
                     S.LastName, 
+                    (YEAR(s.DateAdmitted)) AS yearOfEntry,
                     S.FirstName, 
                     S.MiddleName,
                     S.LastName + ', ' + S.FirstName + ' ' + S.MiddleInitial AS StudentName ,
@@ -209,7 +210,6 @@ class StudentController extends Controller
         $sortedData = collect($request->subject)->sortBy('Cntr')->values()->all();
         $enrol=[];
         $error=[];
-        
         foreach ($sortedData as $sub) {
             $isExceeded=DB::connection(session()->get('db'))
                         ->select("SELECT 
@@ -252,7 +252,7 @@ class StudentController extends Controller
             return response()->json([$enrol,$error]);
         } else {
             DB::connection(session()->get('db'))
-                        ->statement("EXEC dbo.CUSTOM_sp_SaveEnrollment ?,?,?,?,?,?,?,?",array(session()->get('idNumber'),intval($request->term),session()->get('campusID'),0,0,0,1,intval($request->yearLevelID))); # saveEnrollment array($request->info['studentID'],intval($request->info['termID']),$request->info['campusID'],0,0,0,1,ES_Student::YearLevelID($request->info['yearLevel']))
+                        ->statement("EXEC dbo.CUSTOM_sp_SaveEnrollment ?,?,?,?,?,?,?,?",array(session()->get('idNumber'),intval($request->term),session()->get('campusID'),0,0,0,1,intval($request->yearLevel))); # saveEnrollment array($request->info['studentID'],intval($request->info['termID']),$request->info['campusID'],0,0,0,1,ES_Student::YearLevelID($request->info['yearLevel']))
             $regID = DB::connection(session()->get('db'))
                         ->select("EXEC dbo.CUSTOM_ES_GetCurrentStudReg ?", [session()->get('idNumber')]);
             $RegID=$regID[0]->regID;

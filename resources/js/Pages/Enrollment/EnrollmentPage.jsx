@@ -129,10 +129,43 @@ export default function Main({reg,data,enrollment,info,status}) {
 
         }
     }
-    function addSubject(sub){
-        setSubject(subject.concat(sub))
-        Maxlimit(subject.concat(sub))
+    async function addSubject(sub) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You want to add " + sub[0].SubjectTitle + "?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            confirmButtonColor: '#D75D5F',
+            cancelButtonText: 'No',
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const Response2 = await axios.post(route("checkconflict"), { array1: sub, array2: subject });
+                    console.log(Response2)
+                    if (Response2.data.error) {
+                        Swal.fire({
+                            title: 'Conflict Detected',
+                            text: Response2.data.error,
+                            icon: 'error',
+                            confirmButtonColor: '#D75D5F'
+                        });
+                    }else{
+                        setSubject(subject.concat(sub));
+                        Maxlimit(subject.concat(sub));
+                    }
+                } catch (error) {
+                    console.error('Error adding subject:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'There was an error processing your request.',
+                        icon: 'error'
+                    });
+                }
+            }
+        });
     }
+    console.log(reg)
     function removeSubject(sub){
         const updatedsub = subject.filter(item => 
             item.ScheduleID !== sub[0].ScheduleID
@@ -202,6 +235,26 @@ export default function Main({reg,data,enrollment,info,status}) {
             });
         }
     }
+
+    function SwalConfirm(sub){
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You want to remove "+sub[0].SubjectTitle+"?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, remove it',
+            confirmButtonColor: '#D75D5F',
+            cancelButtonText: 'No, keep it',
+          }).then((result) => {
+            if (result.isConfirmed) {
+                const updatedsub = subject.filter(item => 
+                    item.ScheduleID !== sub[0].ScheduleID
+                );
+                setSubject(updatedsub)
+                Maxlimit(updatedsub)
+            } 
+          });
+    }
     return (
         <AuthenticatedLayout
             header={<h2 className="font-semibold text-xl text-red-500 leading-tight"></h2>}
@@ -217,10 +270,10 @@ export default function Main({reg,data,enrollment,info,status}) {
                         <div className="" style={{height: '100%', width: '100%', display: 'flex', flexDirection: 'column', flexWrap: 'unset', justifyContent: 'center', alignItems: 'center', alignContent: 'unset', overflow: 'unset'}}>
                             {/* <img className="w-full " src="/img/banner.jpg" alt=""/> */}
                             <div className="slide-in-fwd-center"> 
-                                <img src={profilePic} alt="Profile" className="rounded-full border-4 border-primary-dark p-2 hover:animate-spin" style={{height: '150px', width: '150px', marginTop: '-93px'}}/> 
+                                <img src={profilePic} alt="Profile" className="rounded-full border-4 border-primary-dark p-2" style={{height: '150px', width: '150px', marginTop: '-93px'}}/> 
                             </div>
                             <div className="text-2xl text-primary-dark">{profile.studentID}</div>
-    
+                            <div className="text-2xl text-gray-800 font-semibold" >{profile.StudentNo}</div>
                             <div className="text-2xl text-gray-800 font-semibold" >{profile.StudentName}</div><br /><br />
                             
                             <div className="text-2xl text-gray-800 font-semibold" >
@@ -230,7 +283,7 @@ export default function Main({reg,data,enrollment,info,status}) {
                                             <span class={`w-6 h-6 border ${(Object.entries(reg).length > 0) ? 'border-indigo-200 bg-indigo-600 text-white' : 'border-gray-200 bg-gray-100'} rounded-full flex justify-center items-center mr-3 text-sm lg:w-10 lg:h-10`}>1</span> Submitted
                                         </div>
                                     </li>
-                                    <li class={`flex md:w-full items-center ${(Object.entries(reg).length > 0) ? 'border-indigo-600 text-indigo-600' : 'border-gray-600 '}  sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-200 after:border-1 after:hidden sm:after:inline-block after:mx-4 xl:after:mx-8 `}>
+                                    {/* <li class={`flex md:w-full items-center ${(Object.entries(reg).length > 0) ? 'border-indigo-600 text-indigo-600' : 'border-gray-600 '}  sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-200 after:border-1 after:hidden sm:after:inline-block after:mx-4 xl:after:mx-8 `}>
                                         <div class="flex items-center whitespace-nowrap after:content-['/'] sm:after:hidden after:mx-2 ">
                                             <span class={`w-6 h-6 border ${(Object.entries(reg).length > 0) ? 'border-indigo-200 bg-indigo-600 text-white' : 'border-gray-200 bg-gray-100'} rounded-full flex justify-center items-center mr-3 text-sm lg:w-10 lg:h-10`}>2</span> OSAS
                                         </div>
@@ -239,10 +292,10 @@ export default function Main({reg,data,enrollment,info,status}) {
                                         <div class="flex items-center whitespace-nowrap after:content-['/'] sm:after:hidden after:mx-2 ">
                                             <span class={`w-6 h-6 border ${(Object.entries(reg).length > 0) ? 'border-indigo-200 bg-indigo-600 text-white' : 'border-gray-200 bg-gray-100'} rounded-full flex justify-center items-center mr-3 text-sm lg:w-10 lg:h-10`}>3</span> Cashier
                                         </div>
-                                    </li>
-                                    <li class={`flex md:w-full items-center ${(Object.entries(reg).length > 0) ? 'border-indigo-600 text-indigo-600' : 'border-gray-600 '}`}>
+                                    </li> */}
+                                    <li class={`flex md:w-full items-center ${reg.ValidationDate && reg.ValidationDate.trim() !== ''  ? 'border-indigo-600 text-indigo-600' : 'border-gray-600 '}`}>
                                         <div class="flex items-center  ">
-                                            <span class={`w-6 h-6 border ${(Object.entries(reg).length > 0) ? 'border-indigo-200 bg-indigo-600 text-white' : 'border-gray-200 bg-gray-100'} rounded-full flex justify-center items-center mr-3 text-sm lg:w-10 lg:h-10`}>4</span> Officially Enrolled
+                                            <span class={`w-6 h-6 border ${reg.ValidationDate && reg.ValidationDate.trim() !== ''  ? 'border-indigo-200 bg-indigo-600 text-white' : 'border-gray-200 bg-gray-100'} rounded-full flex justify-center items-center mr-3 text-sm lg:w-10 lg:h-10`}>2</span> Officially Enrolled
                                         </div>
                                     </li>
                                 </ol>  
@@ -251,9 +304,16 @@ export default function Main({reg,data,enrollment,info,status}) {
                     </div>
                 </div>
             </div>   
-            <div className="m-6 flex flex-col shadow-md bg-gray-50 rounded-md items-center bg-white">
+            <div className="m-6 flex flex-col shadow-md bg-gray-50 rounded-md items-center bg-white relative">
                 <div className="w-full p-2 bg-primary-dark"><label className="block text-2xl font-bold text-white text-center">Profile information</label></div>
-                <div className=" m-3">
+                {/* <button
+                    data-collapse-target="collapse"
+                    className="absolute top-2 right-2 text-white text-2xl font-bold mr-2 rotate-90"
+                    type="button"
+                    >
+                    |||
+                    </button> */}
+                <div className=" m-3" data-collapse="collapse">
                     <table className="min-w-auto bg-white">
                         <tbody>
                             <tr className="info-cell">
@@ -297,6 +357,11 @@ export default function Main({reg,data,enrollment,info,status}) {
                                 <td className="px-3 py-2">{profile.MaxUnitsLoad}</td>
                             </tr>
                             <tr className="info-cell">
+                                <td className="px-3 py-2 font-bold">Year of Entry</td>
+                                <td className="px-3 py-2">:</td>
+                                <td className="px-3 py-2">{profile.yearOfEntry}</td>
+                            </tr>
+                            <tr className="info-cell">
                                 <td className="px-3 py-2 font-bold">Status</td>
                                 <td className="px-3 py-2">:</td>
                                 <td className="px-3 py-2">{profile.status}</td>
@@ -333,10 +398,9 @@ export default function Main({reg,data,enrollment,info,status}) {
             
             <div className="m-6 flex flex-col shadow-md bg-gray-50 rounded-md">
                 <div className="w-full p-2 bg-primary-dark"><label className="block text-2xl font-bold text-white text-center">List of Subject to be Enroll</label></div>
-                
                 <div className="m-4">
                 <form action="#" method="post">
-                    <EnrollSubTable value={subject} onSelectionChange={removeSubject} TUnit={curUnit} allow={(!(Object.entries(reg).length > 0))}></EnrollSubTable>
+                    <EnrollSubTable value={subject} onSelectionChange={SwalConfirm} TUnit={curUnit} allow={(!(Object.entries(reg).length > 0))}></EnrollSubTable>
                     <button type="button" onClick={Submit} disabled={((Object.entries(reg).length > 0) || status.allowWithBalance==false || status.isOpen['isOpen'] == false)} className={`text-white hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3 ${((Object.entries(reg).length > 0) || status.allowWithBalance==false || status.isOpen['isOpen'] == false)? 'bg-gray-400' : ' bg-gradient-to-r from-primary-light to-primary-dark'}`}>Submit</button>
                     <button type="button" onClick={()=>{setshow(true)}}disabled={((Object.entries(reg).length > 0) || status.allowWithBalance==false || status.isOpen['isOpen'] == false)} className={`text-white hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-left mt-3 ${((Object.entries(reg).length > 0) || status.allowWithBalance==false || status.isOpen['isOpen'] == false)? 'bg-gray-400' : ' bg-gradient-to-r from-primary-light to-primary-dark'}`}>Add Subject</button>
                 </form>
