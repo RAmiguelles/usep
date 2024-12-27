@@ -14,7 +14,6 @@ const BlockSection = ({info,CurSubject , listOfSubject,addsubject, allow, show,s
     // const [curSection,setcurSection]=useState([])
     const [enrolledSub,setenrolledSub]=useState([])
     const [loading,setloading]=useState(true)
-    const [scheds,setscheds]=useState([])
     const [Availablescheds,setAvailablescheds]=useState([])
     const [defaultAvailableScheds,setDefaultAvailableScheds]=useState([])
     const [searchQuery, setSearchQuery] = useState('');
@@ -32,17 +31,20 @@ const BlockSection = ({info,CurSubject , listOfSubject,addsubject, allow, show,s
                 if (Response.data) {
                     // setSchedules(Response.data['schedules']);
                     const schedules= Response.data['schedules'];
-                    const test =Response.data['sections'].filter(item => item.ProgCode === info.ProgramCode).map(item => item.SectionID);
+                    const advise =Response.data['sections'].filter(item => item.ProgCode === info.ProgramCode).map(item => item.SectionID);
                     const Mscheds=[] 
                     const Ascheds=[]
                     Object.entries(schedules).forEach(([key, value]) => {
-                        if (test.includes(key)) {
+                        if (advise.includes(key)) {
                             Mscheds.push(...value)
                         }
                         Ascheds.push(...value)
                     });
-                    listOfSubject(Mscheds)
-                    setscheds(Mscheds)
+                    const Response2 = await axios.post(route("checkconflict"),{array1:Mscheds, array2:[]});
+                    if (Response2.data) {
+                        listOfSubject(Response2.data)
+                    }
+                    // listOfSubject(Mscheds)
                     setDefaultAvailableScheds(Ascheds)
                     setloading(false)
                     // if(datas[3]==true){
@@ -149,12 +151,14 @@ const BlockSection = ({info,CurSubject , listOfSubject,addsubject, allow, show,s
         if(searchQuery == ''){
             setAvailablescheds([])
         }else{
+            const schedID=CurSubject.map(sub => sub.ScheduleID)
             const filter=defaultAvailableScheds.filter(item =>
                 item.SubjectCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 item.SubjectTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 item.SectionName.toLowerCase().includes(searchQuery.toLowerCase())
             )
-            setAvailablescheds(filter)
+            const test=filter.filter(item=>!schedID.includes(item.ScheduleID))
+            setAvailablescheds(test)
         }
 
       };

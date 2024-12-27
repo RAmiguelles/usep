@@ -145,4 +145,36 @@ class EnrollmentController extends Controller
             'total' => $total[0]->total
         ]);
     }
+    
+    public function CheckConflict(Request $request){
+        $arr1=$request->array1;
+        $arr2=$request->array2;
+
+        foreach($arr1 as $sub){
+            $conflict=false;
+            if($arr2==[]){
+                $arr2[]=$sub;
+            }else{
+                foreach($arr2 as $myListSubject){
+                    $result=DB::connection(session()->get('db'))
+                    ->select("EXEC dbo.sp_CheckSchedConflicts ?,?",array($myListSubject['ScheduleID'],$sub['ScheduleID'])); #filter conflict
+                    if($result[0]->Conflict >0 || $myListSubject['SubjectID'] == $sub['SubjectID']){
+                        $conflict=true;
+                        if($request->array2!=[]){
+                            return response()->json(["error"=>"Conflict with ".$myListSubject['SubjectTitle']]);
+                        }
+                    }
+                }
+                if(!$conflict){
+                    $arr2[]=$sub;
+                }
+            }
+        }
+        if($request->array2==[]){
+            return response()->json($arr2);
+        }else{
+            return response()->json(["success"=>"No Conflict"]);
+        }
+        
+    }
 }
