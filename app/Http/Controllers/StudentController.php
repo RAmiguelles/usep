@@ -82,8 +82,13 @@ class StudentController extends Controller
                     S.MaxUnitsLoad,
                     S.CampusID,
                     CAST(dbo.fn_TotalCreditUnitsEarned_OES(S.StudentNo) AS INT) AS UnitsEarned,
-                    dbo.fn_DefaultTermID_OES() AS TermID
+                    dbo.fn_DefaultTermID_OES() AS TermID,
+                    CASE 
+                        WHEN DATEDIFF(DAY, S.DateAdmitted, GETDATE()) < (P.ProgYears + 1) * 365 THEN 'Non_Paying'
+                        ELSE 'Paying'
+                    END AS isPaying
                 FROM    ES_Students S
+                LEFT JOIN ES_Programs as P on P.ProgID = S.ProgID AND P.CollegeID = dbo.fn_ProgramCollegeID(S.ProgID)
                 WHERE   S.StudentNo = ?",
                 [$data['user']]
             );
@@ -113,6 +118,13 @@ class StudentController extends Controller
             $registration[0] = [];
 
             if ($regID || isset($regID[0]->regID)) {
+                if($profile->isPaying !="Paying"){
+                    $sql= "UPDATE
+                    ES_Registrations
+                    SET ValidationDate = GETDATE(), ValidatingOfficerID = 'OES'
+                    WHERE regID = ? AND CampusID = ?";
+                    DB::connection(session()->get('db'))->statement($sql,array($regID[0]->regID,session()->get('campusID')));
+                }
                 $registration = DB::connection(session()->get('db'))
                                     ->select("EXEC dbo.ES_GetStudentRegistration_r2 ?, ?", [$regID[0]->regID, session()->get('idNumber')]);
             } 

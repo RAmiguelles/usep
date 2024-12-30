@@ -22,7 +22,7 @@ const LoadingSpinner = () => (
 );
 
 export default function Main({reg,data,enrollment,info,status}) {
-    const [activePage, setActivePage] = useState('Page1');
+    const [validated, setvalidated] = useState(reg.ValidationDate);
     const [profilePic, setprofilePic] = useState('');
     const [profile, setprofile] = useState([]);
     const [subject, setSubject] = useState([]);
@@ -66,6 +66,23 @@ export default function Main({reg,data,enrollment,info,status}) {
                 confirmButtonColor: '#D75D5F',
             })
         }
+        if (Object.entries(reg).length > 0) {
+            try {
+                if(info.isPaying=="Paying"){
+                    Swal.fire({
+                        title: 'Warning!',
+                        text: "Ensure that any unpaid balance is settled with the cashier.",
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#D75D5F',
+                    });
+                }
+            } catch (error) {
+                console.error("Error sending request:", error);
+                // Optionally handle the error (e.g., showing a message to the user)
+            }
+        }
+
         const Major=()=>{
             const stopWords = ["and", "the", "of", "a", "an"];
             const words = info.MajorStudy.split(" ");
@@ -184,54 +201,74 @@ export default function Main({reg,data,enrollment,info,status}) {
                 confirmButtonColor: '#D75D5F',
             });
         }else{
-            axios.post(route("saveSubjects"), {subject, term: info.TermID, yearLevel:info.YearLevelID,})
-            .then(response => {
-                console.log(response)
-                if (response.data.error) {
-                    const errorMessage = response.data.error.split('\n').join('<br />');
-                    Swal.fire({
-                        html:errorMessage,
-                        icon: 'warning',
-                        confirmButtonText: 'OK',
-                        confirmButtonColor: '#FFC107', 
-                    }).then(() => {
-                        window.location.reload();
-                    });
-                } else {
-                    if(response.data[1]){
-                        const errorMessages = response.data[1].map((error, index) => `${index + 1}. ${error}`).join("<br><br>");
-                        console.log(errorMessages)
-                        Swal.fire({
-                            title: 'Conflict!',
-                            html: `There was a problem saving the subjects. Please try again.<br><br>${errorMessages}`, 
-                            icon: 'warning',
-                            confirmButtonText: 'OK',
-                            confirmButtonColor: '#D75D5F',
-                          });
-                        setSubject(response.data[0])
-                        Maxlimit(response.data[0])
-                    }else{
-                        Swal.fire({
-                            title: 'Success!',
-                            text: 'Subjects saved successfully.',
-                            icon: 'success',
-                            confirmButtonText: 'OK',
-                            confirmButtonColor: '#28a745',
-                        }).then(() => {
-                            window.location.reload();
-                        });
-                    }
-                }
-                
-            }).catch(error => {
-                console.error("Error saving subjects:", error);
+            Swal.fire({
+                title: 'Data Privacy Consent',
+                html: `I have read the Unicersity of Southeastern Philippines' Data Provacy Statement and hereby allow the University to collect, use, process and store my personal information through its official channels for legitimate purpose.<br><br> I affirm my fundamental right to privacy and my constitutional data privacy rights as stated in the Republic Act No. 10173 of the Philippines. This consent is herby given on the guarantee that these rights shall be upheld at all times.<br></br><a href="https://www.usep.edu.ph/usep-data-privacy-statement/" target="_blank">Click to read Data Privacy Statement</a>`,
+                icon: 'warning',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#28a745',
+            }).then(() => {
                 Swal.fire({
-                    title: 'Error!',
-                    text: 'There was a problem saving the subjects. Please try again.',
-                    icon: 'error',
-                    confirmButtonText: 'OK',
+                    title: 'Are you sure?',
+                    text: "You are about to submit your chosen courses, by clicking 'Yes', you are required to abide and comply with all the rules and regulation laid down by the competent authorities in the University and in the College or School in which you enrolled.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes',
                     confirmButtonColor: '#D75D5F',
-                });
+                    cancelButtonText: 'No',
+                  }).then((result) => {
+                    if (result.isConfirmed) {
+                        axios.post(route("saveSubjects"), {subject, term: info.TermID, yearLevel:info.YearLevelID,})
+                        .then(response => {
+                            console.log(response)
+                            if (response.data.error) {
+                                const errorMessage = response.data.error.split('\n').join('<br />');
+                                Swal.fire({
+                                    html:errorMessage,
+                                    icon: 'warning',
+                                    confirmButtonText: 'OK',
+                                    confirmButtonColor: '#FFC107', 
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                if(response.data[1]){
+                                    const errorMessages = response.data[1].map((error, index) => `${index + 1}. ${error}`).join("<br><br>");
+                                    console.log(errorMessages)
+                                    Swal.fire({
+                                        title: 'Conflict!',
+                                        html: `There was a problem saving the subjects. Please try again.<br><br>${errorMessages}`, 
+                                        icon: 'warning',
+                                        confirmButtonText: 'OK',
+                                        confirmButtonColor: '#D75D5F',
+                                      });
+                                    setSubject(response.data[0])
+                                    Maxlimit(response.data[0])
+                                }else{
+                                    Swal.fire({
+                                        title: 'Success!',
+                                        text: 'Submitted.',
+                                        icon: 'success',
+                                        confirmButtonText: 'OK',
+                                        confirmButtonColor: '#28a745',
+                                    }).then(() => {
+                                        window.location.reload();
+                                    });
+                                }
+                            }
+                            
+                        }).catch(error => {
+                            console.error("Error saving subjects:", error);
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'There was a problem saving the subjects. Please try again.',
+                                icon: 'error',
+                                confirmButtonText: 'OK',
+                                confirmButtonColor: '#D75D5F',
+                            });
+                        });
+                    } 
+                  });
             });
         }
     }
@@ -293,9 +330,9 @@ export default function Main({reg,data,enrollment,info,status}) {
                                             <span class={`w-6 h-6 border ${(Object.entries(reg).length > 0) ? 'border-indigo-200 bg-indigo-600 text-white' : 'border-gray-200 bg-gray-100'} rounded-full flex justify-center items-center mr-3 text-sm lg:w-10 lg:h-10`}>3</span> Cashier
                                         </div>
                                     </li> */}
-                                    <li class={`flex md:w-full items-center ${reg.ValidationDate && reg.ValidationDate.trim() !== ''  ? 'border-indigo-600 text-indigo-600' : 'border-gray-600 '}`}>
+                                    <li class={`flex md:w-full items-center ${validated && validated !== ''  ? 'border-indigo-600 text-indigo-600' : 'border-gray-600 '}`}>
                                         <div class="flex items-center  ">
-                                            <span class={`w-6 h-6 border ${reg.ValidationDate && reg.ValidationDate.trim() !== ''  ? 'border-indigo-200 bg-indigo-600 text-white' : 'border-gray-200 bg-gray-100'} rounded-full flex justify-center items-center mr-3 text-sm lg:w-10 lg:h-10`}>2</span> Officially Enrolled
+                                            <span class={`w-6 h-6 border ${validated && validated !== ''  ? 'border-indigo-200 bg-indigo-600 text-white' : 'border-gray-200 bg-gray-100'} rounded-full flex justify-center items-center mr-3 text-sm lg:w-10 lg:h-10`}>2</span> Officially Enrolled
                                         </div>
                                     </li>
                                 </ol>  
@@ -364,7 +401,7 @@ export default function Main({reg,data,enrollment,info,status}) {
                             <tr className="info-cell">
                                 <td className="px-3 py-2 font-bold">Status</td>
                                 <td className="px-3 py-2">:</td>
-                                <td className="px-3 py-2">{profile.status}</td>
+                                <td className="px-3 py-2">{profile.isPaying}</td>
                             </tr>
                             <tr className="info-cell">
                                 <td className="px-3 py-2 font-bold">Gender</td>
