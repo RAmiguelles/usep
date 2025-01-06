@@ -36,6 +36,8 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {  
+        $request->session()->flush();
+        $request->session()->regenerateToken();
         if($request->IdNumber=='admin' && $request->password=="123"){
             DBOSession::where('idNumber','admin')->delete();
             $request->session()->put('idNumber', 'admin' );
