@@ -83,10 +83,9 @@ class StudentController extends Controller
                     S.CampusID,
                     CAST(dbo.fn_TotalCreditUnitsEarned_OES(S.StudentNo) AS INT) AS UnitsEarned,
                     dbo.fn_DefaultTermID_OES() AS TermID,
-                    CASE 
-                        WHEN DATEDIFF(DAY, S.DateAdmitted, GETDATE()) < (P.ProgYears + 1) * 365 THEN 'Non_Paying'
-                        ELSE 'Paying'
-                    END AS isPaying
+                    datediff(DAY,s.DateAdmitted,GETDATE())/365 AS Residency,
+                    IIF(p.progyears-(datediff(DAY,s.DateAdmitted,GETDATE())/365)<0,'Paying','Non-paying') AS isPaying,
+                    dbo.fn_CUSTOM_getOutstandingBalanceFromStudentLedger(S.StudentNo) AS PrevBalance
                 FROM    ES_Students S
                 LEFT JOIN ES_Programs as P on P.ProgID = S.ProgID AND P.CollegeID = dbo.fn_ProgramCollegeID(S.ProgID)
                 WHERE   S.StudentNo = ?",
@@ -273,6 +272,8 @@ class StudentController extends Controller
                 DB::connection(session()->get('db'))
                 ->statement("EXEC dbo.sp_SaveEnrolledSubjects ?,?,?",array($RegID,$en['ScheduleID'],$en['count']));   
             }
+            DB::connection(session()->get('db'))
+            ->statement("EXEC dbo.sp_comRegAssessment ?",array($RegID)); 
             return response()->json(['message' => 'Subjects saved successfully']);
         }
 

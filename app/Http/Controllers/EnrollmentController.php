@@ -60,7 +60,7 @@ class EnrollmentController extends Controller
                     WHERE StudentNo = ?)
             )
         )
-        ORDER BY CollegeCode, SectionName";
+        ORDER BY YearLevelID DESC";
         $sections=DB::connection(session()->get('db'))->select($sql, [$campusID, $termID, $programID_CollegeID_, $progID, $studentNo]);
         foreach($sections as $section){
             $requestparam = new Request(['data' => [$section->SectionID,  $studentNo, $collegeID, $progID]]);
@@ -90,6 +90,7 @@ class EnrollmentController extends Controller
     }
 
     public function getBlockClassSchedule(Request $request) {
+        $remark=["Passed","Credited"];
         $response = DB::connection(session()->get('db'))->select("EXEC dbo.ES_getBlockClassSchedules ?,?,?,?", $request->data);
         $filteredResponse = [];
 
@@ -104,14 +105,18 @@ class EnrollmentController extends Controller
             //             $filteredResponse[] = $item;  
             //     }
             // }
-
             $inCurriculum=DB::connection(session()->get('db'))->select("EXEC dbo.sp_Reg_CheckSubjectInTheCurriculum ?,?,?", [session()->get('idNumber'),session()->get('curriculumID'),$item->SubjectID]);
             if($inCurriculum!=null){
                 $ispass = DB::connection(session()->get('db'))->select(
-                    "SELECT TOP 1 FinalRemarks FROM dbo.ES_Grades WHERE StudentNo = ? AND (SubjectID = ? OR EquivalentSubjectID=?)",
-                    [session()->get('idNumber'), $item->SubjectID, $item->SubjectID]
+                    "SELECT TOP 1 FinalRemarks FROM dbo.ES_Grades WHERE StudentNo = ?
+                    AND (
+                        SubjectID = ?
+                        OR EquivalentSubjectID= ?
+                       )
+                        ORDER BY LastModifiedDate DESC",
+                    [session()->get('idNumber'),$item->SubjectID,$item->SubjectID]
                 );
-                if (!$ispass || $ispass[0]->FinalRemarks !== 'Passed') {
+                if (!$ispass || !in_array($ispass[0]->FinalRemarks,$remark)) {
                     $preRequisites=Subject::getPreRequisites($item->SubjectID);
                     if($preRequisites!=null){
                         $pass=true;

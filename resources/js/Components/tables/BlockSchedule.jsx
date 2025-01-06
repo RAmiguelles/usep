@@ -91,7 +91,7 @@ const BlockSchedule = ({value=[], onSelectionChange, subs, allow}) => {
             body={(rowData) => {
               // Check if the SubjectCode is in the disabledSubjectCodes array
               if (disabledSubjectCodes.includes(rowData.SubjectCode)) {
-                  return 'Enrolled';
+                  return 'Added';
               }else if(rowData.Registered == rowData.Limit){
                 return 'Full';
               }

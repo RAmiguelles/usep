@@ -31,12 +31,12 @@ const BlockSection = ({info,CurSubject , listOfSubject,addsubject, allow, show,s
                 if (Response.data) {
                     // setSchedules(Response.data['schedules']);
                     const schedules= Response.data['schedules'];
-                    const advise =Response.data['sections'].filter(item => item.ProgCode === info.ProgramCode).map(item => item.SectionID);
+                    const advise =Response.data['sections'].filter(item => item.ProgCode === info.ProgramCode && item.YearLevelID == info.YearLevelID).map(item => item.SectionID);
                     const Mscheds=[] 
                     const Ascheds=[]
                     Object.entries(schedules).forEach(([key, value]) => {
                         if (advise.includes(key)) {
-                            Mscheds.push(...value)
+                            Mscheds.unshift(...value)
                         }
                         Ascheds.push(...value)
                     });

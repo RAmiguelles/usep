@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect } from "react";
-const Print= ({componentRef, data=[]}) => {
+const Print= ({data=[]}) => {
     const [totals,settotals]=useState([])
     const [totalAssessmentFee,settotalAssessmentFee]=useState(0)
     const [tablefee,settablefee]=useState([])
@@ -17,8 +17,8 @@ const Print= ({componentRef, data=[]}) => {
                 let updatedItem = { ...item };
 
                 if (updatedItem.AcctName === "Tuition Fee") {
-                    updatedItem.AcctName = `Tuition Fee ${units.acadUnits + units.labUnits}@${Number(updatedItem.Amount)}`;
-                    updatedItem.Amount = Number(updatedItem.Amount) * (units.acadUnits + units.labUnits);
+                    updatedItem.AcctName = `Tuition Fee ${units.acadUnits+units.labUnits}@${Number(updatedItem.Amount)}`;
+                    updatedItem.Amount = Number(updatedItem.Amount) * (units.acadUnits+units.labUnits);
                 } else if (updatedItem.AcctName === "Laboratory Fee") {
                     updatedItem.AcctName = `Laboratory Fee ${units.labUnits}@${Number(updatedItem.Amount)}`;
                     updatedItem.Amount = Number(updatedItem.Amount) * units.labUnits;
@@ -43,7 +43,7 @@ const Print= ({componentRef, data=[]}) => {
     }, [data]);
   return (
     <>
-        <div style={{ display: 'none' }}>
+        {/* <div style={{ display: 'none' }}>
         <div ref={componentRef} className='m-6 p-6'>
           <div className="" >
             <div className="" >
@@ -51,9 +51,9 @@ const Print= ({componentRef, data=[]}) => {
             </div>
           </div>
 
-          <div className="border bg-black" style={{height:'1px', width:'100%'}}></div>
+          <div className="border bg-black" style={{height:'1px', width:'100%'}}></div> */}
 
-          <div>
+          {/* <div>
             <div className="grid grid-cols-2">
               <div className="bg-white">
                   <div className="flex items-center">
@@ -123,12 +123,12 @@ const Print= ({componentRef, data=[]}) => {
                   </div>
               </div>
             </div>
-          </div>
-
+          </div> */}
+{/* 
           <div className="border bg-black" style={{height:'1px', width:'100%'}}></div>
 
-          <div className="grid grid-cols-12 gap-6">
-            <div className="col-span-8 bg-white">
+          <div className="grid grid-cols-12 gap-6"> */}
+            {/* <div className="col-span-8 bg-white">
                 <h2 className="text-lg font-bold mb-4">Enrolled Subjects</h2>
                 <table className="w-full border-collapse border border-gray-200 text-xs">
                     <thead>
@@ -172,11 +172,11 @@ const Print= ({componentRef, data=[]}) => {
                     </tr>
                     </tfoot>
                 </table>
-            </div>
+            </div> */}
 
-            <div className="col-span-4 bg-white">
-                <h2 className="text-lg font-bold mb-4">Billing Information</h2>
-                <table className="w-full border-collapse border border-gray-200 text-xs">
+            <div className="col-span-4 bg-white p-6">
+                {/* <h2 className="text-lg font-bold mb-4">Billing Information</h2> */}
+                <table className="w-full border-collapse border border-gray-200 p-3">
                     <thead>
                         <tr className="bg-gray-100">
                             <th className="border border-gray-300 p-2 text-left">Description</th>
@@ -187,21 +187,21 @@ const Print= ({componentRef, data=[]}) => {
                     {tablefee.map((item, index) => (
                     <tr key={index}>
                         <td className="border border-gray-300">{item.AcctName}</td>
-                        <td className="border border-gray-300 text-right">{Number(item.Amount).toFixed(2)}</td>
+                        <td className="border border-gray-300 text-right pr-3">{Number(item.Amount).toFixed(2)}</td>
                     </tr>
                     ))}
                     </tbody>
                     <tfoot>
                         <tr>
                             <td className="border border-gray-300 font-bold">Total : </td>
-                            <td className="border border-gray-300 text-right">{totalAssessmentFee}</td>
+                            <td className="border border-gray-300 text-right p-2">{totalAssessmentFee}</td>
                         </tr>
                     </tfoot>
                 </table>
             </div>
+        {/* </div>
         </div>
-        </div>
-        </div>
+        </div> */}
     </>
   );
 };

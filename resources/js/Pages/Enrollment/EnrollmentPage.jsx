@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
-// import Table from "@/Components/Table";
+import Print from '@/Components/print';
 import axios from "axios";
 import { useState, useEffect } from "react";
 // import { DataTable } from 'primereact/datatable';
@@ -30,11 +30,17 @@ export default function Main({reg,data,enrollment,info,status}) {
     const [loading, setLoading] = useState(true);
     const [show, setshow] = useState(false);
     const [curUnit, setcurUnit] = useState(0);
+    const[Assessment, setAssessment]=useState([]);
+    const[Total, setTotal]=useState('');
+    const [isCollapsed, setIsCollapsed] = useState(false);
+    const toggleCollapse = () => {
+      setIsCollapsed(prevState => !prevState);
+    };
     const url = `https://api.usep.edu.ph/student/`;
     const handleNavClick = (page) => {
       setActivePage(page);
     };
-  console.log(info)
+console.log(info)
     const getHTTPConfig = (token) => {
         return {
             headers: {
@@ -49,7 +55,7 @@ export default function Main({reg,data,enrollment,info,status}) {
         if (!status.isOpen['isOpen']) {
             Swal.fire({
                 title: 'Enrollment Closed',
-                text: `The Enrollment for ${reg.YearTerm} has been closed since ${status.isOpen['EndEnrollment']}`,
+                text: `The Enrollment has been closed since ${status.isOpen['EndEnrollment']}`,
                 icon: 'info',
                 confirmButtonText: 'Continue',
                 confirmButtonColor: '#D75D5F',
@@ -71,7 +77,7 @@ export default function Main({reg,data,enrollment,info,status}) {
                 if(info.isPaying=="Paying"){
                     Swal.fire({
                         title: 'Warning!',
-                        text: "Ensure that any unpaid balance is settled with the cashier.",
+                        text: "You may now settle your enrollment fee at the cashier's office.",
                         icon: 'warning',
                         confirmButtonText: 'OK',
                         confirmButtonColor: '#D75D5F',
@@ -111,6 +117,20 @@ export default function Main({reg,data,enrollment,info,status}) {
             }
         };
         fetchData();
+
+        const fetchAssessment = async () => {
+            try {
+                const response = await axios.post(route("getassessment"), { term: info.TermID, template: info.TblFeesID });
+                if (response.data) {
+                    console.log(response.data)
+                    setAssessment(response.data.response);
+                    setTotal(response.data.total);
+                }
+            } catch (error) {
+                console.error("Error fetching assessment data:", error);
+            }
+        };
+        fetchAssessment()
 
     },[data]);
      
@@ -182,7 +202,7 @@ export default function Main({reg,data,enrollment,info,status}) {
             }
         });
     }
-    console.log(reg)
+
     function removeSubject(sub){
         const updatedsub = subject.filter(item => 
             item.ScheduleID !== sub[0].ScheduleID
@@ -203,20 +223,13 @@ export default function Main({reg,data,enrollment,info,status}) {
         }else{
             Swal.fire({
                 title: 'Data Privacy Consent',
-                html: `I have read the Unicersity of Southeastern Philippines' Data Provacy Statement and hereby allow the University to collect, use, process and store my personal information through its official channels for legitimate purpose.<br><br> I affirm my fundamental right to privacy and my constitutional data privacy rights as stated in the Republic Act No. 10173 of the Philippines. This consent is herby given on the guarantee that these rights shall be upheld at all times.<br></br><a href="https://www.usep.edu.ph/usep-data-privacy-statement/" target="_blank">Click to read Data Privacy Statement</a>`,
+                html: `<div style="text-align:left;padding-left: 20px;">You are about to submit your chosen courses. By clicking "Yes", you hereby confirm that you will abide and comply with all the rules and regulation laid down by competent authorities in the University of Southeastern Philippines (USeP) and in the College/School in which you will enroll. <br></br>You also confirm that you have read the USeP Data Privacy Statement and that you allow the University to collect, use and store your personal information through its official channels for legitimat purpose. Further, you affirm your fundamental right to privacy and your constitutional data privacy right as stated in Republic Act No. 10173 of the Philippines.<br></br><a href="https://www.usep.edu.ph/usep-data-privacy-statement/" target="_blank">Click to read Data Privacy Statement</a></div>`,
                 icon: 'warning',
-                confirmButtonText: 'OK',
-                confirmButtonColor: '#28a745',
-            }).then(() => {
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You are about to submit your chosen courses, by clicking 'Yes', you are required to abide and comply with all the rules and regulation laid down by the competent authorities in the University and in the College or School in which you enrolled.",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes',
-                    confirmButtonColor: '#D75D5F',
-                    cancelButtonText: 'No',
-                  }).then((result) => {
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                confirmButtonColor: '#D75D5F',
+                cancelButtonText: 'No',
+            }).then((result) => {
                     if (result.isConfirmed) {
                         axios.post(route("saveSubjects"), {subject, term: info.TermID, yearLevel:info.YearLevelID,})
                         .then(response => {
@@ -245,15 +258,19 @@ export default function Main({reg,data,enrollment,info,status}) {
                                     setSubject(response.data[0])
                                     Maxlimit(response.data[0])
                                 }else{
-                                    Swal.fire({
-                                        title: 'Success!',
-                                        text: 'Submitted.',
-                                        icon: 'success',
-                                        confirmButtonText: 'OK',
-                                        confirmButtonColor: '#28a745',
-                                    }).then(() => {
+                                    if(info.isPaying=='Paying'){
                                         window.location.reload();
-                                    });
+                                    }else{
+                                        Swal.fire({
+                                            title: 'Success!',
+                                            text: 'You are officially enrolled.',
+                                            icon: 'success',
+                                            confirmButtonText: 'OK',
+                                            confirmButtonColor: '#28a745',
+                                        }).then(() => {
+                                            window.location.reload();
+                                        });
+                                    }
                                 }
                             }
                             
@@ -268,7 +285,6 @@ export default function Main({reg,data,enrollment,info,status}) {
                             });
                         });
                     } 
-                  });
             });
         }
     }
@@ -343,14 +359,14 @@ export default function Main({reg,data,enrollment,info,status}) {
             </div>   
             <div className="m-6 flex flex-col shadow-md bg-gray-50 rounded-md items-center bg-white relative">
                 <div className="w-full p-2 bg-primary-dark"><label className="block text-2xl font-bold text-white text-center">Profile information</label></div>
-                {/* <button
-                    data-collapse-target="collapse"
+                <button
+                    onClick={toggleCollapse}
                     className="absolute top-2 right-2 text-white text-2xl font-bold mr-2 rotate-90"
                     type="button"
                     >
                     |||
-                    </button> */}
-                <div className=" m-3" data-collapse="collapse">
+                    </button>
+                {!isCollapsed && (<div className=" m-3" data-collapse="collapse">
                     <table className="min-w-auto bg-white">
                         <tbody>
                             <tr className="info-cell">
@@ -404,6 +420,11 @@ export default function Main({reg,data,enrollment,info,status}) {
                                 <td className="px-3 py-2">{profile.isPaying}</td>
                             </tr>
                             <tr className="info-cell">
+                                <td className="px-3 py-2 font-bold">Balance</td>
+                                <td className="px-3 py-2">:</td>
+                                <td className="px-3 py-2">Php  {Number(profile.PrevBalance).toLocaleString()+".00"} <span className={`font-bold ${status.allowWithBalance?'':'text-red-600'}`}>{status.allowWithBalance?"(Cleared to enroll)":"(Not clear to enroll)"}</span></td>
+                            </tr>
+                            <tr className="info-cell">
                                 <td className="px-3 py-2 font-bold">Gender</td>
                                 <td className="px-3 py-2">:</td>
                                 <td className="px-3 py-2">{profile.Gender=='F'? "Female":"Male"}</td>
@@ -431,10 +452,11 @@ export default function Main({reg,data,enrollment,info,status}) {
                         </div>
                     </div>
                 </div>
+                )}
             </div>
             
             <div className="m-6 flex flex-col shadow-md bg-gray-50 rounded-md">
-                <div className="w-full p-2 bg-primary-dark"><label className="block text-2xl font-bold text-white text-center">List of Subject to be Enroll</label></div>
+                <div className="w-full p-2 bg-primary-dark"><label className="block text-2xl font-bold text-white text-center">{!(Object.entries(reg).length > 0)?"List of Courses to be Enrolled":"List of Courses Enrolled"}</label></div>
                 <div className="m-4">
                 <form action="#" method="post">
                     <EnrollSubTable value={subject} onSelectionChange={SwalConfirm} TUnit={curUnit} allow={(!(Object.entries(reg).length > 0))}></EnrollSubTable>
@@ -444,6 +466,10 @@ export default function Main({reg,data,enrollment,info,status}) {
                 </div>
             </div>
 
+            <div className="m-6 flex flex-col shadow-md bg-gray-50 rounded-md">
+                <div className="w-full p-2 bg-primary-dark"><label className="block text-2xl font-bold text-white text-center">Billing Information</label></div>
+                <Print data={[subject,Assessment]}></Print>
+            </div>
             <BlockSection info={info} CurSubject={subject} listOfSubject={offersubject} addsubject={addSubject} allow={(!(Object.entries(reg).length > 0))} show={show} setshow={()=>{setshow(false)}}></BlockSection>
 
             </> 

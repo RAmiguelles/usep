@@ -54,7 +54,7 @@ const EnrollSubTable = ({value=[], onSelectionChange, TUnit, allow}) => {
             headerStyle={{ width: '3rem' }} 
           />}
           
-          <Column datakey="SubjectID" field="SubjectTitle" header="Subject Title" style={{ minWidth: '400px' }}></Column>
+          <Column datakey="SubjectID" field="Course" header="Course" style={{ minWidth: '400px' }} body={(rowData) => (rowData.SubjectCode+" - "+rowData.SubjectTitle )}></Column>
           <Column datakey="SubjectID" field="SectionName" header="Section" style={{ minWidth: '250px' }}></Column>
           <Column datakey="SubjectID" field="CreditUnits" header="CreditUnits" footer={TUnit} style={{ minWidth: '100px' }}></Column>
           <Column datakey="SubjectID"  header="Available slots" style={{ minWidth: '100px' ,minHeight : '82.2px'}} body={(rowData) => (rowData.Registered+"/"+rowData.Limit )}></Column>

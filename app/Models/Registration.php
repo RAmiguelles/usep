@@ -19,7 +19,7 @@ class Registration extends Model
     protected function isOpen($termID){
         $query = " SELECT 
                 StartEnrollment, 
-                EndEnrollment, 
+                FORMAT(EndEnrollment, 'MM/dd/yyyy') AS EndEnrollment,
                 CASE 
                     WHEN GETDATE() BETWEEN StartEnrollment AND EndEnrollment THEN 1 
                     ELSE 0 
