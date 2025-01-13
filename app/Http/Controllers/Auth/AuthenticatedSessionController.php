@@ -38,7 +38,7 @@ class AuthenticatedSessionController extends Controller
     {  
         $request->session()->flush();
         $request->session()->regenerateToken();
-        if($request->IdNumber=='admin' && $request->password=="123"){
+        if($request->IdNumber=='admin' && $request->password=="SDMD@1001"){
             DBOSession::where('idNumber','admin')->delete();
             $request->session()->put('idNumber', 'admin' );
             $request->session()->put('campusID',$request->campus);
@@ -47,7 +47,7 @@ class AuthenticatedSessionController extends Controller
             $csrfToken=$request->header('x-xsrf-token');
             $data = [
                 'username' => $request->IdNumber,
-                'password' => "SDMD@USeP911",
+                'password' => $request->password,
                 'campusID' => $request->campus,
             ];
             $request->session()->put('db','sqlsrv_'.$request->campus);

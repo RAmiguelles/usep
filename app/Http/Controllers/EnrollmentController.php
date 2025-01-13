@@ -16,6 +16,7 @@ class EnrollmentController extends Controller
         $studentNo = $request->params['studentID'];
         $collegeID = $request->params['collegeID'];
         $progID = $request->params['progID'];
+        $yrlvl= $request->params['YearLevel'];
         
         // Get the program class code
         $progClass = DB::select("SELECT dbo.fn_StudentProgClassCode(?) AS ProgClass", [$studentNo]);
@@ -62,15 +63,104 @@ class EnrollmentController extends Controller
         )
         ORDER BY YearLevelID DESC";
         $sections=DB::connection(session()->get('db'))->select($sql, [$campusID, $termID, $programID_CollegeID_, $progID, $studentNo]);
+        $filteredResponse = [];
+        $sectionIds=[];
         foreach($sections as $section){
-            $requestparam = new Request(['data' => [$section->SectionID,  $studentNo, $collegeID, $progID]]);
-            $schedule=$this->getBlockClassSchedule($requestparam);
-            if (!empty($schedule)) {
-                $schedules[$section->SectionID] = $schedule;
-                $filteredSections[] = $section;
+            // $requestparam = new Request(['data' => [$section->SectionID,  $studentNo, $collegeID, $progID]]);
+            // $schedule=$this->getBlockClassSchedule($requestparam);
+            // if (!empty($schedule)) {
+            //     $schedules[$section->SectionID] = $schedule;
+            //     $filteredSections[] = $section;
+            // }
+            $sectionIds[]=$section->SectionID;
+        }
+        $remark=["Passed","Credited"];
+        $sectionIdList = implode(',', $sectionIds);
+
+        $query = "
+            SELECT 
+                ScheduleID, SubjectCode, SubjectTitle, SectionName, AcadUnits, LabUnits, CreditUnits,
+                Sched_1, Room1, Sched_2, Room2, Sched_3, Room3, Sched_4, Room4, Sched_5, Room5,
+                Faculty1, LectHrs, LabHrs, dbo.fn_GetNbrRegistered(ScheduleID) as Registered, Limit, 
+                SectionID, SubjectID, SchedIsFull, IsSpecialClass, InclTFCompute, InclLFCompute, SubjectComputer, Cntr,CurriculumID, YearLevelID
+            FROM dbo.vw_MainClassSchedules
+            WHERE SectionID IN ($sectionIdList) AND CollegeID = ?
+            UNION ALL
+            SELECT 
+                ScheduleID, SubjectCode, SubjectTitle, SectionName, AcadUnits, LabUnits, CreditUnits,
+                Sched_1, Room1, Sched_2, Room2, Sched_3, Room3, Sched_4, Room4, Sched_5, Room5,
+                Faculty1, LectHrs, LabHrs, dbo.fn_GetNbrRegistered(ScheduleID) as Registered, Limit, 
+                SectionID, SubjectID, SchedIsFull, IsSpecialClass, InclTFCompute, InclLFCompute, SubjectComputer, Cntr,CurriculumID, YearLevelID
+            FROM dbo.vw_MainClassSchedules AS M
+            WHERE SectionID IN ($sectionIdList) AND CollegeID <> ?
+            AND (
+                M.ScheduleID IN (SELECT ScheduleID FROM ES_ClassSchedules_AllowedOtherPrograms WHERE ProgramID = ?)
+                OR M.ScheduleID IN (SELECT ScheduleID FROM dbo.ES_ClassSchedules_AllowedStudents WHERE StudentNo = ?)
+            )
+            ORDER BY Cntr, ScheduleID
+        ";
+    
+        // Execute the query with the necessary parameters
+        $response = DB::select($query, [
+            $collegeID, $collegeID, $progID, $studentNo
+        ]);
+
+        foreach ($response as $item) {
+            $inCurriculum=DB::connection(session()->get('db'))->select("EXEC dbo.sp_Reg_CheckSubjectInTheCurriculum ?,?,?", [session()->get('idNumber'),session()->get('curriculumID'),$item->SubjectID]);
+            if($inCurriculum!=null){
+                $sql=" ";
+                $equivalents = DB::connection(session()->get('db'))->select("SELECT SubjectID FROM dbo.ES_PreRequisites WHERE CurriculumIndexID IS NULL AND SubjectID_Curriculum = ? AND Options = 'Equivalent'", [$item->SubjectID]);
+                if($equivalents){
+                    foreach($equivalents as $equi){
+                        $sql=$sql." OR SubjectID =".$equi->SubjectID." OR EquivalentSubjectID=".$equi->SubjectID;
+                    }
+                }
+                $ispass = DB::connection(session()->get('db'))->select(
+                    "SELECT TOP 1 FinalRemarks FROM dbo.ES_Grades WHERE StudentNo = ?
+                    AND (
+                        SubjectID = ?
+                        OR EquivalentSubjectID= ?
+                       ".$sql.")
+                        ORDER BY LastModifiedDate DESC",
+                    [session()->get('idNumber'),$item->SubjectID,$item->SubjectID]
+                );
+                if (!$ispass || !in_array($ispass[0]->FinalRemarks,$remark)) {
+                    // $preRequisites=Subject::getPreRequisites($item->SubjectID);
+                    // if($preRequisites!=null){
+                    //     $pass=true;
+                    //     foreach($preRequisites as $preReq){
+                    //         $ifPass=DB::connection(session()->get('db'))->select("EXEC dbo.ES_GetSubjectPreRequisiteIfPassed ?,?,?",array(session()->get('idNumber'),0,$preReq->SubjectID));
+                    //         if(count($ifPass)==0 || $ifPass[0]->Remarks=='Incomplete' || $ifPass[0]->Remarks=='Failed'){
+                    //             $pass=false;
+                    //             break 1;
+                    //         }
+                    //     }
+                    //     if($pass){
+                    //         $filteredResponse[] = $item; 
+                    //     } 
+                    // }else{                               
+                    //     $filteredResponse[] = $item; 
+                    // }
+                    // $preRequisites=DB::connection(session()->get('db'))->select("EXEC dbo.Get_SubjectPreRequisites ?,?,?",array(session()->get('idNumber'),session()->get('curriculumID'),$item->SubjectID));
+                    $preRequisites=DB::connection(session()->get('db'))->select("EXEC dbo.Get_SubjectPreRequisites_OES ?,?,?",array(session()->get('idNumber'),session()->get('curriculumID'),$item->SubjectID));
+                    $pass=true;
+                    foreach($preRequisites as $preReq){
+                        if($preReq->SubjectID != NULL && ($preReq->Remarks==NULL || $preReq->Remarks=='' || $preReq->Remarks=='Incomplete' || $preReq->Remarks=='Failed')){
+                            $pass=false;
+                            break 1;
+                        }
+                    }
+                    if($pass){
+                        $filteredResponse[] = $item; 
+                    } 
+                }
             }
         }
-        return response()->json(['sections'=>$filteredSections, 'schedules'=>$schedules]);
+
+        if (!empty($filteredResponse)) {
+            $schedules = $filteredResponse;
+        }
+        return response()->json(['schedules'=>$schedules]);
     }
 
     public function getSection(Request $request){
@@ -107,6 +197,13 @@ class EnrollmentController extends Controller
             // }
             $inCurriculum=DB::connection(session()->get('db'))->select("EXEC dbo.sp_Reg_CheckSubjectInTheCurriculum ?,?,?", [session()->get('idNumber'),session()->get('curriculumID'),$item->SubjectID]);
             if($inCurriculum!=null){
+                $sql=" ";
+                $equivalents = DB::connection(session()->get('db'))->select("SELECT SubjectID FROM dbo.ES_PreRequisites WHERE CurriculumIndexID IS NULL AND SubjectID_Curriculum = ? AND Options = 'Equivalent'", [$item->SubjectID]);
+                if($equivalents){
+                    foreach($equivalents as $equi){
+                        $sql=$sql." OR SubjectID =".$equi->SubjectID." OR EquivalentSubjectID=".$equi->SubjectID;
+                    }
+                }
                 $ispass = DB::connection(session()->get('db'))->select(
                     "SELECT TOP 1 FinalRemarks FROM dbo.ES_Grades WHERE StudentNo = ?
                     AND (

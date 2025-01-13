@@ -6,7 +6,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {faMinus} from '@fortawesome/free-solid-svg-icons'
 
 const EnrollSubTable = ({value=[], onSelectionChange, TUnit, allow}) => {
-
   const getVisibleColumns = (data) => {
     const columns = [];
     const hasData = (key) => data.some(row => row[key] != null && row[key] !== '');

@@ -5,3 +5,8 @@
     opacity: 0.5; /* Make the row look disabled */
     pointer-events: none; /* Prevent interaction */
 }
+
+.table-row-hover:hover {
+    background-color: #f1f1f1; /* Light gray background color on hover */
+    cursor: pointer; /* Pointer cursor on hover */
+  }

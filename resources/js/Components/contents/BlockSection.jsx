@@ -22,7 +22,8 @@ const BlockSection = ({info,CurSubject , listOfSubject,addsubject, allow, show,s
         'termID':info.TermID,
         'studentID':info.StudentNo,
         'collegeID':info.CollegeID,
-        'progID':info.ProgID
+        'progID':info.ProgID,
+        'YearLevel':info.YearLevelID
     }
     useEffect(() => {
         const fetchData = async () => {                                                         //get blocksection
@@ -31,17 +32,20 @@ const BlockSection = ({info,CurSubject , listOfSubject,addsubject, allow, show,s
                 if (Response.data) {
                     // setSchedules(Response.data['schedules']);
                     const schedules= Response.data['schedules'];
-                    const advise =Response.data['sections'].filter(item => item.ProgCode === info.ProgramCode && item.YearLevelID == info.YearLevelID).map(item => item.SectionID);
-                    const Mscheds=[] 
-                    const Ascheds=[]
-                    Object.entries(schedules).forEach(([key, value]) => {
-                        if (advise.includes(key)) {
-                            Mscheds.unshift(...value)
-                        }
-                        Ascheds.push(...value)
-                    });
+                    const Mscheds=[]
+                    // const advise =Response.data['sections'].filter(item => item.ProgCode === info.ProgramCode && item.YearLevelID == info.YearLevelID).map(item => item.SectionID);
+                    const filteredSchedules = schedules.filter(schedule => schedule.YearLevelID == info.YearLevelID && schedule.CurriculumID==info.CurriculumID);
+                    Mscheds.unshift(...filteredSchedules);
+                    const Ascheds=Response.data['schedules']
+                    // Object.entries(schedules).forEach(([key, value]) => {
+                    //     if (advise.includes(key)) {
+                    //         Mscheds.unshift(...value)
+                    //     }
+                    //     Ascheds.push(...value)
+                    // });
                     const Response2 = await axios.post(route("checkconflict"),{array1:Mscheds, array2:[]});
                     if (Response2.data) {
+                        console.log(Response2)
                         listOfSubject(Response2.data)
                     }
                     // listOfSubject(Mscheds)
@@ -64,6 +68,7 @@ const BlockSection = ({info,CurSubject , listOfSubject,addsubject, allow, show,s
 
         fetchData();
     }, []);
+
 
     // useEffect(() => {
     //     if(datas[1].RegID){
@@ -166,12 +171,15 @@ const BlockSection = ({info,CurSubject , listOfSubject,addsubject, allow, show,s
     <>
     {loading ? 
         (
-        <div className="fixed inset-0 flex items-center justify-center bg-white">
-            <div class='flex space-x-2 justify-center items-center bg-white h-full dark:invert'>
+        <div className="fixed inset-0 flex items-center justify-center bg-opacity-50">
+            {/* <div class='flex space-x-2 justify-center items-center bg-white h-full dark:invert'>
                 <span class='sr-only'>Loading...</span>
                 <div class='h-8 w-8 bg-black rounded-full animate-bounce [animation-delay:-0.3s]'></div>
                 <div class='h-8 w-8 bg-black rounded-full animate-bounce [animation-delay:-0.15s]'></div>
                 <div class='h-8 w-8 bg-black rounded-full animate-bounce'></div>
+            </div> */}
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-b-4 border-primary-dark"></div>
             </div>
         </div>
         ):(
