@@ -77,8 +77,8 @@ const BlockSchedule = ({value=[], onSelectionChange, subs, allow}) => {
             frozen 
             headerStyle={{ width: '3rem' }} 
           />}
-          <Column datakey="SubjectID" field="SubjectCode" header="Subject Code" style={{ minWidth: '150px',minHeight : '82.2px'}}></Column>
-          <Column datakey="SubjectID" field="SubjectTitle" header="Subject Title" style={{ minWidth: '250px' ,minHeight : '82.2px'}}></Column>
+          <Column datakey="SubjectID" field="SubjectCode" header="Course Code" style={{ minWidth: '150px',minHeight : '82.2px'}}></Column>
+          <Column datakey="SubjectID" field="SubjectTitle" header="Course Title" style={{ minWidth: '250px' ,minHeight : '82.2px'}}></Column>
           <Column datakey="SubjectID" field="SectionName" header="Section" style={{ minWidth: '250px' ,minHeight : '82.2px'}}></Column>
           <Column datakey="SubjectID" field="AcadUnits" header="Lec Unit" style={{ minWidth: '100px' ,minHeight : '82.2px'}}></Column>
           <Column datakey="SubjectID" field="LabUnits" header="Lab Unit" style={{ minWidth: '100px' ,minHeight : '82.2px'}}></Column>

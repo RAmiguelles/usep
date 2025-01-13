@@ -32,6 +32,7 @@ export default function Main({reg,data,enrollment,info,status}) {
     const [curUnit, setcurUnit] = useState(0);
     const[Assessment, setAssessment]=useState([]);
     const[Total, setTotal]=useState('');
+    const[disable, setdisable]=useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
     const toggleCollapse = () => {
       setIsCollapsed(prevState => !prevState);
@@ -40,7 +41,7 @@ export default function Main({reg,data,enrollment,info,status}) {
     const handleNavClick = (page) => {
       setActivePage(page);
     };
-console.log(info)
+
     const getHTTPConfig = (token) => {
         return {
             headers: {
@@ -74,6 +75,7 @@ console.log(info)
         }
         if (Object.entries(reg).length > 0) {
             try {
+                offersubject([])
                 if(info.isPaying=="Paying"){
                     Swal.fire({
                         title: 'Warning!',
@@ -122,7 +124,6 @@ console.log(info)
             try {
                 const response = await axios.post(route("getassessment"), { term: info.TermID, template: info.TblFeesID });
                 if (response.data) {
-                    console.log(response.data)
                     setAssessment(response.data.response);
                     setTotal(response.data.total);
                 }
@@ -135,13 +136,19 @@ console.log(info)
     },[data]);
      
     function Maxlimit(subs){
-        const totalAcadUnits = subs.reduce((total, sub) => total + parseFloat(sub.CreditUnits), 0);
+        // const totalAcadUnits = subs.reduce((total, sub) => {
+        //     const creditUnits = parseFloat(sub.CreditUnits);
+        //     return creditUnits > 0 ? total + creditUnits : total;
+        // }, 0);
+        const totalAcadUnits = subs.reduce((total, sub) => total + Math.abs(parseFloat(sub.CreditUnits)), 0);
         setcurUnit(totalAcadUnits)
     }
+
     async function offersubject(subjects){
         const subs=subjects.filter(item =>
-            item.Registered < item.Limit
+            Number(item.Limit) > Number(item.Registered)
         )
+        console.log(subs)
         if((Object.entries(reg).length > 0)){
             try {
                 const response = await axios.post(route("getEnrollSubject"), { data: reg.RegID });
@@ -153,16 +160,16 @@ console.log(info)
                 console.error("Error fetching enroll subjects:", error);
             }
         }else{
-            const filter=subs.filter(item =>
-                item.SectionName.toLowerCase().includes(major.toLowerCase())
-            )
-            if(filter.length > 0){
-                setSubject(filter)
-                Maxlimit(filter)
-            }else{
+            // const filter=subs.filter(item =>
+            //     item.SectionName.toLowerCase().includes(major.toLowerCase())
+            // )
+            // if(filter.length > 0){
+            //     setSubject(filter)
+            //     Maxlimit(filter)
+            // }else{
                 setSubject(subs)
                 Maxlimit(subs)
-            }
+            // }
 
         }
     }
@@ -212,6 +219,7 @@ console.log(info)
     }
 
     function Submit(e){
+        setdisable(!disable)
         if(curUnit > info.MaxUnitsLoad){
             Swal.fire({
                 title: 'Error!',
@@ -346,9 +354,9 @@ console.log(info)
                                             <span class={`w-6 h-6 border ${(Object.entries(reg).length > 0) ? 'border-indigo-200 bg-indigo-600 text-white' : 'border-gray-200 bg-gray-100'} rounded-full flex justify-center items-center mr-3 text-sm lg:w-10 lg:h-10`}>3</span> Cashier
                                         </div>
                                     </li> */}
-                                    <li class={`flex md:w-full items-center ${validated && validated !== ''  ? 'border-indigo-600 text-indigo-600' : 'border-gray-600 '}`}>
+                                    <li class={`flex md:w-full items-center ${reg.ValidationDate && reg.ValidationDate !== ''  ? 'border-indigo-600 text-indigo-600' : 'border-gray-600 '}`}>
                                         <div class="flex items-center  ">
-                                            <span class={`w-6 h-6 border ${validated && validated !== ''  ? 'border-indigo-200 bg-indigo-600 text-white' : 'border-gray-200 bg-gray-100'} rounded-full flex justify-center items-center mr-3 text-sm lg:w-10 lg:h-10`}>2</span> Officially Enrolled
+                                            <span class={`w-6 h-6 border ${reg.ValidationDate && reg.ValidationDate !== ''  ? 'border-indigo-200 bg-indigo-600 text-white' : 'border-gray-200 bg-gray-100'} rounded-full flex justify-center items-center mr-3 text-sm lg:w-10 lg:h-10`}>2</span> Officially Enrolled
                                         </div>
                                     </li>
                                 </ol>  
@@ -461,7 +469,12 @@ console.log(info)
                 <form action="#" method="post">
                     <EnrollSubTable value={subject} onSelectionChange={SwalConfirm} TUnit={curUnit} allow={(!(Object.entries(reg).length > 0))}></EnrollSubTable>
                     <button type="button" onClick={Submit} disabled={((Object.entries(reg).length > 0) || status.allowWithBalance==false || status.isOpen['isOpen'] == false)} className={`text-white hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3 ${((Object.entries(reg).length > 0) || status.allowWithBalance==false || status.isOpen['isOpen'] == false)? 'bg-gray-400' : ' bg-gradient-to-r from-primary-light to-primary-dark'}`}>Submit</button>
-                    <button type="button" onClick={()=>{setshow(true)}}disabled={((Object.entries(reg).length > 0) || status.allowWithBalance==false || status.isOpen['isOpen'] == false)} className={`text-white hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-left mt-3 ${((Object.entries(reg).length > 0) || status.allowWithBalance==false || status.isOpen['isOpen'] == false)? 'bg-gray-400' : ' bg-gradient-to-r from-primary-light to-primary-dark'}`}>Add Subject</button>
+                    <button type="button" onClick={()=>{setshow(true)}} disabled={((Object.entries(reg).length > 0) || status.allowWithBalance==false || status.isOpen['isOpen'] == false)} className={`text-white hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-left mt-3 ${((Object.entries(reg).length > 0) || status.allowWithBalance==false || status.isOpen['isOpen'] == false)? 'bg-gray-400' : ' bg-gradient-to-r from-primary-light to-primary-dark'}`}>Add Course</button>
+                    <button type="button"   onClick={() => {
+                                                    const currentURL = window.location.origin;  
+                                                    const newURL = currentURL + '/evaluation';  
+                                                    window.open(newURL, '_blank');  
+                                                }} className={`text-white hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-left mt-3 bg-gradient-to-r from-primary-light to-primary-dark`}>Evaluation</button>
                 </form>
                 </div>
             </div>
@@ -470,6 +483,7 @@ console.log(info)
                 <div className="w-full p-2 bg-primary-dark"><label className="block text-2xl font-bold text-white text-center">Billing Information</label></div>
                 <Print data={[subject,Assessment]}></Print>
             </div>
+            {/* {!(Object.entries(reg).length > 0) &&  <BlockSection info={info} CurSubject={subject} listOfSubject={offersubject} addsubject={addSubject} allow={(!(Object.entries(reg).length > 0))} show={show} setshow={()=>{setshow(false)}}></BlockSection>} */}
             <BlockSection info={info} CurSubject={subject} listOfSubject={offersubject} addsubject={addSubject} allow={(!(Object.entries(reg).length > 0))} show={show} setshow={()=>{setshow(false)}}></BlockSection>
 
             </> 

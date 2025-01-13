@@ -58,10 +58,10 @@ class StudentController extends Controller
                     dbo.fn_ProgramCode(S.ProgID) AS ProgramCode ,
                     dbo.fn_ProgramName(S.ProgID) AS ProgramName ,
                     dbo.fn_MajorName(s.MajorDiscID) AS MajorStudy ,
-                    -- S.YearLevelID ,
-                    -- dbo.fn_YearLevel(S.YearLevelID) AS YearLevel ,
-                    (select YearLevelID from [dbo].[fn_getAutoYearLevel_OES_2](S.StudentNo,2)) AS YearLevelID,
-                    (select YearLevel from [dbo].[fn_getAutoYearLevel_OES_2](S.StudentNo,2)) AS YearLevel,
+                    S.YearLevelID ,
+                    dbo.fn_YearLevel(S.YearLevelID) AS YearLevel ,
+                    -- (select YearLevelID from [dbo].[fn_getAutoYearLevel_OES_2](S.StudentNo,2)) AS YearLevelID,
+                    -- (select YearLevel from [dbo].[fn_getAutoYearLevel_OES_2](S.StudentNo,2)) AS YearLevel,
                     S.Gender ,
                     s.CurriculumID ,
                     dbo.fn_CurriculumCode(s.CurriculumID) AS CurriculumCode ,
@@ -79,7 +79,8 @@ class StudentController extends Controller
                     dbo.fn_CurricularYearLevel2(s.StudentNo, s.ProgID, s.YearLevelID) AS cYearLevelID ,
                     dbo.fn_YearLevel(dbo.fn_CurricularYearLevel2(s.StudentNo, s.ProgID,
                     s.YearLevelID)) AS cYearLevel ,
-                    S.MaxUnitsLoad,
+                    -- S.MaxUnitsLoad,
+                    dbo.fn_computeMaxUnitsLoad(dbo.fn_DefaultTermID_OES(),S.StudentNo,s.YearLevelID) as MaxUnitsLoad,
                     S.CampusID,
                     CAST(dbo.fn_TotalCreditUnitsEarned_OES(S.StudentNo) AS INT) AS UnitsEarned,
                     dbo.fn_DefaultTermID_OES() AS TermID,
@@ -98,7 +99,7 @@ class StudentController extends Controller
             }else{
                 throw new Exception('Unable to fetch profile data');
             }
-    
+            
             $outstandingbalance = DB::connection(session()->get('db'))
                                     ->select("EXEC dbo.CUSTOM_ES_GetOutstandingBalanceFromStudentLedger ?", [session()->get('idNumber')]);
             if ($outstandingbalance[0]->OutstandingBalance > 0) {
@@ -109,6 +110,8 @@ class StudentController extends Controller
                 }else{
                     $allowWithBalance=true;
                 }
+            }else{
+                $allowWithBalance=true;
             }
             $status["allowWithBalance"]=$allowWithBalance;
 
@@ -117,17 +120,17 @@ class StudentController extends Controller
             $registration[0] = [];
 
             if ($regID || isset($regID[0]->regID)) {
-                if($profile->isPaying !="Paying"){
+                $registration = DB::connection(session()->get('db'))
+                ->select("EXEC dbo.ES_GetStudentRegistration_r2 ?, ?", [$regID[0]->regID, session()->get('idNumber')]);
+                if($profile->isPaying !="Paying" && $registration[0]->ValidationDate==null){
                     $sql= "UPDATE
                     ES_Registrations
                     SET ValidationDate = GETDATE(), ValidatingOfficerID = 'OES'
                     WHERE regID = ? AND CampusID = ?";
                     DB::connection(session()->get('db'))->statement($sql,array($regID[0]->regID,session()->get('campusID')));
                 }
-                $registration = DB::connection(session()->get('db'))
-                                    ->select("EXEC dbo.ES_GetStudentRegistration_r2 ?, ?", [$regID[0]->regID, session()->get('idNumber')]);
             } 
-
+           
             $result=DB::connection(session()->get('db'))
                         ->select("EXEC dbo.CUSTOM_isUndergrad ?,?",[session()->get('idNumber'),session()->get('campusID')]);
 
@@ -139,7 +142,7 @@ class StudentController extends Controller
                 if ($IsPerCollegeEnrollmentValue == 1) {
                     $isOpenResult=Registration::perCollegeisOpen($profile->TermID,$profile->CollegeID);
                     if(!$isOpenResult){
-                        $isOpenResult=Registration::isOpen($profile->TermID);
+                        $isOpenResult=['isOpen'=>false];
                     }
                 } else {
                     $isOpenResult=Registration::isOpen($profile->TermID);
@@ -156,7 +159,6 @@ class StudentController extends Controller
             //         $final=["isFinal"=>$isFinal, "status"=>"submitted"];
             //     }
             // }
-
             return Inertia::render('Enrollment/EnrollmentPage', [
                 'reg' =>  $registration[0],
                 'data' => $data,
@@ -273,9 +275,17 @@ class StudentController extends Controller
                 ->statement("EXEC dbo.sp_SaveEnrolledSubjects ?,?,?",array($RegID,$en['ScheduleID'],$en['count']));   
             }
             DB::connection(session()->get('db'))
-            ->statement("EXEC dbo.sp_comRegAssessment ?",array($RegID)); 
+            ->statement("EXEC dbo.sp_comRegAssessment_OES ?",array($RegID)); 
             return response()->json(['message' => 'Subjects saved successfully']);
         }
 
+    }
+
+    public function Evaluation(){
+        $data = DB::connection(session()->get('db'))
+        ->select("EXEC dbo.sis_evaluation ?", [session()->get('idNumber')]);
+        return Inertia::render('Evaluation', [
+            'data'=>$data
+        ]);
     }
 }
