@@ -169,20 +169,14 @@ const BlockSection = ({info,CurSubject , listOfSubject,addsubject, allow, show,s
       };
   return (
     <>
-    {loading ? 
+    {/* {loading ? 
         (
         <div className="fixed inset-0 flex items-center justify-center bg-opacity-50">
-            {/* <div class='flex space-x-2 justify-center items-center bg-white h-full dark:invert'>
-                <span class='sr-only'>Loading...</span>
-                <div class='h-8 w-8 bg-black rounded-full animate-bounce [animation-delay:-0.3s]'></div>
-                <div class='h-8 w-8 bg-black rounded-full animate-bounce [animation-delay:-0.15s]'></div>
-                <div class='h-8 w-8 bg-black rounded-full animate-bounce'></div>
-            </div> */}
             <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
                 <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-b-4 border-primary-dark"></div>
             </div>
         </div>
-        ):(
+        ):( */}
         <div>
             {/* <div className='m-4 p-2 border border-2 rounded-xl mt-12 hover:border-2 hover:shadow-md'>
                 <label className="block  text-base font-medium text-gray-900 dark:text-white m-4 ">AVAILABLE CLASS SCHEDULE</label>
@@ -226,7 +220,7 @@ const BlockSection = ({info,CurSubject , listOfSubject,addsubject, allow, show,s
                 </div>
             </Modal>
         </div>
-        )}        
+        {/* )}         */}
     </>
   );
 };

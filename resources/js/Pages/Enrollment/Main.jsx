@@ -1,19 +1,11 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
-import Print from '@/Components/print';
 import axios from "axios";
 import { useState, useEffect } from "react";
-// import { DataTable } from 'primereact/datatable';
-// import { Column } from 'primereact/column';
-import BlockSection from "@/Components/contents/BlockSection";
-// import FreeSection from "@/Components/contents/FreeSection";
-// import EnrollSub from '@/Components/contents/EnrollSub';
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-// import {faArrowsRotate} from '@fortawesome/free-solid-svg-icons'
-// import { format } from 'date-fns';
 import Swal from 'sweetalert2';
-import EnrollSubTable from "@/Components/tables/EnrollSubTable";
-import Modal from '@/Components/Modal';
+import "./../../../css/enrollmentPageStyle.css"
+import ProfilePage from '@/Components/contents/ProfilePage';
+import EnrollmentPage from '@/Components/contents/EnrollmentPage';
 
 const LoadingSpinner = () => (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -22,22 +14,35 @@ const LoadingSpinner = () => (
 );
 
 export default function Main({reg,data,enrollment,info,status}) {
-    const [validated, setvalidated] = useState(reg.ValidationDate);
+    const [activeContent, setActiveContent] = useState('Profile');
     const [profilePic, setprofilePic] = useState('');
     const [profile, setprofile] = useState([]);
     const [subject, setSubject] = useState([]);
     const [major, setMajor] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [show, setshow] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [curUnit, setcurUnit] = useState(0);
     const[Assessment, setAssessment]=useState([]);
     const[Total, setTotal]=useState('');
     const[disable, setdisable]=useState(false);
-    const [isCollapsed, setIsCollapsed] = useState(false);
+
+    const [defaultAvailableScheds,setDefaultAvailableScheds]=useState([])
+    const [Availablescheds,setAvailablescheds]=useState([])
+
+    const params={
+        'campusID':info.CampusID,
+        'termID':info.TermID,
+        'studentID':info.StudentNo,
+        'collegeID':info.CollegeID,
+        'progID':info.ProgID,
+        'YearLevel':info.YearLevelID
+    }
+
     const toggleCollapse = () => {
       setIsCollapsed(prevState => !prevState);
     };
+
     const url = `https://api.usep.edu.ph/student/`;
+
     const handleNavClick = (page) => {
       setActivePage(page);
     };
@@ -47,7 +52,6 @@ export default function Main({reg,data,enrollment,info,status}) {
             headers: {
                 'Authorization': token,
                 'Content-Type': 'application/json'
-                // Add other headers if needed
             }
         };
     };
@@ -87,7 +91,6 @@ export default function Main({reg,data,enrollment,info,status}) {
                 }
             } catch (error) {
                 console.error("Error sending request:", error);
-                // Optionally handle the error (e.g., showing a message to the user)
             }
         }
 
@@ -101,21 +104,19 @@ export default function Main({reg,data,enrollment,info,status}) {
         Major();
         const fetchData = async () => {
             try {
-                setLoading(true); // Set loading to true when fetching starts
+                setLoading(true);
                 if (data && data.user && data.campus && data.token) {
                     const profilePicResponse = await axios.get(`${url}getProfilePic/${data.user}/${data.campus}`, getHTTPConfig(data.token));
                     if (profilePicResponse.data) {
                         const date = new Date(reg.RegDate);
-                        // reg.RegDate = format(date, 'MM/dd/yyyy');
-                        // setyearlevel(profileResponse.data.yearLevel);
                         setprofilePic(profilePicResponse.data);
                         setprofile(info)
                     }
                 }
-                    setLoading(false); // Set loading to false when fetching is complete
+                    setLoading(false);
             } catch (error) {
                 console.error("Error fetching profile data:", error);
-                setLoading(false); // Set loading to false on error
+                setLoading(false); 
             }
         };
         fetchData();
@@ -136,10 +137,6 @@ export default function Main({reg,data,enrollment,info,status}) {
     },[data]);
      
     function Maxlimit(subs){
-        // const totalAcadUnits = subs.reduce((total, sub) => {
-        //     const creditUnits = parseFloat(sub.CreditUnits);
-        //     return creditUnits > 0 ? total + creditUnits : total;
-        // }, 0);
         const totalAcadUnits = subs.reduce((total, sub) => total + Math.abs(parseFloat(sub.CreditUnits)), 0);
         setcurUnit(totalAcadUnits)
     }
@@ -160,17 +157,8 @@ export default function Main({reg,data,enrollment,info,status}) {
                 console.error("Error fetching enroll subjects:", error);
             }
         }else{
-            // const filter=subs.filter(item =>
-            //     item.SectionName.toLowerCase().includes(major.toLowerCase())
-            // )
-            // if(filter.length > 0){
-            //     setSubject(filter)
-            //     Maxlimit(filter)
-            // }else{
-                setSubject(subs)
-                Maxlimit(subs)
-            // }
-
+            setSubject(subs)
+            Maxlimit(subs)
         }
     }
     async function addSubject(sub) {
@@ -316,176 +304,87 @@ export default function Main({reg,data,enrollment,info,status}) {
             } 
           });
     }
+
+    const handleClick = (content) => {
+        setActiveContent(content);
+      };
+    
+    useEffect(() => {
+        const fetchData = async () => {                                                         //get blocksection
+            try {
+                const Response = await axios.post(route("getBlockSection"),{params});
+                if (Response.data) {
+                    const schedules= Response.data['schedules'];
+                    const Mscheds=[]
+                    const filteredSchedules = schedules.filter(schedule => schedule.YearLevelID == info.YearLevelID && schedule.CurriculumID==info.CurriculumID);
+                    Mscheds.unshift(...filteredSchedules);
+                    const Ascheds=Response.data['schedules']
+                    const Response2 = await axios.post(route("checkconflict"),{array1:Mscheds, array2:[]});
+                    if (Response2.data) {
+                        offersubject(Response2.data)
+                    }
+                    setDefaultAvailableScheds(Ascheds)
+                    setLoading(false)
+
+                }
+            } catch (error) {
+                console.error("Error fetching profile data:", error);
+            }
+        };
+        if((Object.entries(reg).length < 1)){
+            fetchData();
+        }
+    }, []);
+
     return (
         <AuthenticatedLayout
             header={<h2 className="font-semibold text-xl text-red-500 leading-tight"></h2>}
         >{loading ? (
-            <LoadingSpinner /> // Render loading spinner while loading is true
+            <LoadingSpinner /> 
         ) : (
             <>
             <Head title="Enrollment" />
-            <div className="">
-                <div className="" style={{height:'200px',background:'linear-gradient(0deg,rgba(151, 57, 57, 0.1),rgba(151, 57, 57, 0.1)),url(/img/banner.jpg)',backgroundSize:'cover', backgroundPosition:'center'}}></div>
+            <div>
+                <div  style={{height:'200px',background:'linear-gradient(0deg,rgba(151, 57, 57, 0.1),rgba(151, 57, 57, 0.1)),url(/img/banner.jpg)',backgroundSize:'cover', backgroundPosition:'center'}}></div>
                 <div className="profile">
-                    <div className="" style={{height: '100%', width: '100%', display: 'flex', flexDirection: 'column', flexWrap: 'unset', justifyContent: 'center', alignItems: 'center', alignContent: 'unset', overflow: 'unset'}}>
-                        <div className="" style={{height: '100%', width: '100%', display: 'flex', flexDirection: 'column', flexWrap: 'unset', justifyContent: 'center', alignItems: 'center', alignContent: 'unset', overflow: 'unset'}}>
-                            {/* <img className="w-full " src="/img/banner.jpg" alt=""/> */}
+                    <div style={{height: '100%', width: '100%', display: 'flex', flexDirection: 'column', flexWrap: 'unset', justifyContent: 'center', alignItems: 'center', alignContent: 'unset', overflow: 'unset'}}>
+                        <div style={{height: '100%', width: '100%', display: 'flex', flexDirection: 'column', flexWrap: 'unset', justifyContent: 'center', alignItems: 'center', alignContent: 'unset', overflow: 'unset'}}>
                             <div className="slide-in-fwd-center"> 
                                 <img src={profilePic} alt="Profile" className="rounded-full border-4 border-primary-dark p-2" style={{height: '150px', width: '150px', marginTop: '-93px'}}/> 
                             </div>
-                            <div className="text-2xl text-primary-dark">{profile.studentID}</div>
+                            <div className="text-2xl text-primary-dark ">{profile.studentID}</div>
                             <div className="text-2xl text-gray-800 font-semibold" >{profile.StudentNo}</div>
                             <div className="text-2xl text-gray-800 font-semibold" >{profile.StudentName}</div><br /><br />
-                            
-                            <div className="text-2xl text-gray-800 font-semibold" >
+                            {/* <div className="text-2xl text-gray-800 font-semibold" >
                                 <ol class="flex items-center w-full text-sm text-gray-600 font-medium sm:text-base">
                                     <li class={`flex md:w-full items-center ${(Object.entries(reg).length > 0) ? 'border-indigo-600 text-indigo-600' : 'border-gray-600 '}  sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-200 after:border-1 after:hidden sm:after:inline-block after:mx-4 xl:after:mx-8 `}>
                                         <div class="flex items-center whitespace-nowrap after:content-['/'] sm:after:hidden after:mx-2 ">
                                             <span class={`w-6 h-6 border ${(Object.entries(reg).length > 0) ? 'border-indigo-200 bg-indigo-600 text-white' : 'border-gray-200 bg-gray-100'} rounded-full flex justify-center items-center mr-3 text-sm lg:w-10 lg:h-10`}>1</span> Submitted
                                         </div>
                                     </li>
-                                    {/* <li class={`flex md:w-full items-center ${(Object.entries(reg).length > 0) ? 'border-indigo-600 text-indigo-600' : 'border-gray-600 '}  sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-200 after:border-1 after:hidden sm:after:inline-block after:mx-4 xl:after:mx-8 `}>
-                                        <div class="flex items-center whitespace-nowrap after:content-['/'] sm:after:hidden after:mx-2 ">
-                                            <span class={`w-6 h-6 border ${(Object.entries(reg).length > 0) ? 'border-indigo-200 bg-indigo-600 text-white' : 'border-gray-200 bg-gray-100'} rounded-full flex justify-center items-center mr-3 text-sm lg:w-10 lg:h-10`}>2</span> OSAS
-                                        </div>
-                                    </li>
-                                    <li class={`flex md:w-full items-center ${(Object.entries(reg).length > 0) ? 'border-indigo-600 text-indigo-600' : 'border-gray-600 '}  sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-200 after:border-1 after:hidden sm:after:inline-block after:mx-4 xl:after:mx-8 `}>
-                                        <div class="flex items-center whitespace-nowrap after:content-['/'] sm:after:hidden after:mx-2 ">
-                                            <span class={`w-6 h-6 border ${(Object.entries(reg).length > 0) ? 'border-indigo-200 bg-indigo-600 text-white' : 'border-gray-200 bg-gray-100'} rounded-full flex justify-center items-center mr-3 text-sm lg:w-10 lg:h-10`}>3</span> Cashier
-                                        </div>
-                                    </li> */}
                                     <li class={`flex md:w-full items-center ${reg.ValidationDate && reg.ValidationDate !== ''  ? 'border-indigo-600 text-indigo-600' : 'border-gray-600 '}`}>
                                         <div class="flex items-center  ">
                                             <span class={`w-6 h-6 border ${reg.ValidationDate && reg.ValidationDate !== ''  ? 'border-indigo-200 bg-indigo-600 text-white' : 'border-gray-200 bg-gray-100'} rounded-full flex justify-center items-center mr-3 text-sm lg:w-10 lg:h-10`}>2</span> Officially Enrolled
                                         </div>
                                     </li>
                                 </ol>  
-                            </div>
+                            </div> */}
                         </div>
                     </div>
+                </div>
+                <div className='navbutton'>
+                    <nav className="navbar">
+                        <button className="nav-button hover:bg-gradient-to-br bg-gradient-to-r from-primary-light to-primary-dark" onClick={() => handleClick('Profile')}>Profile</button>
+                        <button className="nav-button hover:bg-gradient-to-br bg-gradient-to-r from-primary-light to-primary-dark" onClick={() => handleClick('Grade')}>Grade</button>
+                        <button className="nav-button hover:bg-gradient-to-br bg-gradient-to-r from-primary-light to-primary-dark" onClick={() => handleClick('Evaluation')}>Evaluation</button>
+                        <button className="nav-button hover:bg-gradient-to-br bg-gradient-to-r from-primary-light to-primary-dark" onClick={() => handleClick('Enrollment')}>Enrollment</button>
+                    </nav>
                 </div>
             </div>   
-            <div className="m-6 flex flex-col shadow-md bg-gray-50 rounded-md items-center bg-white relative">
-                <div className="w-full p-2 bg-primary-dark"><label className="block text-2xl font-bold text-white text-center">Profile information</label></div>
-                <button
-                    onClick={toggleCollapse}
-                    className="absolute top-2 right-2 text-white text-2xl font-bold mr-2 rotate-90"
-                    type="button"
-                    >
-                    |||
-                    </button>
-                {!isCollapsed && (<div className=" m-3" data-collapse="collapse">
-                    <table className="min-w-auto bg-white">
-                        <tbody>
-                            <tr className="info-cell">
-                                <td className="px-3 py-2 font-bold">Registration No.</td>
-                                <td className="px-3 py-2">:</td>
-                                <td className="px-3 py-2">{reg.RegID}</td>
-                            </tr>
-                            <tr className="info-cell">
-                                <td className="px-3 py-2 font-bold">Registration Date</td>
-                                <td className="px-3 py-2">:</td>
-                                <td className="px-3 py-2">{reg.RegDate}</td>
-                            </tr>
-                            <tr className="info-cell">
-                                <td className="px-3 py-2 font-bold">College Name</td>
-                                <td className="px-3 py-2">:</td>
-                                <td className="px-3 py-2">{profile.CollegeName}</td>
-                            </tr>
-                            <tr className="info-cell">
-                                <td className="px-3 py-2 font-bold">Program Name</td>
-                                <td className="px-3 py-2">:</td>
-                                <td className="px-3 py-2">{profile.ProgramName}</td>
-                            </tr>
-                            <tr className="info-cell">
-                                <td className="px-3 py-2 font-bold">Major Name</td>
-                                <td className="px-3 py-2">:</td>
-                                <td className="px-3 py-2">{profile.MajorStudy}</td>
-                            </tr>
-                            <tr className="info-cell">
-                                <td className="px-3 py-2 font-bold">Year Level Description</td>
-                                <td className="px-3 py-2">:</td>
-                                <td className="px-3 py-2" >{profile.YearLevel}</td>
-                            </tr>
-                            <tr className="info-cell">
-                                <td className="px-3 py-2 font-bold">Curriculum Name</td>
-                                <td className="px-3 py-2">:</td>
-                                <td className="px-3 py-2">{profile.CurriculumCode}</td>
-                            </tr>
-                            <tr className="info-cell">
-                                <td className="px-3 py-2 font-bold">Max. Load</td>
-                                <td className="px-3 py-2">:</td>
-                                <td className="px-3 py-2">{profile.MaxUnitsLoad}</td>
-                            </tr>
-                            <tr className="info-cell">
-                                <td className="px-3 py-2 font-bold">Year of Entry</td>
-                                <td className="px-3 py-2">:</td>
-                                <td className="px-3 py-2">{profile.yearOfEntry}</td>
-                            </tr>
-                            <tr className="info-cell">
-                                <td className="px-3 py-2 font-bold">Status</td>
-                                <td className="px-3 py-2">:</td>
-                                <td className="px-3 py-2">{profile.isPaying}</td>
-                            </tr>
-                            <tr className="info-cell">
-                                <td className="px-3 py-2 font-bold">Balance</td>
-                                <td className="px-3 py-2">:</td>
-                                <td className="px-3 py-2">Php  {Number(profile.PrevBalance).toLocaleString()+".00"} <span className={`font-bold ${status.allowWithBalance?'':'text-red-600'}`}>{status.allowWithBalance?"(Cleared to enroll)":"(Not clear to enroll)"}</span></td>
-                            </tr>
-                            <tr className="info-cell">
-                                <td className="px-3 py-2 font-bold">Gender</td>
-                                <td className="px-3 py-2">:</td>
-                                <td className="px-3 py-2">{profile.Gender=='F'? "Female":"Male"}</td>
-                            </tr>
-                            <tr className="info-cell">
-                                <td className="px-3 py-2 font-bold">Scholarship Name</td>
-                                <td className="px-3 py-2">:</td>
-                                <td className="px-3 py-2">{reg.ScholarProviderName}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <h1 className='px-3 py-2 font-bold text-xl'>Overall Progress:</h1>
-                    <div className="flex flex-col items-center">
-                        <div className="flex justify-between w-full">
-                            <div className='font-bold'><p className='text-lg'>{profile.UnitsEarned} <span className='text-xs'>Units Earned</span></p></div>
-                            <div className='font-bold'><p className='text-lg'>{profile.CurrTotalCreditUnits} <span className='text-xs'>Total Units</span></p></div>
-                        </div>
-                        <div className="w-full h-6 bg-gray-200 rounded-full dark:bg-gray-700 mt-2">
-                            <div 
-                                className="h-6 bg-gradient-to-r from-green-500 to-green-600 text-xl font-medium text-gray-700 text-center p-0.5 leading-none dark:bg-blue-500 rounded-full" 
-                                style={{ width: ((profile.UnitsEarned / profile.CurrTotalCreditUnits)*100) + "%" }}
-                            >
-                                {((profile.UnitsEarned / profile.CurrTotalCreditUnits)*100).toFixed(2)+'%'}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                )}
-            </div>
-            
-            <div className="m-6 flex flex-col shadow-md bg-gray-50 rounded-md">
-                <div className="w-full p-2 bg-primary-dark"><label className="block text-2xl font-bold text-white text-center">{!(Object.entries(reg).length > 0)?"List of Courses to be Enrolled":"List of Courses Enrolled"}</label></div>
-                <div className="m-4">
-                <form action="#" method="post">
-                    <EnrollSubTable value={subject} onSelectionChange={SwalConfirm} TUnit={curUnit} allow={(!(Object.entries(reg).length > 0))}></EnrollSubTable>
-                    <button type="button" onClick={Submit} disabled={((Object.entries(reg).length > 0) || status.allowWithBalance==false || status.isOpen['isOpen'] == false)} className={`text-white hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3 ${((Object.entries(reg).length > 0) || status.allowWithBalance==false || status.isOpen['isOpen'] == false)? 'bg-gray-400' : ' bg-gradient-to-r from-primary-light to-primary-dark'}`}>Submit</button>
-                    <button type="button" onClick={()=>{setshow(true)}} disabled={((Object.entries(reg).length > 0) || status.allowWithBalance==false || status.isOpen['isOpen'] == false)} className={`text-white hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-left mt-3 ${((Object.entries(reg).length > 0) || status.allowWithBalance==false || status.isOpen['isOpen'] == false)? 'bg-gray-400' : ' bg-gradient-to-r from-primary-light to-primary-dark'}`}>Add Course</button>
-                    <button type="button"   onClick={() => {
-                                                    const currentURL = window.location.origin;  
-                                                    const newURL = currentURL + '/evaluation';  
-                                                    window.open(newURL, '_blank');  
-                                                }} className={`text-white hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-left mt-3 bg-gradient-to-r from-primary-light to-primary-dark`}>Evaluation</button>
-                </form>
-                </div>
-            </div>
-
-            <div className="m-6 flex flex-col shadow-md bg-gray-50 rounded-md">
-                <div className="w-full p-2 bg-primary-dark"><label className="block text-2xl font-bold text-white text-center">Billing Information</label></div>
-                <Print data={[subject,Assessment]}></Print>
-            </div>
-            {/* {!(Object.entries(reg).length > 0) &&  <BlockSection info={info} CurSubject={subject} listOfSubject={offersubject} addsubject={addSubject} allow={(!(Object.entries(reg).length > 0))} show={show} setshow={()=>{setshow(false)}}></BlockSection>} */}
-            <BlockSection info={info} CurSubject={subject} listOfSubject={offersubject} addsubject={addSubject} allow={(!(Object.entries(reg).length > 0))} show={show} setshow={()=>{setshow(false)}}></BlockSection>
-
+            {activeContent === 'Profile' && <ProfilePage reg={reg} profile={profile} status={status}></ProfilePage>}
+            {activeContent === 'Grade' && <div>Grade Content</div>}
+            {activeContent === 'Evaluation' && <div>Evaluation Content</div>}
+            {activeContent === 'Enrollment' && <EnrollmentPage reg={reg} defaultAvailableScheds={defaultAvailableScheds} status={status}subject={subject} Assessment={Assessment} curUnit={curUnit} CurSubject={subject} addSubject={addSubject} SwalConfirm={SwalConfirm}  allow={(!(Object.entries(reg).length > 0))} Submit={Submit}></EnrollmentPage>}
             </> 
         )}
         </AuthenticatedLayout>

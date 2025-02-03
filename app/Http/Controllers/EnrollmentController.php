@@ -76,7 +76,6 @@ class EnrollmentController extends Controller
         }
         $remark=["Passed","Credited"];
         $sectionIdList = implode(',', $sectionIds);
-
         $query = "
             SELECT 
                 ScheduleID, SubjectCode, SubjectTitle, SectionName, AcadUnits, LabUnits, CreditUnits,
@@ -125,24 +124,7 @@ class EnrollmentController extends Controller
                     [session()->get('idNumber'),$item->SubjectID,$item->SubjectID]
                 );
                 if (!$ispass || !in_array($ispass[0]->FinalRemarks,$remark)) {
-                    // $preRequisites=Subject::getPreRequisites($item->SubjectID);
-                    // if($preRequisites!=null){
-                    //     $pass=true;
-                    //     foreach($preRequisites as $preReq){
-                    //         $ifPass=DB::connection(session()->get('db'))->select("EXEC dbo.ES_GetSubjectPreRequisiteIfPassed ?,?,?",array(session()->get('idNumber'),0,$preReq->SubjectID));
-                    //         if(count($ifPass)==0 || $ifPass[0]->Remarks=='Incomplete' || $ifPass[0]->Remarks=='Failed'){
-                    //             $pass=false;
-                    //             break 1;
-                    //         }
-                    //     }
-                    //     if($pass){
-                    //         $filteredResponse[] = $item; 
-                    //     } 
-                    // }else{                               
-                    //     $filteredResponse[] = $item; 
-                    // }
-                    // $preRequisites=DB::connection(session()->get('db'))->select("EXEC dbo.Get_SubjectPreRequisites ?,?,?",array(session()->get('idNumber'),session()->get('curriculumID'),$item->SubjectID));
-                    $preRequisites=DB::connection(session()->get('db'))->select("EXEC dbo.Get_SubjectPreRequisites_OES ?,?,?",array(session()->get('idNumber'),session()->get('curriculumID'),$item->SubjectID));
+                    $preRequisites=DB::connection(session()->get('db'))->select("EXEC dbo.Get_SubjectPreRequisites ?,?,?",array(session()->get('idNumber'),session()->get('curriculumID'),$item->SubjectID));
                     $pass=true;
                     foreach($preRequisites as $preReq){
                         if($preReq->SubjectID != NULL && ($preReq->Remarks==NULL || $preReq->Remarks=='' || $preReq->Remarks=='Incomplete' || $preReq->Remarks=='Failed')){

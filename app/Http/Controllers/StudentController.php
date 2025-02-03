@@ -58,10 +58,10 @@ class StudentController extends Controller
                     dbo.fn_ProgramCode(S.ProgID) AS ProgramCode ,
                     dbo.fn_ProgramName(S.ProgID) AS ProgramName ,
                     dbo.fn_MajorName(s.MajorDiscID) AS MajorStudy ,
-                    S.YearLevelID ,
-                    dbo.fn_YearLevel(S.YearLevelID) AS YearLevel ,
-                    -- (select YearLevelID from [dbo].[fn_getAutoYearLevel_OES_2](S.StudentNo,2)) AS YearLevelID,
-                    -- (select YearLevel from [dbo].[fn_getAutoYearLevel_OES_2](S.StudentNo,2)) AS YearLevel,
+                    -- S.YearLevelID ,
+                    -- dbo.fn_YearLevel(S.YearLevelID) AS YearLevel ,
+                    (select YearLevelID from [dbo].[fn_getAutoYearLevel_OES_2](S.StudentNo,2)) AS YearLevelID,
+                    (select YearLevel from [dbo].[fn_getAutoYearLevel_OES_2](S.StudentNo,2)) AS YearLevel,
                     S.Gender ,
                     s.CurriculumID ,
                     dbo.fn_CurriculumCode(s.CurriculumID) AS CurriculumCode ,
@@ -99,7 +99,19 @@ class StudentController extends Controller
             }else{
                 throw new Exception('Unable to fetch profile data');
             }
-            
+            // $prevRegs= DB::connection(session()->get('db'))
+            //             ->select("SELECT TOP 2 RegID
+            //                                 ,StudentNo
+            //                                 ,TermID
+            //                             FROM ES_Registrations 
+            //                             WHERE StudentNo = ?  ORDER BY TermID DESC", [session()->get('idNumber')]);
+            // if(count($prevRegs)==2){
+            //     $reg1= DB::connection(session()->get('db'))->select('SELECT dbo.fn_RegPassPercentage_OES('.intval($prevRegs[0]->RegID).') AS pass_percentage');
+            //     $reg2= DB::connection(session()->get('db'))->select('SELECT dbo.fn_RegPassPercentage_OES('.intval($prevRegs[1]->RegID).') AS pass_percentage');
+            //     if($reg1[0]->pass_percentage <= 75 && $reg2[0]->pass_percentage <= 75){
+            //         $profile->MaxUnitsLoad=$profile->MaxUnitsLoad * .75;
+            //     }
+            // }
             $outstandingbalance = DB::connection(session()->get('db'))
                                     ->select("EXEC dbo.CUSTOM_ES_GetOutstandingBalanceFromStudentLedger ?", [session()->get('idNumber')]);
             if ($outstandingbalance[0]->OutstandingBalance > 0) {
@@ -159,7 +171,7 @@ class StudentController extends Controller
             //         $final=["isFinal"=>$isFinal, "status"=>"submitted"];
             //     }
             // }
-            return Inertia::render('Enrollment/EnrollmentPage', [
+            return Inertia::render('Enrollment/Main', [
                 'reg' =>  $registration[0],
                 'data' => $data,
                 // 'enrollment'=> $isOpenResult,
