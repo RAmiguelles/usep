@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect} from 'react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
@@ -7,7 +7,27 @@ import { Link } from '@inertiajs/react';
 
 export default function Authenticated({ header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
+
+    useEffect(() => {
+        const preventDevToolsShortcuts = (e) => {
+          if (e.key === "F12" || (e.ctrlKey && e.shiftKey && e.key === "I")) {
+            e.preventDefault();
+          }
+        };
     
+        const preventRightClick = (e) => {
+          e.preventDefault(); 
+        };
+    
+        window.addEventListener("keydown", preventDevToolsShortcuts);
+        window.addEventListener("contextmenu", preventRightClick);
+    
+        return () => {
+          window.removeEventListener("keydown", preventDevToolsShortcuts);
+          window.removeEventListener("contextmenu", preventRightClick);
+        };
+      }, []);
+
     return (
         <div className="min-h-screen bg-gray-100">
             <nav className="bg-white border-b border-gray-100">

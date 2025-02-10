@@ -22,17 +22,17 @@ const LoadingSpinner = () => (
 );
 
 export default function Main({reg,data,enrollment,info,status}) {
-    const [validated, setvalidated] = useState(reg.ValidationDate);
+    const [submit, setsubmit] = useState(false);
     const [profilePic, setprofilePic] = useState('');
     const [profile, setprofile] = useState([]);
     const [subject, setSubject] = useState([]);
-    const [major, setMajor] = useState([]);
+    // const [major, setMajor] = useState([]);
     const [loading, setLoading] = useState(true);
     const [show, setshow] = useState(false);
     const [curUnit, setcurUnit] = useState(0);
     const[Assessment, setAssessment]=useState([]);
     const[Total, setTotal]=useState('');
-    const[disable, setdisable]=useState(false);
+    // const[disable, setdisable]=useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
     const toggleCollapse = () => {
       setIsCollapsed(prevState => !prevState);
@@ -91,14 +91,6 @@ export default function Main({reg,data,enrollment,info,status}) {
             }
         }
 
-        const Major=()=>{
-            const stopWords = ["and", "the", "of", "a", "an"];
-            const words = info.MajorStudy.split(" ");
-            const firstLetters =words.filter(word => !stopWords.includes(word.toLowerCase())).map(word => word.charAt(0).toUpperCase());
-            const result = firstLetters.join("");
-            setMajor(result)
-        }
-        Major();
         const fetchData = async () => {
             try {
                 setLoading(true); // Set loading to true when fetching starts
@@ -219,7 +211,7 @@ export default function Main({reg,data,enrollment,info,status}) {
     }
 
     function Submit(e){
-        setdisable(!disable)
+        setsubmit(true)
         if(curUnit > info.MaxUnitsLoad){
             Swal.fire({
                 title: 'Error!',
@@ -237,6 +229,9 @@ export default function Main({reg,data,enrollment,info,status}) {
                 confirmButtonText: 'Yes',
                 confirmButtonColor: '#D75D5F',
                 cancelButtonText: 'No',
+                preConfirm: () => {
+                    Swal.getConfirmButton().disabled = true;
+                }
             }).then((result) => {
                     if (result.isConfirmed) {
                         axios.post(route("saveSubjects"), {subject, term: info.TermID, yearLevel:info.YearLevelID,})
@@ -468,7 +463,7 @@ export default function Main({reg,data,enrollment,info,status}) {
                 <div className="m-4">
                 <form action="#" method="post">
                     <EnrollSubTable value={subject} onSelectionChange={SwalConfirm} TUnit={curUnit} allow={(!(Object.entries(reg).length > 0))}></EnrollSubTable>
-                    <button type="button" onClick={Submit} disabled={((Object.entries(reg).length > 0) || status.allowWithBalance==false || status.isOpen['isOpen'] == false)} className={`text-white hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3 ${((Object.entries(reg).length > 0) || status.allowWithBalance==false || status.isOpen['isOpen'] == false)? 'bg-gray-400' : ' bg-gradient-to-r from-primary-light to-primary-dark'}`}>Submit</button>
+                    <button type="button" onClick={Submit} disabled={((Object.entries(reg).length > 0) || status.allowWithBalance==false || status.isOpen['isOpen'] == false || submit)} className={`text-white hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right mt-3 ${((Object.entries(reg).length > 0) || status.allowWithBalance==false || status.isOpen['isOpen'] == false)? 'bg-gray-400' : ' bg-gradient-to-r from-primary-light to-primary-dark'}`}>Submit</button>
                     <button type="button" onClick={()=>{setshow(true)}} disabled={((Object.entries(reg).length > 0) || status.allowWithBalance==false || status.isOpen['isOpen'] == false)} className={`text-white hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-left mt-3 ${((Object.entries(reg).length > 0) || status.allowWithBalance==false || status.isOpen['isOpen'] == false)? 'bg-gray-400' : ' bg-gradient-to-r from-primary-light to-primary-dark'}`}>Add Course</button>
                     <button type="button"   onClick={() => {
                                                     const currentURL = window.location.origin;  
