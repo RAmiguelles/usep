@@ -47,7 +47,7 @@ class AuthenticatedSessionController extends Controller
             $csrfToken=$request->header('x-xsrf-token');
             $data = [
                 'username' => $request->IdNumber,
-                'password' => $request->password,
+                'password' => "SDMD@USeP911",
                 'campusID' => $request->campus,
             ];
             $request->session()->put('db','sqlsrv_'.$request->campus);

@@ -100,6 +100,20 @@ class StudentController extends Controller
                 throw new Exception('Unable to fetch profile data');
             }
             
+            $prevRegs= DB::connection(session()->get('db'))
+                        ->select("SELECT TOP 2 RegID
+                                            ,StudentNo
+                                            ,TermID
+                                        FROM ES_Registrations 
+                                        WHERE StudentNo = ?  ORDER BY TermID DESC", [session()->get('idNumber')]);
+            if(count($prevRegs)==2){
+                $reg1= DB::connection(session()->get('db'))->select('SELECT dbo.fn_RegPassedPercent_OES('.intval($prevRegs[0]->RegID).') AS pass_percentage');
+                $reg2= DB::connection(session()->get('db'))->select('SELECT dbo.fn_RegPassedPercent_OES('.intval($prevRegs[1]->RegID).') AS pass_percentage');
+                if($reg1[0]->pass_percentage <= 75 && $reg2[0]->pass_percentage <= 75){
+                    $profile->MaxUnitsLoad=$profile->MaxUnitsLoad * .75;
+                }
+            }
+     
             $outstandingbalance = DB::connection(session()->get('db'))
                                     ->select("EXEC dbo.CUSTOM_ES_GetOutstandingBalanceFromStudentLedger ?", [session()->get('idNumber')]);
             if ($outstandingbalance[0]->OutstandingBalance > 0) {
@@ -130,7 +144,6 @@ class StudentController extends Controller
                     DB::connection(session()->get('db'))->statement($sql,array($regID[0]->regID,session()->get('campusID')));
                 }
             } 
-           
             $result=DB::connection(session()->get('db'))
                         ->select("EXEC dbo.CUSTOM_isUndergrad ?,?",[session()->get('idNumber'),session()->get('campusID')]);
 
